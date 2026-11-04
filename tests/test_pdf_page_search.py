@@ -281,3 +281,42 @@ async def test_adjacent_continuation_is_retained_after_restart(tmp_path):
         citations = await search_pdf_pages(memory, question, limit=2)
         assert await source_ids(memory, citations) == {(await definitions.resolve(page)).name for page in pages[-2:]}
         assert len(await search_pdf_pages(memory, question, limit=1)) == 1
+
+
+@pytest.mark.asyncio
+async def test_fragmented_navigation_header_does_not_hide_financial_statements():
+    definitions = registry()
+    pages = [
+        PDFPageInput(
+            document_id="ACME_2022_10K",
+            document_sha256="a" * 64,
+            page_number=i,
+            text=(
+                "EBITDA operating profit operating income depreciation amortization cash flows. "
+                "EBITDA EBITDA compensation targets in 2022."
+                if i == 1
+                else f"Acme corporate governance in 2022. Discussion {i}."
+            ),
+        )
+        for i in range(1, 26)
+    ]
+    pages += [
+        PDFPageInput(
+            document_id="ACME_2022_10K",
+            document_sha256="a" * 64,
+            page_number=40,
+            text="T\nable of\nContents\nAcme Company and Subsidiaries\nConsolidated Statement of Income\n"
+            "2022 2021\nNet revenue 100 90\nOperating income 30 25",
+        ),
+        PDFPageInput(
+            document_id="ACME_2022_10K",
+            document_sha256="a" * 64,
+            page_number=44,
+            text="T\nable of\nContents\nAcme Company and Subsidiaries\nConsolidated Statement of Cash Flows\n"
+            "2022 2021\nDepreciation and amortization 8 7\nCash provided by operating activities 40 35",
+        ),
+    ]
+    async with open_builtin_runtime(BuiltinConfig(), candidate_pipeline=EvidencePipeline()) as runtime:
+        memory = await seed(runtime, definitions, pages)
+        citations = await search_pdf_pages(memory, "What is Acme's FY2022 EBITDA?", limit=2)
+        assert await source_ids(memory, citations) == {(await definitions.resolve(page)).name for page in pages[-2:]}

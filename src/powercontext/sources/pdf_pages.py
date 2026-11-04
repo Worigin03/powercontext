@@ -28,6 +28,7 @@ from urllib.parse import quote
 
 from pydantic import BaseModel, Field, field_validator
 from pypdf import PdfReader
+from pypdf.generic import ArrayObject, DictionaryObject, NullObject, StreamObject
 
 from powercontext.limits import MAX_SOURCE_ID_LENGTH
 from powercontext.sources import TEXT_EVIDENCE_PROJECTION_KEY, AdapterSourceDefinition, TextEvidence
@@ -137,9 +138,11 @@ def parse_pdf_document(value: PDFDocumentInput, /) -> tuple[PDFPageInput, ...]:
         raise ValueError("pdf content must not be empty")  # noqa: TRY003
     document_sha256 = hashlib.sha256(content).hexdigest()
     try:
-        reader = PdfReader(io.BytesIO(content))
+        # Lenient recovery can silently drop a broken /Kids entry and report a
+        # shorter, apparently successful document. Partial reports are invalid.
+        reader = PdfReader(io.BytesIO(content), strict=True)
         locked = bool(reader.is_encrypted) and not bool(reader.decrypt(""))
-        texts = () if locked else tuple(page.extract_text() or "" for page in reader.pages)
+        texts = () if locked else _extract_complete_document(reader)
     except Exception as error:  # pypdf raises a wide family of parse errors
         raise ValueError(f"pdf content cannot be parsed: {error}") from error  # noqa: TRY003
     if locked:
@@ -155,6 +158,27 @@ def parse_pdf_document(value: PDFDocumentInput, /) -> tuple[PDFPageInput, ...]:
         )
         for index, text in enumerate(texts, start=1)
     )
+
+
+def _extract_complete_document(reader: PdfReader) -> tuple[str, ...]:
+    pages = tuple(reader.pages)
+    page_tree = reader.root_object["/Pages"]
+    if not isinstance(page_tree, DictionaryObject) or len(pages) != page_tree.get("/Count"):
+        raise ValueError("PDF page tree count does not match its pages")  # noqa: TRY003
+    texts = []
+    for page in pages:
+        contents = page.get("/Contents")
+        if contents is not None:
+            contents = contents.get_object()
+            streams = contents if isinstance(contents, ArrayObject) else (contents,)
+            for stream in streams:
+                resolved = stream.get_object()
+                # A null /Contents is legal for an empty page. Other objects
+                # must not be ignored by pypdf's ContentStream concatenation.
+                if not isinstance(resolved, (StreamObject, NullObject)):
+                    raise TypeError("PDF page content is not a stream")  # noqa: TRY003
+        texts.append(page.extract_text() or "")
+    return tuple(texts)
 
 
 async def search_pdf_pages(
@@ -215,10 +239,15 @@ def _page_identity(sources: tuple[SourceRef, ...]) -> str | None:
 
 
 def _starts_continuation(body: str) -> bool:
-    lines = [
-        line.strip() for line in body.splitlines() if line.strip() and line.strip().casefold() != "table of contents"
-    ]
+    lines = _heading_lines(body)
     return bool(lines and (re.match(r"^[2-9]\d*[.)]\s", lines[0]) or "(continued)" in lines[0].casefold()))
+
+
+def _heading_lines(body: str) -> list[str]:
+    # Running navigation text can be emitted as "T\nable of\nContents".
+    # Normalize it only for ranking; preserve the original page evidence.
+    body = re.sub(r"\A\s*t\s*able\s+of\s+contents\b[^\S\n]*", "", body, flags=re.IGNORECASE)
+    return [line.strip() for line in body.splitlines() if line.strip()]
 
 
 async def _continuation_neighbors(
@@ -317,7 +346,7 @@ def _statement_role(body: str) -> str | None:
     lines = body.splitlines()
     if sum(len(re.findall(r"\d[\d,]*(?:\.\d+)?", line)) >= 2 for line in lines) < 3:
         return None
-    headings = [line for line in lines if line.strip() and line.strip().casefold() != "table of contents"]
+    headings = _heading_lines(body)
     for line in headings[:3]:
         title = " ".join(line.casefold().split())
         if len(title) > 120:

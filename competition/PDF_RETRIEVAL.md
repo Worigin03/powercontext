@@ -3,11 +3,19 @@
 `powercontext.sources.pdf_pages` 从完整原 PDF 解析全部物理页，并保留既有页级 Source、
 标准文本投影和精确 Memory 引用契约。检索只使用已打开 scoped Memory 的公开 API。
 
+## 全文完整性
+
+使用 pypdf 严格读取原始字节，检查页树声明页数与实际页数一致，并核验页面的内容流类型。
+缺失页面对象、页数不一致、损坏的内容流数组和非 PDF 文件头统一以 `ValueError` 失败，
+不会将自动修复后剩余的页面作为完整报告返回。合法空白页、空内容流及空密码权限文件继续支持。
+正文仍使用普通文本提取，保留全部物理页和完整原文件 SHA-256。
+
 ## 检索方式
 
 1. 规范化财政年份、所有格和常见财务缩写，生成最多 24 路有界查询。
 2. 汇总各路真实 `Memory.search` 候选，再用词形、BM25、文档标识中的主体与年份信息统一重排。
 3. 根据问题需要覆盖损益表、现金流量表和资产负债表；区分正文报表、目录引用及其他综合收益表。
+   页眉中的 `Table of Contents` 即使被提取为多行，也不会遮挡实际报表标题；该规范化仅用于排序。
 4. 对已召回的物理相邻续页保留少量位置。仅在存在续页候选时读取一次 `Memory.list`，
    按完整文档身份、PDF 摘要和物理页码判断相邻关系。
 5. 使用真实 `Memory.get` 校验最终引用，按完整页级 Source 身份去重并遵守返回上限。
@@ -23,11 +31,16 @@
 
 ## 验证
 
-- 完整 503 页公开财报：Linux Python 3.12 公开验收 6 项通过，包含全部页面入库、重复提交、
-  重启、原始问题检索和精确引用。
-- 新增 7 项真实 Runtime 回归：长文档摘要身份、修订身份、法律问法、跨公司干扰、
-  目录/综合收益表干扰、经营地域及重启后物理续页和 limit。
-- 修复前的检索函数在前四项新增用例上可复现失败；修复后的实现通过相应用例。
+- Linux Python 3.12、pypdf 6.19.0：完整 503 页公开验收、6 项 PDF 完整性回归、
+  8 项真实 Runtime 检索回归及 12 项 Source 兼容回归，共 32 项通过。
+- 完整性回归覆盖缺失页面对象、页树计数、损坏内容流数组、非 PDF 头，
+  以及带正文和空白页的普通文件、空密码权限文件。
+- 检索回归覆盖长文档摘要身份、修订身份、法律问法、跨公司干扰、目录/综合收益表干扰、
+  经营地域、重启后物理续页与 limit，以及碎片化导航页眉下的报表检索。
+- 使用 PepsiCo、3M、Adobe、Amazon、Amcor 的 2022 年原始 10-K 共 1079 页，
+  对产品解析结果与独立 Poppler 提取逐页做词频多重集合对照。
+  每页词项数比例为 0.9962–1.0127，最低词项 F1 为 0.9811。
+  这是不同提取引擎之间的交叉验证，不是 FinanceBench 标注质量或平台 Recall@20 分数。
 - Ruff 和针对 PDF 模块的 ty 检查通过。
 
 使用已持久化的 503 页原始公开财报及五个原始问题检查耗时，`limit=20` 时每问题约
@@ -37,5 +50,6 @@
 ```bash
 make -C competition test-pdf
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHONPATH=src python -m pytest -q \
-  -p pytest_asyncio.plugin -o asyncio_mode=auto tests/test_pdf_page_search.py
+  -p pytest_asyncio.plugin -o asyncio_mode=auto \
+  tests/test_pdf_document_integrity.py tests/test_pdf_page_search.py
 ```

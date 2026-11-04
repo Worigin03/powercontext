@@ -1,0 +1,198 @@
+{
+  "generatedAt": "2026-11-04T07:30:51.996Z",
+  "sample": 96,
+  "results": [
+    {
+      "device": "webgpu",
+      "dtype": "fp32",
+      "sample": 96,
+      "avgChars": 280.92,
+      "rows": [
+        {
+          "batchSize": 8,
+          "bucket": true,
+          "ms": 2039.5,
+          "chunksPerSecond": 47.1,
+          "charsPerSecond": 13223
+        },
+        {
+          "batchSize": 16,
+          "bucket": true,
+          "ms": 2316.48,
+          "chunksPerSecond": 41.4,
+          "charsPerSecond": 11642
+        },
+        {
+          "batchSize": 32,
+          "bucket": true,
+          "ms": 2661.99,
+          "chunksPerSecond": 36.1,
+          "charsPerSecond": 10131
+        },
+        {
+          "batchSize": 64,
+          "bucket": true,
+          "ms": 2228.76,
+          "chunksPerSecond": 43.1,
+          "charsPerSecond": 12100
+        },
+        {
+          "batchSize": 8,
+          "bucket": false,
+          "ms": 1965.18,
+          "chunksPerSecond": 48.9,
+          "charsPerSecond": 13723
+        },
+        {
+          "batchSize": 16,
+          "bucket": false,
+          "ms": 2876.72,
+          "chunksPerSecond": 33.4,
+          "charsPerSecond": 9375
+        },
+        {
+          "batchSize": 32,
+          "bucket": false,
+          "ms": 2629.61,
+          "chunksPerSecond": 36.5,
+          "charsPerSecond": 10255
+        },
+        {
+          "batchSize": 64,
+          "bucket": false,
+          "ms": 11959.18,
+          "chunksPerSecond": 8,
+          "charsPerSecond": 2255
+        }
+      ]
+    },
+    {
+      "device": "webgpu",
+      "dtype": "fp16",
+      "sample": 96,
+      "avgChars": 280.92,
+      "rows": [
+        {
+          "batchSize": 8,
+          "bucket": true,
+          "ms": 1658.12,
+          "chunksPerSecond": 57.9,
+          "charsPerSecond": 16264
+        },
+        {
+          "batchSize": 16,
+          "bucket": true,
+          "ms": 1304.73,
+          "chunksPerSecond": 73.6,
+          "charsPerSecond": 20669
+        },
+        {
+          "batchSize": 32,
+          "bucket": true,
+          "ms": 1825.04,
+          "chunksPerSecond": 52.6,
+          "charsPerSecond": 14777
+        },
+        {
+          "batchSize": 64,
+          "bucket": true,
+          "ms": 1694.96,
+          "chunksPerSecond": 56.6,
+          "charsPerSecond": 15911
+        },
+        {
+          "batchSize": 8,
+          "bucket": false,
+          "ms": 1406.87,
+          "chunksPerSecond": 68.2,
+          "charsPerSecond": 19169
+        },
+        {
+          "batchSize": 16,
+          "bucket": false,
+          "ms": 1685.46,
+          "chunksPerSecond": 57,
+          "charsPerSecond": 16000
+        },
+        {
+          "batchSize": 32,
+          "bucket": false,
+          "ms": 1609.04,
+          "chunksPerSecond": 59.7,
+          "charsPerSecond": 16760
+        },
+        {
+          "batchSize": 64,
+          "bucket": false,
+          "ms": 1922.78,
+          "chunksPerSecond": 49.9,
+          "charsPerSecond": 14026
+        }
+      ]
+    },
+    {
+      "device": "wasm",
+      "dtype": "int8",
+      "sample": 96,
+      "avgChars": 280.92,
+      "rows": [
+        {
+          "batchSize": 8,
+          "bucket": true,
+          "ms": 7327.94,
+          "chunksPerSecond": 13.1,
+          "charsPerSecond": 3680
+        },
+        {
+          "batchSize": 16,
+          "bucket": true,
+          "ms": 7731.55,
+          "chunksPerSecond": 12.4,
+          "charsPerSecond": 3488
+        },
+        {
+          "batchSize": 32,
+          "bucket": true,
+          "ms": 8182.78,
+          "chunksPerSecond": 11.7,
+          "charsPerSecond": 3296
+        },
+        {
+          "batchSize": 64,
+          "bucket": true,
+          "ms": 9284.6,
+          "chunksPerSecond": 10.3,
+          "charsPerSecond": 2905
+        },
+        {
+          "batchSize": 8,
+          "bucket": false,
+          "ms": 8005.64,
+          "chunksPerSecond": 12,
+          "charsPerSecond": 3369
+        },
+        {
+          "batchSize": 16,
+          "bucket": false,
+          "ms": 9059.71,
+          "chunksPerSecond": 10.6,
+          "charsPerSecond": 2977
+        },
+        {
+          "batchSize": 32,
+          "bucket": false,
+          "ms": 10266.17,
+          "chunksPerSecond": 9.4,
+          "charsPerSecond": 2627
+        },
+        {
+          "batchSize": 64,
+          "bucket": false,
+          "ms": 10732.35,
+          "chunksPerSecond": 8.9,
+          "charsPerSecond": 2513
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+services:
+  seekdb:
+    image: oceanbase/seekdb:latest
+    container_name: edgekb-seekdb
+    ports:
+      - '2881:2881'
+    volumes:
+      - seekdb_data:/var/lib/seekdb
+    healthcheck:
+      test: ['CMD-SHELL', 'bash -c "exec 3<>/dev/tcp/127.0.0.1/2881" || exit 1']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: edgekb-app
+    ports:
+      - '8787:8787'
+    environment:
+      PORT: '8787'
+      SEEKDB_HOST: seekdb
+      SEEKDB_PORT: '2881'
+      SEEKDB_USER: root
+      SEEKDB_PASSWORD: ''
+      SEEKDB_DATABASE: test
+      EMBEDDING_DIM: '512'
+      DEFAULT_COLLECTION: edge_kb
+    depends_on:
+      seekdb:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  seekdb_data:

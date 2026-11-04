@@ -1,0 +1,24 @@
+# 依赖与大文件
+node_modules/
+web/node_modules/
+server/node_modules/
+web/dist/
+.vite/
+web/vite.config.ts.timestamp-*
+run/
+
+# 模型与 ONNX Runtime 运行时（由 npm run setup 生成，不入库）
+web/public/models/
+web/public/ort/
+
+# 基准原始产物（保留汇总表，原始 JSON 可选）
+bench/*.png
+bench/smoke*.png
+
+# 本地数据与日志
+*.log
+data/local/
+.env
+.env.local
+.DS_Store
+Thumbs.db

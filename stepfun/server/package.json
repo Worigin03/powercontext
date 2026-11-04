@@ -1,0 +1,15 @@
+{
+  "name": "seekdb-edge-kb-server",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "seekdb 混合检索后端：接收浏览器端算好的向量，写入 seekdb 并执行向量+全文融合检索",
+  "scripts": {
+    "start": "node src/index.mjs",
+    "dev": "node --watch src/index.mjs"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "seekdb": "1.4.0"
+  }
+}

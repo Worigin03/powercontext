@@ -97,9 +97,21 @@ workflow:
         isInIteration: false
         isInLoop: false
         sourceType: llm
-        targetType: answer
-      id: keeper-answer
+        targetType: code
+      id: keeper-clean
       source: keeper
+      sourceHandle: source
+      target: clean
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: answer
+      id: clean-answer
+      source: clean
       sourceHandle: source
       target: answer
       targetHandle: target
@@ -281,7 +293,13 @@ workflow:
             6. action=chat：如果客人在打招呼或问规则，用一两句话介绍这里能做什么（典当 / 赎回 / 逛黑市 / 托梦 / 查余额），并顺带报余额；如果客人想典当但说得太短，就请他再多给一点细节。
             7. 如果柜台结果里 ok=false（例如记忆币不够、没有可赎回的记忆），用一句当铺口吻说明原因，再给一个下一步建议。
 
-            只输出给客人看的中文回复，不要输出 JSON，不要解释你的思考过程。
+            只输出给客人看的中文回复，不要输出 JSON，不要展示思考过程。
+        - role: user
+          text: |-
+            客人的话：{{#sys.query#}}
+
+            柜台结果：
+            {{#counter.body#}}
         retry_config:
           enabled: true
           exponential_backoff:
@@ -311,7 +329,44 @@ workflow:
       type: custom
       width: 244
     - data:
-        answer: '{{#keeper.text#}}'
+        code: |-
+          import re
+
+
+          def main(text: str) -> dict:
+              s = text or ""
+              s = re.sub(r"(?is)<think>.*?</think>", "", s)
+              if "</think>" in s:
+                  s = s.split("</think>")[-1]
+              s = s.replace("<think>", "").replace("</think>", "")
+              return {"clean": s.strip()}
+        code_language: python3
+        desc: 推理模型会在正文前输出思考块，这里只保留给客人看的部分。
+        outputs:
+          clean:
+            children: null
+            type: string
+        selected: false
+        title: 去掉思考块
+        type: code
+        variables:
+        - value_selector:
+          - keeper
+          - text
+          value_type: string
+          variable: text
+      height: 90
+      id: clean
+      position:
+        x: 1280
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        answer: '{{#clean.clean#}}'
         desc: ''
         selected: false
         title: 直接回复
@@ -320,7 +375,7 @@ workflow:
       height: 90
       id: answer
       position:
-        x: 1280
+        x: 1580
         y: 282
       selected: false
       sourcePosition: right

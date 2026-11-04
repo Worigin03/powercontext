@@ -1,0 +1,84 @@
+--- a/src/ledgerflow/service.py
++++ b/src/ledgerflow/service.py
+@@ -6,7 +6,9 @@
+ 
+ from __future__ import annotations
+ 
++import re
+ from collections.abc import Mapping
++from decimal import Decimal
+ from typing import Any
+ 
+ from ledgerflow.errors import FilterError
+@@ -16,6 +18,8 @@
+ DEFAULT_PAGE_SIZE = 20
+ MAX_PAGE_SIZE = 100
+ ORDER_STATUSES = frozenset({"pending", "paid", "shipped", "cancelled", "refunded"})
++# REQ-ORD-014: decimal strings only, at most 12 integer digits and 6 decimals.
++AMOUNT_PATTERN = re.compile(r"^[0-9]{1,12}(?:\.[0-9]{1,6})?$")
+ 
+ 
+ class OrderQueryService:
+@@ -31,10 +35,26 @@
+             raise FilterError("INVALID_STATUS", f"unsupported status: {status}")
+         page, page_size = _paging(payload)
+ 
++        amount_min = _amount(payload, "amount_min")
++        amount_max = _amount(payload, "amount_max")
++        currency = _optional_text(payload, "currency")
++        if (amount_min is not None or amount_max is not None) and currency is None:
++            raise FilterError(
++                "CURRENCY_REQUIRED", "currency is required when filtering by amount"
++            )
++        if amount_min is not None and amount_max is not None and amount_min > amount_max:
++            raise FilterError("INVALID_RANGE", "amount_min must not be greater than amount_max")
++
+         rows = [
+             order
+             for order in self._repository.all()
+             if _matches(order, status=status, customer_id=customer_id)
++            and _matches_amount(
++                order,
++                amount_min=amount_min,
++                amount_max=amount_max,
++                currency=currency,
++            )
+         ]
+         rows.sort(key=lambda order: order.order_id)
+         rows.sort(key=lambda order: order.created_at, reverse=True)
+@@ -56,6 +76,35 @@
+     if customer_id is not None and order.customer_id != customer_id:
+         return False
+     return True
++
++
++def _matches_amount(
++    order: Order,
++    *,
++    amount_min: Decimal | None,
++    amount_max: Decimal | None,
++    currency: str | None,
++) -> bool:
++    """Closed-interval amount filter; both bounds are inclusive (REQ-ORD-014)."""
++
++    if currency is not None and order.currency != currency:
++        return False
++    if amount_min is not None and order.amount < amount_min:
++        return False
++    if amount_max is not None and order.amount > amount_max:
++        return False
++    return True
++
++
++def _amount(payload: Mapping[str, Any], key: str) -> Decimal | None:
++    """Parse a decimal amount bound; blank values mean "not provided"."""
++
++    raw = _optional_text(payload, key)
++    if raw is None:
++        return None
++    if not AMOUNT_PATTERN.fullmatch(raw):
++        raise FilterError("INVALID_AMOUNT", f"{key} must be a decimal amount string")
++    return Decimal(raw)
+ 
+ 
+ def _optional_text(payload: Mapping[str, Any], key: str) -> str | None:

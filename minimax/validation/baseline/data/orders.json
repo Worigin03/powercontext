@@ -1,0 +1,15 @@
+[
+  {"order_id": "ORD-1001", "customer_id": "C-001", "status": "paid", "currency": "CNY", "amount": "99.00", "created_at": "2026-09-01T09:00:00Z", "channel": "web"},
+  {"order_id": "ORD-1002", "customer_id": "C-002", "status": "paid", "currency": "CNY", "amount": "1200.00", "created_at": "2026-09-03T10:30:00Z", "channel": "app"},
+  {"order_id": "ORD-1003", "customer_id": "C-003", "status": "cancelled", "currency": "CNY", "amount": "2400.00", "created_at": "2026-09-05T11:15:00Z", "channel": "web"},
+  {"order_id": "ORD-1004", "customer_id": "C-001", "status": "shipped", "currency": "CNY", "amount": "3600.00", "created_at": "2026-09-07T14:00:00Z", "channel": "app"},
+  {"order_id": "ORD-1005", "customer_id": "C-004", "status": "paid", "currency": "USD", "amount": "500.00", "created_at": "2026-09-09T08:45:00Z", "channel": "web"},
+  {"order_id": "ORD-1006", "customer_id": "C-002", "status": "refunded", "currency": "CNY", "amount": "780.50", "created_at": "2026-09-11T16:20:00Z", "channel": "web"},
+  {"order_id": "ORD-1007", "customer_id": "C-005", "status": "paid", "currency": "CNY", "amount": "1200.00", "created_at": "2026-09-13T13:10:00Z", "channel": "app"},
+  {"order_id": "ORD-1008", "customer_id": "C-003", "status": "paid", "currency": "CNY", "amount": "15000.00", "created_at": "2026-09-15T09:05:00Z", "channel": "web"},
+  {"order_id": "ORD-1009", "customer_id": "C-006", "status": "pending", "currency": "CNY", "amount": "45.00", "created_at": "2026-09-17T18:30:00Z", "channel": "app"},
+  {"order_id": "ORD-1010", "customer_id": "C-004", "status": "shipped", "currency": "USD", "amount": "820.00", "created_at": "2026-09-19T12:00:00Z", "channel": "app"},
+  {"order_id": "ORD-1011", "customer_id": "C-005", "status": "paid", "currency": "CNY", "amount": "0.00", "created_at": "2026-09-21T07:55:00Z", "channel": "web"},
+  {"order_id": "ORD-1012", "customer_id": "C-002", "status": "paid", "currency": "CNY", "amount": "3600.00", "created_at": "2026-09-23T15:40:00Z", "channel": "app"},
+  {"order_id": "ORD-1013", "customer_id": "C-006", "status": "paid", "currency": "CNY", "amount": "2600.00", "created_at": "2026-09-23T15:40:00Z", "channel": "web"}
+]

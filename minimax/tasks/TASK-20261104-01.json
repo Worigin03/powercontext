@@ -1,0 +1,7 @@
+{
+  "task_id": "TASK-20261104-01",
+  "title": "订单查询支持金额区间筛选",
+  "description": "订单列表页需要按金额区间筛选订单。请按 REQ-ORD-014 实现金额区间筛选，并保证 REQ-ORD-002、REQ-ORD-003 规定的排序与分页行为不变；既有状态/客户筛选与未知字段兼容性（REQ-ORD-001、REQ-ORD-004）必须保持。",
+  "modules": ["order-query"],
+  "repo": "demo_project"
+}

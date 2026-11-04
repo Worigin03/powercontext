@@ -1,0 +1,9 @@
+# MiniMax API 直连检查记录
+
+时间: 2026-11-04T07:47:09Z
+
+## Key A (sk-cp-C57UL2eK…)
+{"type":"error","error":{"type":"authorized_error","message":"invalid api key (2049)","http_code":"401"},"request_id":"073a15fee394f9d3eee5892cdbb153bf"}
+## Key B (sk-cp-6yt9dwMS…)
+{"type":"error","error":{"type":"insufficient_balance_error","message":"insufficient balance (1008)","http_code":"402"},"request_id":"073a15ffe9d0d26c645e84f2974029c6"}
+

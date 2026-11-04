@@ -1,0 +1,806 @@
+{
+  "schema": "sdd-context-pack/1",
+  "generated_at": "2026-11-04T07:56:34Z",
+  "task": {
+    "task_id": "TASK-20261104-01",
+    "title": "订单查询支持金额区间筛选",
+    "description": "订单列表页需要按金额区间筛选订单。请按 REQ-ORD-014 实现金额区间筛选，并保证 REQ-ORD-002、REQ-ORD-003 规定的排序与分页行为不变；既有状态/客户筛选与未知字段兼容性（REQ-ORD-001、REQ-ORD-004）必须保持。",
+    "modules": [
+      "order-query"
+    ],
+    "repo": "demo_project"
+  },
+  "specs": [
+    {
+      "id": "REQ-ORD-004",
+      "title": "未知字段向后兼容",
+      "kind": "requirement",
+      "status": "active",
+      "module": "order-query",
+      "tags": [
+        "compatibility",
+        "contract",
+        "payload"
+      ],
+      "applies_to": [
+        "ledgerflow.service.OrderQueryService.search"
+      ],
+      "verified_by": [
+        "tests/test_search_basic.py"
+      ],
+      "supersedes": [],
+      "superseded_by": "",
+      "affects": [],
+      "body": "请求体中未定义的字段必须被忽略，不得因此返回 4xx。该规则保证旧客户端在服务端新增筛选项后仍然可用；\n新增筛选项本身不得放宽本规则。",
+      "source": "specs/order-query.md#L41",
+      "revision": "7b2b32ae4d1ae075e290058af81173c70ca585b49144eaa4c840d8c52585c618"
+    },
+    {
+      "id": "REQ-ORD-014",
+      "title": "订单金额区间筛选",
+      "kind": "requirement",
+      "status": "active",
+      "module": "order-query",
+      "tags": [
+        "amount",
+        "range",
+        "filter",
+        "decimal",
+        "currency"
+      ],
+      "applies_to": [
+        "ledgerflow.service.OrderQueryService.search"
+      ],
+      "verified_by": [
+        "tests/test_amount_filter.py",
+        "tests/test_amount_validation.py"
+      ],
+      "supersedes": [
+        "REQ-ORD-009"
+      ],
+      "superseded_by": "",
+      "affects": [],
+      "body": "请求体新增三个可选字段：`amount_min`、`amount_max`、`currency`。\n\n1. `amount_min` 与 `amount_max` 为十进制字符串，使用 `decimal.Decimal` 做精确数值比较，禁止转换为\n   `float`；区间为闭区间 `[amount_min, amount_max]`，上下界都必须能命中。\n2. 只给出其中一个边界时按单侧区间处理；两个边界都不给时金额区间不参与过滤。\n3. 任一金额边界出现（非空字符串）时，必须显式提供 `currency`，否则返回\n   `400 CURRENCY_REQUIRED`。不得为缺失的币种假定默认值。\n4. `currency` 单独出现时也必须生效，只返回币种完全相同的订单。\n5. 金额格式只允许 `^[0-9]{1,12}(\\.[0-9]{1,6})?$`；千分位、科学计数法、负号、币种符号、其他字符\n   一律返回 `400 INVALID_AMOUNT`。空字符串与纯空白视为未提供。\n6. `amount_min > amount_max` 返回 `400 INVALID_RANGE`；两者相等时按精确金额匹配。\n7. 金额筛选必须与其他筛选条件、排序契约（REQ-ORD-002）和分页契约（REQ-ORD-003）组合生效，\n   `total` 仍为全部过滤条件生效后的总数。",
+      "source": "specs/order-query.md#L63",
+      "revision": "f0dbb3b16992b0239f75d851c8f35aefeca2f7f3ca376866744a41bf753ea8ec"
+    },
+    {
+      "id": "REQ-ORD-002",
+      "title": "结果排序契约",
+      "kind": "requirement",
+      "status": "active",
+      "module": "order-query",
+      "tags": [
+        "ordering",
+        "sort",
+        "stable"
+      ],
+      "applies_to": [
+        "ledgerflow.service.OrderQueryService.search"
+      ],
+      "verified_by": [
+        "tests/test_search_basic.py"
+      ],
+      "supersedes": [],
+      "superseded_by": "",
+      "affects": [],
+      "body": "结果必须先按 `created_at` 倒序排列；`created_at` 相同的订单按 `order_id` 升序排列。\n排序必须在分页切片之前完成，任何新增筛选条件都不得改变该排序契约。",
+      "source": "specs/order-query.md#L18",
+      "revision": "38330c79404c06332ca576eddf6417727b5d8659a3b4a2e511a76d3e0826b4d0"
+    },
+    {
+      "id": "REQ-ORD-001",
+      "title": "状态与客户筛选",
+      "kind": "requirement",
+      "status": "active",
+      "module": "order-query",
+      "tags": [
+        "status",
+        "customer",
+        "filter",
+        "search"
+      ],
+      "applies_to": [
+        "ledgerflow.service.OrderQueryService.search"
+      ],
+      "verified_by": [
+        "tests/test_search_basic.py"
+      ],
+      "supersedes": [],
+      "superseded_by": "",
+      "affects": [],
+      "body": "`status` 与 `customer_id` 可以单独使用，也可以组合使用，语义为逻辑与。\n`status` 只接受 `pending`、`paid`、`shipped`、`cancelled`、`refunded`，其他取值返回\n`400 INVALID_STATUS`。空字符串与纯空白视为未提供该筛选条件，不参与过滤。",
+      "source": "specs/order-query.md#L6",
+      "revision": "1b73c8ca9a7c873ec160671640a58982991966a1470a7906623fc579d0c421d8"
+    },
+    {
+      "id": "REQ-ORD-016",
+      "title": "金额筛选的验证要求",
+      "kind": "requirement",
+      "status": "active",
+      "module": "order-query",
+      "tags": [
+        "verification",
+        "regression",
+        "test"
+      ],
+      "applies_to": [
+        "tests/test_amount_filter.py"
+      ],
+      "verified_by": [
+        "tests/test_amount_filter.py",
+        "tests/test_amount_validation.py"
+      ],
+      "supersedes": [],
+      "superseded_by": "",
+      "affects": [],
+      "body": "验证必须同时包含目标功能测试与回归测试：目标测试覆盖闭区间边界、单侧区间、币种隔离、精度比较与\n错误码；回归测试覆盖既有筛选、排序、分页与未知字段兼容。修改不得删除或跳过任何既有断言。",
+      "source": "specs/order-query.md#L86",
+      "revision": "ea5f650240a979ecc3d24164619d0e6fca18ddb887676632c19c46adceb6e494"
+    },
+    {
+      "id": "CTR-ORD-001",
+      "title": "搜索接口的错误响应",
+      "kind": "contract",
+      "status": "active",
+      "module": "order-query",
+      "tags": [
+        "error",
+        "contract",
+        "http",
+        "response"
+      ],
+      "applies_to": [
+        "ledgerflow.service.handle_search"
+      ],
+      "verified_by": [
+        "tests/test_pagination.py",
+        "tests/test_amount_validation.py"
+      ],
+      "supersedes": [],
+      "superseded_by": "",
+      "affects": [],
+      "body": "可预期的入参错误必须返回 HTTP 400 与统一错误体：\n\n```json\n{\"error\": {\"code\": \"<ERROR_CODE>\", \"message\": \"<可读说明>\"}}\n```\n\n`code` 取值受控：`INVALID_REQUEST`、`INVALID_STATUS`、`INVALID_PAGE`、`INVALID_PAGE_SIZE`、\n`CURRENCY_REQUIRED`、`INVALID_AMOUNT`、`INVALID_RANGE`。`message` 面向调用方，不得包含堆栈或内部路径。",
+      "source": "specs/api-contract.md#L3",
+      "revision": "7a744a82631046668fbb0e64d8fff2ffc15c50212a7895a1b4b274981e3ea6f9"
+    },
+    {
+      "id": "REQ-ORD-003",
+      "title": "分页契约",
+      "kind": "requirement",
+      "status": "active",
+      "module": "order-query",
+      "tags": [
+        "pagination",
+        "page",
+        "total"
+      ],
+      "applies_to": [
+        "ledgerflow.service.OrderQueryService.search"
+      ],
+      "verified_by": [
+        "tests/test_pagination.py"
+      ],
+      "supersedes": [],
+      "superseded_by": "",
+      "affects": [],
+      "body": "`page` 从 1 开始，小于 1 返回 `400 INVALID_PAGE`；`page_size` 默认 20，小于 1 返回\n`400 INVALID_PAGE_SIZE`，大于 100 时截断为 100。`total` 是过滤后、分页前的记录总数，\n不是当前页条数。超出末页返回空 `items` 且 `total` 不变。",
+      "source": "specs/order-query.md#L29",
+      "revision": "34eb54553ba87ee71cc6c371d7d7e717292a90a85cc41757bbd52db97e60c112"
+    }
+  ],
+  "decisions": {
+    "active": [
+      {
+        "id": "ADR-007",
+        "title": "金额比较使用 Decimal 闭区间并要求显式币种",
+        "kind": "decision",
+        "status": "active",
+        "module": "order-query",
+        "tags": [
+          "amount",
+          "decimal",
+          "inclusive",
+          "currency"
+        ],
+        "applies_to": [],
+        "verified_by": [],
+        "supersedes": [
+          "ADR-003"
+        ],
+        "superseded_by": "",
+        "affects": [
+          "REQ-ORD-014"
+        ],
+        "body": "金额必须以 `decimal.Decimal` 解析并比较，区间为闭区间；查询方必须显式给出 `currency`，服务端不做\n任何默认币种推断。理由：金额是财务数据，`float` 的二进制表示无法精确表达两位小数；闭区间与对账口径\n（`min <= amount <= max`）一致；显式币种可以避免把 USD 订单混入 CNY 区间统计。",
+        "source": "specs/decisions.md#L18",
+        "revision": "20b3693d35144faa7848b93565f25d5d41483d6a0d4d86f39de27696773c505b"
+      },
+      {
+        "id": "ADR-011",
+        "title": "未知请求字段保持静默忽略",
+        "kind": "decision",
+        "status": "active",
+        "module": "order-query",
+        "tags": [
+          "compatibility",
+          "contract",
+          "payload"
+        ],
+        "applies_to": [],
+        "verified_by": [],
+        "supersedes": [],
+        "superseded_by": "",
+        "affects": [
+          "REQ-ORD-004"
+        ],
+        "body": "新增筛选项时不为未知字段引入严格校验：老客户端可能携带服务端尚未识别的字段，静默忽略可以保证升级期间\n不发生 4xx。该决策只约束“未知字段”，不约束已定义字段的取值校验。",
+        "source": "specs/decisions.md#L31",
+        "revision": "645183a38aca37c64e8de847c823d58f9e569ac2eea0e3c6690f6837f68bee8f"
+      }
+    ],
+    "invalidated": [
+      {
+        "id": "ADR-003",
+        "title": "金额筛选使用 float 且上界开区间",
+        "kind": "decision",
+        "status": "superseded",
+        "superseded_by": "ADR-007",
+        "reason": "ADR-007 取代了该条目，不得作为实现依据",
+        "source": "specs/decisions.md#L6"
+      },
+      {
+        "id": "REQ-ORD-009",
+        "title": "金额上限筛选（已废止）",
+        "kind": "requirement",
+        "status": "superseded",
+        "superseded_by": "REQ-ORD-014",
+        "reason": "REQ-ORD-014 取代了该条目，不得作为实现依据",
+        "source": "specs/order-query.md#L52"
+      }
+    ]
+  },
+  "code": [
+    {
+      "symbol": "ledgerflow.models.Order",
+      "kind": "class",
+      "path": "src/ledgerflow/models.py",
+      "lines": [
+        11,
+        31
+      ],
+      "signature": "class Order",
+      "docstring": "One immutable ledger order row.",
+      "source": "src/ledgerflow/models.py#L11-L31",
+      "module": "order-query"
+    },
+    {
+      "symbol": "ledgerflow.service.OrderQueryService.__init__",
+      "kind": "function",
+      "path": "src/ledgerflow/service.py",
+      "lines": [
+        24,
+        25
+      ],
+      "signature": "def __init__(self, repository: OrderRepository | None=None) -> None",
+      "docstring": "",
+      "source": "src/ledgerflow/service.py#L24-L25",
+      "module": "order-query"
+    },
+    {
+      "symbol": "ledgerflow.service.OrderQueryService.search",
+      "kind": "function",
+      "path": "src/ledgerflow/service.py",
+      "lines": [
+        27,
+        50
+      ],
+      "signature": "def search(self, payload: Mapping[str, Any]) -> dict[str, Any]",
+      "docstring": "",
+      "source": "src/ledgerflow/service.py#L27-L50",
+      "module": "order-query"
+    },
+    {
+      "symbol": "ledgerflow.service.default_service",
+      "kind": "function",
+      "path": "src/ledgerflow/service.py",
+      "lines": [
+        94,
+        98
+      ],
+      "signature": "def default_service() -> OrderQueryService",
+      "docstring": "",
+      "source": "src/ledgerflow/service.py#L94-L98",
+      "module": "order-query"
+    },
+    {
+      "symbol": "ledgerflow.service.handle_search",
+      "kind": "function",
+      "path": "src/ledgerflow/service.py",
+      "lines": [
+        101,
+        121
+      ],
+      "signature": "def handle_search(payload: Mapping[str, Any], *, service: OrderQueryService | None=None) -> dict[str, Any]",
+      "docstring": "Handle one ``POST /orders/search`` call and return status + JSON body.",
+      "source": "src/ledgerflow/service.py#L101-L121",
+      "module": "order-query"
+    }
+  ],
+  "tests": {
+    "target": [
+      {
+        "id": "tests/test_amount_filter.py::test_amount_range_is_inclusive_on_both_bounds",
+        "name": "test_amount_range_is_inclusive_on_both_bounds",
+        "kind": "target",
+        "covers": [
+          "REQ-ORD-014"
+        ],
+        "path": "tests/test_amount_filter.py",
+        "line": 15,
+        "docstring": "",
+        "source": "tests/test_amount_filter.py#L15"
+      },
+      {
+        "id": "tests/test_amount_filter.py::test_amount_filter_keeps_contract_ordering",
+        "name": "test_amount_filter_keeps_contract_ordering",
+        "kind": "target",
+        "covers": [
+          "REQ-ORD-014"
+        ],
+        "path": "tests/test_amount_filter.py",
+        "line": 33,
+        "docstring": "",
+        "source": "tests/test_amount_filter.py#L33"
+      },
+      {
+        "id": "tests/test_amount_filter.py::test_amount_min_only",
+        "name": "test_amount_min_only",
+        "kind": "target",
+        "covers": [
+          "REQ-ORD-014"
+        ],
+        "path": "tests/test_amount_filter.py",
+        "line": 50,
+        "docstring": "",
+        "source": "tests/test_amount_filter.py#L50"
+      },
+      {
+        "id": "tests/test_amount_filter.py::test_amount_max_includes_zero_valued_order",
+        "name": "test_amount_max_includes_zero_valued_order",
+        "kind": "target",
+        "covers": [
+          "REQ-ORD-014"
+        ],
+        "path": "tests/test_amount_filter.py",
+        "line": 57,
+        "docstring": "",
+        "source": "tests/test_amount_filter.py#L57"
+      },
+      {
+        "id": "tests/test_amount_filter.py::test_bounds_with_extra_precision_compare_numerically",
+        "name": "test_bounds_with_extra_precision_compare_numerically",
+        "kind": "target",
+        "covers": [
+          "REQ-ORD-014"
+        ],
+        "path": "tests/test_amount_filter.py",
+        "line": 64,
+        "docstring": "",
+        "source": "tests/test_amount_filter.py#L64"
+      },
+      {
+        "id": "tests/test_amount_filter.py::test_amount_filter_is_scoped_to_the_requested_currency",
+        "name": "test_amount_filter_is_scoped_to_the_requested_currency",
+        "kind": "target",
+        "covers": [
+          "REQ-ORD-014"
+        ],
+        "path": "tests/test_amount_filter.py",
+        "line": 73,
+        "docstring": "",
+        "source": "tests/test_amount_filter.py#L73"
+      },
+      {
+        "id": "tests/test_amount_filter.py::test_currency_alone_filters_without_amount_bounds",
+        "name": "test_currency_alone_filters_without_amount_bounds",
+        "kind": "target",
+        "covers": [
+          "REQ-ORD-014"
+        ],
+        "path": "tests/test_amount_filter.py",
+        "line": 85,
+        "docstring": "",
+        "source": "tests/test_amount_filter.py#L85"
+      },
+      {
+        "id": "tests/test_amount_filter.py::test_amount_filter_combines_with_status",
+        "name": "test_amount_filter_combines_with_status",
+        "kind": "target",
+        "covers": [
+          "REQ-ORD-014"
+        ],
+        "path": "tests/test_amount_filter.py",
+        "line": 95,
+        "docstring": "",
+        "source": "tests/test_amount_filter.py#L95"
+      },
+      {
+        "id": "tests/test_amount_validation.py::test_amount_filter_requires_explicit_currency",
+        "name": "test_amount_filter_requires_explicit_currency",
+        "kind": "target",
+        "covers": [
+          "CTR-ORD-001",
+          "REQ-ORD-014"
+        ],
+        "path": "tests/test_amount_validation.py",
+        "line": 15,
+        "docstring": "",
+        "source": "tests/test_amount_validation.py#L15"
+      },
+      {
+        "id": "tests/test_amount_validation.py::test_malformed_amount_is_rejected",
+        "name": "test_malformed_amount_is_rejected",
+        "kind": "target",
+        "covers": [
+          "CTR-ORD-001",
+          "REQ-ORD-014"
+        ],
+        "path": "tests/test_amount_validation.py",
+        "line": 22,
+        "docstring": "",
+        "source": "tests/test_amount_validation.py#L22"
+      },
+      {
+        "id": "tests/test_amount_validation.py::test_blank_amount_is_treated_as_absent",
+        "name": "test_blank_amount_is_treated_as_absent",
+        "kind": "target",
+        "covers": [
+          "CTR-ORD-001",
+          "REQ-ORD-014"
+        ],
+        "path": "tests/test_amount_validation.py",
+        "line": 39,
+        "docstring": "",
+        "source": "tests/test_amount_validation.py#L39"
+      },
+      {
+        "id": "tests/test_amount_validation.py::test_lower_bound_above_upper_bound_is_rejected",
+        "name": "test_lower_bound_above_upper_bound_is_rejected",
+        "kind": "target",
+        "covers": [
+          "CTR-ORD-001",
+          "REQ-ORD-014"
+        ],
+        "path": "tests/test_amount_validation.py",
+        "line": 46,
+        "docstring": "",
+        "source": "tests/test_amount_validation.py#L46"
+      },
+      {
+        "id": "tests/test_amount_validation.py::test_equal_bounds_select_exact_amount",
+        "name": "test_equal_bounds_select_exact_amount",
+        "kind": "target",
+        "covers": [
+          "CTR-ORD-001",
+          "REQ-ORD-014"
+        ],
+        "path": "tests/test_amount_validation.py",
+        "line": 55,
+        "docstring": "",
+        "source": "tests/test_amount_validation.py#L55"
+      }
+    ],
+    "regression": [
+      {
+        "id": "tests/test_pagination.py::test_second_page_window",
+        "name": "test_second_page_window",
+        "kind": "regression",
+        "covers": [
+          "REQ-ORD-003"
+        ],
+        "path": "tests/test_pagination.py",
+        "line": 15,
+        "docstring": "",
+        "source": "tests/test_pagination.py#L15"
+      },
+      {
+        "id": "tests/test_pagination.py::test_page_beyond_last_page_is_empty",
+        "name": "test_page_beyond_last_page_is_empty",
+        "kind": "regression",
+        "covers": [
+          "REQ-ORD-003"
+        ],
+        "path": "tests/test_pagination.py",
+        "line": 32,
+        "docstring": "",
+        "source": "tests/test_pagination.py#L32"
+      },
+      {
+        "id": "tests/test_pagination.py::test_page_size_is_capped",
+        "name": "test_page_size_is_capped",
+        "kind": "regression",
+        "covers": [
+          "REQ-ORD-003"
+        ],
+        "path": "tests/test_pagination.py",
+        "line": 40,
+        "docstring": "",
+        "source": "tests/test_pagination.py#L40"
+      },
+      {
+        "id": "tests/test_pagination.py::test_numeric_strings_are_accepted",
+        "name": "test_numeric_strings_are_accepted",
+        "kind": "regression",
+        "covers": [
+          "REQ-ORD-003"
+        ],
+        "path": "tests/test_pagination.py",
+        "line": 48,
+        "docstring": "",
+        "source": "tests/test_pagination.py#L48"
+      },
+      {
+        "id": "tests/test_pagination.py::test_invalid_page_size_is_rejected",
+        "name": "test_invalid_page_size_is_rejected",
+        "kind": "regression",
+        "covers": [
+          "REQ-ORD-003"
+        ],
+        "path": "tests/test_pagination.py",
+        "line": 64,
+        "docstring": "",
+        "source": "tests/test_pagination.py#L64"
+      },
+      {
+        "id": "tests/test_pagination.py::test_non_numeric_page_is_rejected",
+        "name": "test_non_numeric_page_is_rejected",
+        "kind": "regression",
+        "covers": [
+          "REQ-ORD-003"
+        ],
+        "path": "tests/test_pagination.py",
+        "line": 71,
+        "docstring": "",
+        "source": "tests/test_pagination.py#L71"
+      },
+      {
+        "id": "tests/test_search_basic.py::test_default_listing_returns_every_order_in_contract_order",
+        "name": "test_default_listing_returns_every_order_in_contract_order",
+        "kind": "regression",
+        "covers": [
+          "REQ-ORD-001",
+          "REQ-ORD-002",
+          "REQ-ORD-004"
+        ],
+        "path": "tests/test_search_basic.py",
+        "line": 31,
+        "docstring": "",
+        "source": "tests/test_search_basic.py#L31"
+      },
+      {
+        "id": "tests/test_search_basic.py::test_same_created_at_is_broken_by_order_id_ascending",
+        "name": "test_same_created_at_is_broken_by_order_id_ascending",
+        "kind": "regression",
+        "covers": [
+          "REQ-ORD-001",
+          "REQ-ORD-002",
+          "REQ-ORD-004"
+        ],
+        "path": "tests/test_search_basic.py",
+        "line": 42,
+        "docstring": "",
+        "source": "tests/test_search_basic.py#L42"
+      },
+      {
+        "id": "tests/test_search_basic.py::test_status_filter",
+        "name": "test_status_filter",
+        "kind": "regression",
+        "covers": [
+          "REQ-ORD-001",
+          "REQ-ORD-002",
+          "REQ-ORD-004"
+        ],
+        "path": "tests/test_search_basic.py",
+        "line": 49,
+        "docstring": "",
+        "source": "tests/test_search_basic.py#L49"
+      },
+      {
+        "id": "tests/test_search_basic.py::test_customer_filter",
+        "name": "test_customer_filter",
+        "kind": "regression",
+        "covers": [
+          "REQ-ORD-001",
+          "REQ-ORD-002",
+          "REQ-ORD-004"
+        ],
+        "path": "tests/test_search_basic.py",
+        "line": 67,
+        "docstring": "",
+        "source": "tests/test_search_basic.py#L67"
+      },
+      {
+        "id": "tests/test_search_basic.py::test_status_and_customer_filter_combine",
+        "name": "test_status_and_customer_filter_combine",
+        "kind": "regression",
+        "covers": [
+          "REQ-ORD-001",
+          "REQ-ORD-002",
+          "REQ-ORD-004"
+        ],
+        "path": "tests/test_search_basic.py",
+        "line": 78,
+        "docstring": "",
+        "source": "tests/test_search_basic.py#L78"
+      },
+      {
+        "id": "tests/test_search_basic.py::test_unknown_fields_are_ignored_for_backward_compatibility",
+        "name": "test_unknown_fields_are_ignored_for_backward_compatibility",
+        "kind": "regression",
+        "covers": [
+          "REQ-ORD-001",
+          "REQ-ORD-002",
+          "REQ-ORD-004"
+        ],
+        "path": "tests/test_search_basic.py",
+        "line": 88,
+        "docstring": "",
+        "source": "tests/test_search_basic.py#L88"
+      },
+      {
+        "id": "tests/test_search_basic.py::test_blank_string_is_treated_as_absent",
+        "name": "test_blank_string_is_treated_as_absent",
+        "kind": "regression",
+        "covers": [
+          "REQ-ORD-001",
+          "REQ-ORD-002",
+          "REQ-ORD-004"
+        ],
+        "path": "tests/test_search_basic.py",
+        "line": 95,
+        "docstring": "",
+        "source": "tests/test_search_basic.py#L95"
+      },
+      {
+        "id": "tests/test_search_basic.py::test_unknown_status_is_rejected",
+        "name": "test_unknown_status_is_rejected",
+        "kind": "regression",
+        "covers": [
+          "REQ-ORD-001",
+          "REQ-ORD-002",
+          "REQ-ORD-004"
+        ],
+        "path": "tests/test_search_basic.py",
+        "line": 102,
+        "docstring": "",
+        "source": "tests/test_search_basic.py#L102"
+      },
+      {
+        "id": "tests/test_search_basic.py::test_item_shape_stays_stable",
+        "name": "test_item_shape_stays_stable",
+        "kind": "regression",
+        "covers": [
+          "REQ-ORD-001",
+          "REQ-ORD-002",
+          "REQ-ORD-004"
+        ],
+        "path": "tests/test_search_basic.py",
+        "line": 109,
+        "docstring": "",
+        "source": "tests/test_search_basic.py#L109"
+      }
+    ]
+  },
+  "state": {
+    "task_id": "TASK-20261104-01",
+    "updated_at": "2026-11-04T07:56:32Z",
+    "done": [
+      "已导入规格、代码与测试索引"
+    ],
+    "todo": [
+      "实现 REQ-ORD-014 金额区间筛选",
+      "运行目标与回归测试"
+    ],
+    "verified": [
+      {
+        "command": "C:\\Users\\Worigin\\Desktop\\oceanbase\\.venv-pc\\Scripts\\python.exe -m pytest -m target -q --tb=line",
+        "exit_code": 0,
+        "summary": "no pytest summary",
+        "label": "target",
+        "at": "2026-11-04T06:03:46Z",
+        "output_tail": ".................                                                        [100%]\nC:\\Users\\Worigin\\Desktop\\oceanbase\\.venv-pc\\Lib\\site-packages\\pytest_asyncio\\plugin.py:300: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the \"fixture\" caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to \"function\" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n"
+      },
+      {
+        "command": "C:\\Users\\Worigin\\Desktop\\oceanbase\\.venv-pc\\Scripts\\python.exe -m pytest -m regression -q --tb=line",
+        "exit_code": 0,
+        "summary": "no pytest summary",
+        "label": "regression",
+        "at": "2026-11-04T06:03:47Z",
+        "output_tail": ".................                                                        [100%]\nC:\\Users\\Worigin\\Desktop\\oceanbase\\.venv-pc\\Lib\\site-packages\\pytest_asyncio\\plugin.py:300: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the \"fixture\" caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to \"function\" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n"
+      },
+      {
+        "command": "C:/Users/Worigin/Desktop/oceanbase/.venv-pc/Scripts/python.exe -m pytest -m target -q --tb=short -p no:cacheprovider",
+        "exit_code": 0,
+        "summary": "no pytest summary",
+        "label": "target",
+        "at": "2026-11-04T07:52:08Z",
+        "output_tail": ".................                                                        [100%]\n\n--- stderr ---\no the \"fixture\" caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to \"function\" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n"
+      },
+      {
+        "command": "C:/Users/Worigin/Desktop/oceanbase/.venv-pc/Scripts/python.exe -m pytest -m regression -q --tb=short -p no:cacheprovider",
+        "exit_code": 0,
+        "summary": "no pytest summary",
+        "label": "regression",
+        "at": "2026-11-04T07:52:12Z",
+        "output_tail": ".................                                                        [100%]\n\n--- stderr ---\no the \"fixture\" caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to \"function\" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n"
+      },
+      {
+        "command": "C:/Users/Worigin/Desktop/oceanbase/.venv-pc/Scripts/python.exe -m pytest -m target --tb=short -p no:cacheprovider",
+        "exit_code": 0,
+        "summary": "17 passed, 17 deselected",
+        "label": "target",
+        "at": "2026-11-04T07:54:50Z",
+        "code_version": "d647275c (working tree modified)",
+        "output_tail": ".................                                                        [100%]\n17 passed, 17 deselected in 0.08s\n\n--- stderr ---\no the \"fixture\" caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to \"function\" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n"
+      },
+      {
+        "command": "C:/Users/Worigin/Desktop/oceanbase/.venv-pc/Scripts/python.exe -m pytest -m regression --tb=short -p no:cacheprovider",
+        "exit_code": 0,
+        "summary": "17 passed, 17 deselected",
+        "label": "regression",
+        "at": "2026-11-04T07:54:54Z",
+        "code_version": "d647275c (working tree modified)",
+        "output_tail": ".................                                                        [100%]\n17 passed, 17 deselected in 0.09s\n\n--- stderr ---\no the \"fixture\" caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to \"function\" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n"
+      },
+      {
+        "command": "C:\\Users\\Worigin\\Desktop\\oceanbase\\.venv-pc\\Scripts\\python.exe -m pytest -m target --tb=line",
+        "exit_code": 0,
+        "summary": "17 passed, 17 deselected",
+        "label": "target",
+        "at": "2026-11-04T07:56:26Z",
+        "code_version": "d647275c (working tree modified)",
+        "output_tail": ".................                                                        [100%]\n17 passed, 17 deselected in 1.33s\n\n--- stderr ---\no the \"fixture\" caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to \"function\" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n"
+      },
+      {
+        "command": "C:\\Users\\Worigin\\Desktop\\oceanbase\\.venv-pc\\Scripts\\python.exe -m pytest -m regression --tb=line",
+        "exit_code": 0,
+        "summary": "17 passed, 17 deselected",
+        "label": "regression",
+        "at": "2026-11-04T07:56:32Z",
+        "code_version": "d647275c (working tree modified)",
+        "output_tail": ".................                                                        [100%]\n17 passed, 17 deselected in 0.11s\n\n--- stderr ---\no the \"fixture\" caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to \"function\" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n"
+      }
+    ],
+    "changed_files": [],
+    "notes": "",
+    "source": "powercontext:memory/art_55c02da7dc694ab3acaab585277961c6"
+  },
+  "database": {
+    "dsn": "mysql://root@127.0.0.1:2881/sdd_context",
+    "counts": {
+      "spec_item": 12,
+      "code_symbol": 20,
+      "test_case": 30,
+      "ingest_run": 3
+    },
+    "queries": 13,
+    "query_log": "C:\\Users\\Worigin\\Desktop\\oceanbase\\pc-eco\\minimax\\records\\db-queries.log",
+    "recall_terms": [
+      "order",
+      "query",
+      "订单",
+      "单查",
+      "查询",
+      "询支",
+      "支持",
+      "持金",
+      "金额",
+      "额区",
+      "区间",
+      "间筛",
+      "筛选",
+      "单列"
+    ]
+  }
+}

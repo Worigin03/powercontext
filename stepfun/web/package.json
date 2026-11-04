@@ -1,0 +1,19 @@
+{
+  "name": "seekdb-edge-kb-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "端侧向量化 + seekdb 混合检索的个人知识库前端",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^4.3.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}

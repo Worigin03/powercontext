@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edge KB · 端侧向量化 + seekdb 混合检索</title>
+    <meta name="description" content="在浏览器本地完成文档向量化，写入 seekdb，并用向量+全文混合检索召回" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo">EK</div>
+          <div>
+            <h1>Edge Knowledge Base</h1>
+            <p class="sub">端侧向量化 · seekdb 混合检索</p>
+          </div>
+        </div>
+        <div class="badges" id="badges">
+          <span class="badge skeleton">初始化…</span>
+        </div>
+      </header>
+
+      <main class="grid">
+        <section class="panel panel-import">
+          <div class="panel-head">
+            <h2>1 · 导入语料</h2>
+            <div class="inline-actions">
+              <select id="collection-select" class="mini-select" title="切换知识库集合"></select>
+              <button class="ghost tiny" id="collection-new" title="新建集合">＋</button>
+            </div>
+          </div>
+
+          <div class="dropzone" id="dropzone">
+            <input type="file" id="file-input" accept=".txt,.md,.markdown,.json,.csv" multiple hidden />
+            <div class="dz-inner">
+              <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+                <path d="M12 16V4m0 0L7 9m5-5l5 5M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <p><strong>拖拽文件</strong> 或 <button class="link" id="pick-file">选择文件</button></p>
+              <p class="muted">支持 .txt / .md / .json / .csv，纯文本在本地切块与向量化</p>
+            </div>
+          </div>
+
+          <textarea id="paste" rows="5" placeholder="也可以直接粘贴一段文本，例如会议纪要、产品文档、读书笔记…"></textarea>
+
+          <div class="row controls">
+            <label class="field">
+              <span>切块长度</span>
+              <input type="number" id="chunk-size" value="600" min="120" max="1200" step="40" />
+            </label>
+            <label class="field">
+              <span>重叠</span>
+              <input type="number" id="chunk-overlap" value="100" min="0" max="400" step="20" />
+            </label>
+            <label class="field">
+              <span>批大小</span>
+              <select id="batch-size">
+                <option value="4">4</option>
+                <option value="8">8</option>
+                <option value="16" selected>16</option>
+                <option value="32">32</option>
+                <option value="64">64</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="row actions">
+            <button class="primary" id="ingest">向量化并写入 seekdb</button>
+            <button class="ghost" id="load-sample">载入示例语料</button>
+            <button class="ghost" id="clear-import">清空</button>
+          </div>
+
+          <div class="progress-block" id="ingest-progress" hidden>
+            <div class="progress-row"><span id="ingest-stage">准备中…</span><span id="ingest-pct">0%</span></div>
+            <div class="bar"><i id="ingest-bar"></i></div>
+            <div class="progress-meta" id="ingest-meta"></div>
+          </div>
+
+          <div class="stat-grid" id="ingest-stats"></div>
+
+          <div class="panel-sub">
+            <div class="panel-head small">
+              <h3>知识库状态</h3>
+              <div class="inline-actions">
+                <button class="ghost tiny" id="refresh-index">刷新索引</button>
+              </div>
+            </div>
+            <div class="kv" id="kb-state"></div>
+          </div>
+        </section>
+
+        <section class="panel panel-search">
+          <div class="panel-head">
+            <h2>2 · 混合检索</h2>
+            <span class="hint" id="mode-hint">RRF 融合在 seekdb 内完成</span>
+          </div>
+
+          <div class="searchbar">
+            <input id="query" type="search" placeholder="输入问题，例如：混合检索的融合算法是什么？" autocomplete="off" />
+            <button class="primary" id="search">检索</button>
+          </div>
+
+          <div class="row controls">
+            <div class="segmented" id="mode">
+              <button data-mode="hybrid" class="active">混合</button>
+              <button data-mode="vector">向量</button>
+              <button data-mode="fulltext">全文</button>
+            </div>
+            <label class="field inline">
+              <span>TopK</span>
+              <input type="number" id="topk" value="8" min="1" max="50" />
+            </label>
+            <label class="field inline">
+              <span>RRF 窗口</span>
+              <input type="number" id="rrf-window" value="60" min="1" max="200" />
+            </label>
+          </div>
+
+          <div class="timing-strip" id="timings" hidden>
+            <div><span>查询向量化</span><b id="t-embed">–</b></div>
+            <div><span>seekdb 检索</span><b id="t-db">–</b></div>
+            <div><span>端到端</span><b id="t-e2e">–</b></div>
+          </div>
+
+          <div class="results" id="results">
+            <div class="empty">
+              <p>导入语料后即可检索。</p>
+              <p class="muted">向量由浏览器本地计算，检索与融合由 seekdb 完成。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel panel-runtime">
+          <div class="panel-head">
+            <h2>3 · 运行环境</h2>
+            <span class="hint" id="runtime-hint">模型仅在本地加载</span>
+          </div>
+          <div class="kv" id="runtime-info"></div>
+          <div class="panel-sub">
+            <div class="panel-head small"><h3>集合与索引</h3></div>
+            <div class="kv" id="schema-info"></div>
+          </div>
+          <div class="panel-sub">
+            <div class="panel-head small"><h3>本次会话</h3></div>
+            <div class="kv" id="session-info"></div>
+          </div>
+        </section>
+      </main>
+
+      <div class="toast" id="toast" hidden></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

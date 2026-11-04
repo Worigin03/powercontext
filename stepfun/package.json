@@ -1,0 +1,21 @@
+{
+  "name": "seekdb-edge-kb",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "端侧 AI 推理 + seekdb 混合检索的迷你知识库（2026 OceanBase 大赛 · 阶跃星辰赛题）",
+  "scripts": {
+    "setup": "node scripts/prepare-assets.mjs && node scripts/fetch-model.mjs && python scripts/quantize.py",
+    "assets": "node scripts/prepare-assets.mjs",
+    "eval:build": "node scripts/build-eval-set.mjs",
+    "build": "npm --prefix web run build",
+    "start": "node server/src/index.mjs",
+    "dev:server": "node server/src/index.mjs",
+    "dev:web": "npm --prefix web run dev",
+    "bench": "node scripts/bench.mjs",
+    "bench:report": "node scripts/report.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  }
+}

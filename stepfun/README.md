@@ -44,7 +44,9 @@ stepfun/
 │   ├── quantize.py      INT8 动态量化 + FP16 转换 + 数值校验 + 体积报告
 │   ├── prepare-assets.mjs 复制 ORT wasm 运行时（离线可用）
 │   ├── build-eval-set.mjs 生成评测语料与查询
-│   └── bench.mjs        Playwright 驱动真实 Chrome 跑基准
+│   ├── bench.mjs        Playwright 驱动真实 Chrome 跑基准
+│   ├── sweep.mjs        批大小 × 长度分桶的单项优化对比
+│   └── modes.mjs        hybrid / vector / fulltext 三种检索策略对照
 ├── docs/TECH_REPORT.md  一页技术说明
 ├── docs/BENCHMARK.md    实测数据与复现条件
 └── docker-compose.yml   seekdb + 应用的容器编排
@@ -127,7 +129,14 @@ npm run eval:build      # 生成评测集（23 篇中文技术文档 → 评测�
 node scripts/bench.mjs --repeat=3
 ```
 
-结果写入 `bench/results.json`，汇总表见 `docs/BENCHMARK.md`。
+结果写入 `bench/results.json`，汇总表见 `docs/BENCHMARK.md`。另有两组单项实验：
+
+```bash
+node scripts/sweep.mjs --sample=96         # 批大小(8/16/32/64) × 长度分桶
+node scripts/modes.mjs                      # hybrid / vector / fulltext 检索策略对照
+```
+
+> 评测集的查询取自文档小节标题，字面重合度偏高，全文分支会因此占优；这组数据只用于说明两路召回的差异，不代表通用场景的最优策略。
 
 ## 已知取舍
 

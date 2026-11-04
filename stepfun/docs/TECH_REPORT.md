@@ -90,9 +90,15 @@ lastRefreshMs / lastRefreshAt`，切集合时重新拉取；后端选择与实�
 | 切块策略 | 段落聚合 + 句子边界切分 + 合并短碎片，600 字/重叠 100 | 600 字的 Recall@10 优于 480 字（已对比，见 README 取舍） |
 | 查询编码 | 查询侧加 BGE 前缀 + 单条直通（不分桶） | 查询向量化 P50 **8.1–10.8 ms**（int8+WebGPU 例外：67.4 ms） |
 | 检索 | 融合下推到 seekdb（一次 RPC，无客户端合并） | seekdb 检索 P50 11.0–13.0 ms，P95 ≤ 22.1 ms；端到端 P50 **29.0–32.4 ms**（int8+WebGPU 例外：90.4 ms） |
+| 索引策略 | HNSW(cosine) + ngram2 全文双索引，查询时按场景选路 | 同集合同查询下调参：hybrid 58.5% / nDCG 50.7%，vector 58.5% / 39.5%，fulltext 71.3% / 59.8%（见表 5） |
 
 **检索质量**（262 块 / 50 条查询 / 47 条有效金标，hybrid Top-10）：Recall@10 **58.5%**、nDCG@10 **50.7%**、MRR@10 **48.8%**；
 文档级 Recall@10 **93.6%**（Top-10 中出现正确文档的任意块）。FP16/FP32 两档质量完全一致，说明量化没有牺牲检索效果。
+
+**索引策略的一个反直觉结论**：本评测集的查询取自文档小节标题，字面重合度高，因此纯全文（ngram2，按 2~3 字 n-gram 词项匹配，
+并非严格子串）反而最强——Recall 71.3%、nDCG 59.8%，高于 hybrid 的 58.5% / 50.7%；向量分支 Recall 相同但排序明显更弱
+（nDCG 39.5%、MRR 33.7%），RRF 等权融合会被这一路拖累。我们仍以 hybrid 为默认（查询措辞与原文不一致时，全文分支会退化，
+向量分支是唯一保底），并把三种模式暴露在界面上供按场景切换；同时如实标注该评测集对全文分支的偏向。
 
 ## 6. 复现
 
@@ -101,6 +107,7 @@ npm run setup        # 拉模型 + INT8/FP16 量化 + 复制 ORT 运行时
 npm run build && npm start     # http://127.0.0.1:8787
 node scripts/bench.mjs --repeat=3      # 5 组配置 → bench/results.json
 node scripts/sweep.mjs                 # 批大小 × 分桶 → bench/sweep.json
+node scripts/modes.mjs                 # hybrid/vector/fulltext 对照 → bench/modes.json
 node scripts/report.mjs                # 渲染 docs/BENCHMARK.md
 ```
 

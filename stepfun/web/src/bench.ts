@@ -181,12 +181,10 @@ export async function runBench(app: App, cfg: BenchConfig) {
       const t2 = performance.now();
       const ranked = res.hits.map((h) => h.id);
       topIdsByQuery.set(q.id, ranked);
-      topIdsByQuery.set(q.id, ranked);
       rounds.embed.push(t1 - t0);
       rounds.db.push(res.tookMs);
       rounds.e2e.push(t2 - t0);
       rounds.recall.push(recallAtK(ranked, gold, 10));
-      rounds.docRecall.push(ranked.slice(0, 10).some((id) => goldDocs.has(id.split(':')[0])) ? 1 : 0);
       rounds.docRecall.push(ranked.slice(0, 10).some((id) => goldDocs.has(id.split(':')[0])) ? 1 : 0);
       rounds.mrr.push(mrrAtK(ranked, gold, 10));
       rounds.ndcg.push(ndcgAtK(ranked, gold, 10));

@@ -1,8 +1,8 @@
 # 开发上下文包 · TASK-20261104-01 订单查询支持金额区间筛选
 
-- 生成时间：2026-11-04T07:56:37Z
+- 生成时间：2026-11-04T08:03:05Z
 - 数据来源：seekdb `mysql://root@127.0.0.1:2881/sdd_context`（spec 7 / symbol 22 / test 30，本次 9 条查询）
-- 任务状态来源：powercontext:memory/art_55c02da7dc694ab3acaab585277961c6
+- 任务状态来源：powercontext:memory/art_433734bab2bc49ed9cb8a12b7910e460
 - 检索词：order、query、订单、单查、查询、询支、支持、持金、金额、额区
 
 ## 1. 任务
@@ -219,7 +219,7 @@ def handle_search(
 
 ## 7. 任务状态（来自 PowerContext）
 
-- 更新时间：2026-11-04T07:56:32Z
+- 更新时间：2026-11-04T08:03:01Z
 - 已完成：已导入规格、代码与测试索引
 - 待办：实现 REQ-ORD-014 金额区间筛选；运行目标与回归测试
 - 已验证：`C:\Users\Worigin\Desktop\oceanbase\.venv-pc\Scripts\python.exe -m pytest -m target -q --tb=line` → exit 0，no pytest summary

@@ -1,6 +1,6 @@
 {
   "schema": "sdd-context-pack/1",
-  "generated_at": "2026-11-04T07:56:34Z",
+  "generated_at": "2026-11-04T08:03:02Z",
   "task": {
     "task_id": "TASK-20261104-01",
     "title": "订单查询支持金额区间筛选",
@@ -694,7 +694,7 @@
   },
   "state": {
     "task_id": "TASK-20261104-01",
-    "updated_at": "2026-11-04T07:56:32Z",
+    "updated_at": "2026-11-04T08:03:01Z",
     "done": [
       "已导入规格、代码与测试索引"
     ],
@@ -758,23 +758,23 @@
         "exit_code": 0,
         "summary": "17 passed, 17 deselected",
         "label": "target",
-        "at": "2026-11-04T07:56:26Z",
-        "code_version": "d647275c (working tree modified)",
-        "output_tail": ".................                                                        [100%]\n17 passed, 17 deselected in 1.33s\n\n--- stderr ---\no the \"fixture\" caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to \"function\" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n"
+        "at": "2026-11-04T08:02:57Z",
+        "code_version": "80d3fd8e (working tree modified)",
+        "output_tail": ".................                                                        [100%]\n17 passed, 17 deselected in 0.09s\n\n--- stderr ---\no the \"fixture\" caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to \"function\" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n"
       },
       {
         "command": "C:\\Users\\Worigin\\Desktop\\oceanbase\\.venv-pc\\Scripts\\python.exe -m pytest -m regression --tb=line",
         "exit_code": 0,
         "summary": "17 passed, 17 deselected",
         "label": "regression",
-        "at": "2026-11-04T07:56:32Z",
-        "code_version": "d647275c (working tree modified)",
+        "at": "2026-11-04T08:03:01Z",
+        "code_version": "80d3fd8e (working tree modified)",
         "output_tail": ".................                                                        [100%]\n17 passed, 17 deselected in 0.11s\n\n--- stderr ---\no the \"fixture\" caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to \"function\" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n"
       }
     ],
     "changed_files": [],
     "notes": "",
-    "source": "powercontext:memory/art_55c02da7dc694ab3acaab585277961c6"
+    "source": "powercontext:memory/art_433734bab2bc49ed9cb8a12b7910e460"
   },
   "database": {
     "dsn": "mysql://root@127.0.0.1:2881/sdd_context",

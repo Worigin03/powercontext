@@ -152,7 +152,7 @@ class CoalescingEmbeddingModel:
         self,
         batch: _Batch,
         *,
-        vectors: tuple[tuple[float, ...], ...] | None = None,
+        vectors: tuple[tuple[float, ...], ...] = (),
         error: BaseException | None = None,
     ) -> None:
         for index, text in enumerate(batch.texts):
@@ -184,20 +184,20 @@ def _consume_outcome(future: asyncio.Future[tuple[float, ...]]) -> None:
 
 def _sum_usage(batches) -> InferenceUsage:
     requests = input_tokens = output_tokens = 0
-    counted_tokens = False
+    counted_input = counted_output = False
     for batch in batches:
         usage = batch.usage
         requests += usage.requests
         if usage.input_tokens is not None:
             input_tokens += usage.input_tokens
-            counted_tokens = True
+            counted_input = True
         if usage.output_tokens is not None:
             output_tokens += usage.output_tokens
-            counted_tokens = True
+            counted_output = True
     return InferenceUsage(
         requests=requests,
-        input_tokens=input_tokens if counted_tokens else None,
-        output_tokens=output_tokens if counted_tokens else None,
+        input_tokens=input_tokens if counted_input else None,
+        output_tokens=output_tokens if counted_output else None,
     )
 
 

@@ -35,7 +35,7 @@ class _ScoreRecord(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     rank: int = Field(strict=True, ge=1)
-    score: float = Field(allow_inf_nan=False)
+    score: float = Field(strict=True, allow_inf_nan=False)
 
 
 class _ScoreResponse(BaseModel):
@@ -116,7 +116,7 @@ class HTTPMemoryReranker:
 def _validate_bounds(candidate_count: int, limit: int) -> None:
     if candidate_count < 1:
         raise ValueError("rerank requires at least one candidate")  # noqa: TRY003
-    if limit < 1 or limit > candidate_count:
+    if type(limit) is not int or limit < 1 or limit > candidate_count:
         raise ValueError("rerank limit must be within the candidate count")  # noqa: TRY003
 
 

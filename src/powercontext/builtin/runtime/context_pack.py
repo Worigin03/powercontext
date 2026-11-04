@@ -152,9 +152,10 @@ def apply_context_pack_delta(base: ContextPack, delta: ContextPackDelta) -> Cont
         raise ContextPackError("delta application requires a pack and a delta")  # noqa: TRY003
     if delta.base_digest != base.digest:
         raise ContextPackError("delta was built for a different base pack")  # noqa: TRY003
-    if delta.prefix_items > len(base.items):
+    prefix_items = _require_prefix(delta.prefix_items)
+    if prefix_items > len(base.items):
         raise ContextPackError("delta prefix exceeds the base chunk count")  # noqa: TRY003
-    rebuilt = ContextPack.build((*base.items[: delta.prefix_items], *delta.appended))
+    rebuilt = ContextPack.build((*base.items[:prefix_items], *delta.appended))
     if rebuilt.digest != delta.target_digest:
         raise ContextPackError("rebuilt context does not match the delta target digest")  # noqa: TRY003
     return rebuilt

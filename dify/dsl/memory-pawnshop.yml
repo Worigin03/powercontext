@@ -1,0 +1,334 @@
+app:
+  description: 记忆当铺：把记忆当掉换记忆币，凭线索赎回，逛别人的黑市，再托梦把碎片缝成梦。
+  icon: 🏮
+  icon_background: '#FFEAD5'
+  icon_type: emoji
+  mode: advanced-chat
+  name: 记忆当铺
+  use_icon_as_answer_icon: false
+dependencies:
+- type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/minimax:0.0.23@85e20eade1517276e81952545130aa14ad08f7b6b91062ebd1c92d1b58f1e666
+kind: app
+site:
+  chat_color_theme: null
+  chat_color_theme_inverted: false
+  copyright: null
+  custom_disclaimer: ''
+  default_language: zh-Hans
+  description: 一家开在城市缝隙里的记忆当铺。掌柜用 seekdb 的向量检索替你找回当掉的旧时光。
+  icon: 🏮
+  icon_background: '#FFEAD5'
+  icon_type: emoji
+  input_placeholder: 说说你今天带了什么记忆来…
+  privacy_policy: null
+  show_workflow_steps: true
+  title: 记忆当铺
+  use_icon_as_answer_icon: false
+version: 0.7.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload: {}
+    opening_statement: |-
+      欢迎光临记忆当铺。
+
+      你可以：把一段记忆当掉换记忆币、凭线索赎回旧当票、逛黑市看看别人的记忆、托梦把碎片缝成梦，或者查一查余额。
+      先说说，你今天带什么来？
+    retriever_resource:
+      enabled: false
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions:
+    - 我想当掉一段记忆：去年冬天奶奶在厨房煮姜汤，窗外下着雪。
+    - 赎回一段关于雨夜的记忆
+    - 逛逛黑市，看看别人的秘密
+    - 帮我把当掉的记忆缝成一个梦
+    - 我还有多少记忆币？
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: code
+      id: start-route
+      source: start
+      sourceHandle: source
+      target: route
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: route-counter
+      source: route
+      sourceHandle: source
+      target: counter
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: llm
+      id: counter-keeper
+      source: counter
+      sourceHandle: source
+      target: keeper
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: keeper-answer
+      source: keeper
+      sourceHandle: source
+      target: answer
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 开始
+        type: start
+        variables: []
+      height: 90
+      id: start
+      position:
+        x: 80
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: |-
+          import json
+          import re
+
+
+          def main(query: str, player_id: str) -> dict:
+              q = (query or "").strip()
+              action = "chat"
+              text = ""
+              search = ""
+              limit = 3
+
+              def after_cmd(s: str, words) -> str:
+                  for w in words:
+                      if s.startswith(w):
+                          s = s[len(w):]
+                          break
+                  return s.lstrip("：:，,。. 　")
+
+              if re.search(r"余额|记忆币|账本|还剩|存了|赎回了几", q) and not re.search(r"当掉|典当|赎回", q):
+                  action = "balance"
+              elif re.search(r"托梦|做梦|缝成梦|梦到|把.*梦", q):
+                  action = "dream"
+              elif re.search(r"黑市|别人.*记忆|逛逛|看看.*柜|有什么.*记忆", q):
+                  action = "browse"
+                  search = after_cmd(q, ["帮我逛逛黑市", "逛逛黑市", "黑市", "看看别人的记忆", "别人的记忆", "逛逛"])
+                  search = re.sub(r"^(看看|帮我|我想)", "", search).strip(" 。！？!?")
+              elif re.search(r"赎回|赎当|赎|找回|取回", q):
+                  action = "redeem"
+                  search = after_cmd(q, ["帮我赎回", "我想赎回", "赎回", "赎当", "找回", "取回", "赎"])
+                  search = re.sub(r"^(?:一段|那段|这段|我的|关于|的)+", "", search).strip(" 。！？!?")
+                  if len(search) < 2:
+                      search = q
+              elif re.search(r"当掉|典当|当了|卖掉|押给你|换.*记忆币", q):
+                  action = "pawn"
+                  text = after_cmd(q, ["我想当掉", "我要当掉", "帮我当掉", "当掉", "典当", "卖掉", "押给你"])
+                  text = re.sub(r"^(?:一段|一个|这段|这个)?(?:记忆|故事)[：:，,。]?", "", text).strip()
+                  if len(text) < 12:
+                      action = "chat"
+
+              payload_query = search if action in ("redeem", "browse") else q
+              payload = {
+                  "player_id": player_id or "guest",
+                  "action": action,
+                  "text": text or q,
+                  "query": payload_query or "",
+                  "limit": limit,
+              }
+              return {
+                  "action": action,
+                  "payload_json": json.dumps(payload, ensure_ascii=False),
+              }
+        code_language: python3
+        desc: 把玩家的话翻译成当铺柜台能执行的动作，并序列化成 JSON，避免引号换行破坏请求体。
+        outputs:
+          action:
+            children: null
+            type: string
+          payload_json:
+            children: null
+            type: string
+        selected: false
+        title: 柜台分诊
+        type: code
+        variables:
+        - value_selector:
+          - sys
+          - query
+          value_type: string
+          variable: query
+        - value_selector:
+          - sys
+          - user_id
+          value_type: string
+          variable: player_id
+      height: 90
+      id: route
+      position:
+        x: 380
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        authorization:
+          type: no-auth
+        body:
+          data:
+          - key: ''
+            type: text
+            value: '{{#route.payload_json#}}'
+          type: json
+        desc: 调用本地记忆当铺服务，由 seekdb 完成向量检索与账本结算。
+        headers: 'Content-Type: application/json'
+        method: post
+        params: ''
+        retry_config:
+          enabled: false
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+          max_retries: 1
+          retry_interval: 1000
+        selected: false
+        timeout:
+          connect: 10
+          read: 30
+          write: 30
+        title: seekdb 柜台
+        type: http-request
+        url: http://host.docker.internal:8700/api/tool
+      height: 90
+      id: counter
+      position:
+        x: 680
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 掌柜人格：把柜台返回的 JSON 讲成当铺里的话。
+        memory:
+          enabled: true
+          query_prompt_template: '{{#sys.query#}}'
+          window:
+            enabled: true
+            size: 8
+        model:
+          completion_params:
+            max_tokens: 1200
+            temperature: 0.8
+          mode: chat
+          name: MiniMax-M2.5
+          provider: langgenius/minimax/minimax
+        prompt_template:
+        - role: system
+          text: |-
+            你是「记忆当铺」的掌柜。这是一家开在城市缝隙里的旧店：客人可以把一段记忆当掉换「记忆币」，也可以凭线索把旧当票赎回；柜台后面有一台会闻味道的旧机器，能算出两段记忆有多像。
+
+            你的语气：温和、节俭、带一点旧时代的诗意，偶尔用当铺行话（当票、柜台、柜底、暗门、估价、手续费）。绝不要提 AI、模型、接口、JSON、数据库。
+
+            你会收到一段「柜台结果」的 JSON，必须严格依据其中的数字和文字回答，不要编造不存在的字段：
+            1. action=pawn：报出估价、记忆的味道（emotion）、余额，并给一句像样的评语。reasons 可以挑一两条说。
+            2. action=redeem：报相似度、手续费、余额，并说明记忆的清晰度（exactness）。
+            3. action=browse：把 items 里的记忆用 2-4 句散文呈现，带上匿名旅人的代号、情绪和相似度，不要逐条罗列成清单。
+            4. action=dream：把 fragments 缝成一段第二人称的短梦，保留原句里最锋利的那半句，最后报扣费与余额。
+            5. action=balance：报余额、存当数量、赎回数量，可以点评最近一笔账。
+            6. action=chat：如果客人在打招呼或问规则，用一两句话介绍这里能做什么（典当 / 赎回 / 逛黑市 / 托梦 / 查余额），并顺带报余额；如果客人想典当但说得太短，就请他再多给一点细节。
+            7. 如果柜台结果里 ok=false（例如记忆币不够、没有可赎回的记忆），用一句当铺口吻说明原因，再给一个下一步建议。
+
+            只输出给客人看的中文回复，不要输出 JSON，不要解释你的思考过程。
+        retry_config:
+          enabled: true
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+          max_retries: 2
+          retry_interval: 1000
+        selected: false
+        structured_output:
+          enabled: false
+        title: 掌柜
+        type: llm
+        variables: []
+        vision:
+          configs:
+            variable_selector: []
+          enabled: false
+      height: 90
+      id: keeper
+      position:
+        x: 980
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        answer: '{{#keeper.text#}}'
+        desc: ''
+        selected: false
+        title: 直接回复
+        type: answer
+        variables: []
+      height: 90
+      id: answer
+      position:
+        x: 1280
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    viewport:
+      x: 0
+      y: 0
+      zoom: 0.7
+  rag_pipeline_variables: []

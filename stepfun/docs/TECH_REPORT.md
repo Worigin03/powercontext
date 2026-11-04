@@ -50,8 +50,8 @@
 - 决策顺序：`WebGPU 可用 → fp16`（零质量损失、体积减半，作为 GPU 路径默认）
   → 显式指定 WebGPU 但初始化抛错 → **自动降级 WASM + int8** → WebGPU 不可用 → 直接 WASM + int8。
   `?device=webgpu|wasm` 与 `?dtype=fp32|fp16|int8` 可强制覆盖，用于复现实验（fp32 亦在基准中跑通）。
-- 界面显式提示：右上角徽标显示 `WebGPU · fp32` / `WASM · int8`，并在降级时给出原因文案（如「未检测到 WebGPU 适配器」），
-  不静默切换。`?device=&dtype=` 可强制覆盖，便于复现实验。
+- 界面显式提示：右上角徽标显示 `WebGPU · FP16` / `WASM · INT8`，并在降级时给出原因文案（如「未检测到 WebGPU 适配器」），
+  不静默切换，用户始终知道当前用的是哪条路径。
 - 线程：响应头下发 `Cross-Origin-Opener-Policy: same-origin` + `Cross-Origin-Embedder-Policy: require-corp`，
   使 `crossOriginIsolated === true`，WASM 后端才能启用 SharedArrayBuffer 多线程；WebGPU 与 WASM 均在 **Web Worker** 内运行，主线程只做 UI。
 - 降级验证：无头 Chrome 下 `navigator.gpu` 为 undefined，自动落到 `WASM · int8` 并正常完成导入/检索；
@@ -88,8 +88,8 @@ lastRefreshMs / lastRefreshAt`，切集合时重新拉取；后端选择与实�
 | 后端选择 | WebGPU 优先，无 GPU 时 WASM 多线程 + INT8 | int8+WASM 19.8 块/s，端到端 P50 **29.0 ms**（全组最低） |
 | 模型加载 | 量化模型 + 本地静态资源 + 预热一次推理 | 冷启动 877–1512 ms；首次推理 337–406 ms（WebGPU）、42–44 ms（WASM） |
 | 切块策略 | 段落聚合 + 句子边界切分 + 合并短碎片，600 字/重叠 100 | 600 字的 Recall@10 优于 480 字（已对比，见 README 取舍） |
-| 查询编码 | 查询侧加 BGE 前缀 + 单条直通（不分桶） | 查询向量化 P50 8.1–10.8 ms；端到端 P50 **29.0–30.8 ms** |
-| 检索 | 融合下推到 seekdb（一次 RPC，无客户端合并） | seekdb 检索 P50 11.0–13.0 ms，P95 ≤ 21.2 ms |
+| 查询编码 | 查询侧加 BGE 前缀 + 单条直通（不分桶） | 查询向量化 P50 **8.1–10.8 ms**（int8+WebGPU 例外：67.4 ms） |
+| 检索 | 融合下推到 seekdb（一次 RPC，无客户端合并） | seekdb 检索 P50 11.0–13.0 ms，P95 ≤ 22.1 ms；端到端 P50 **29.0–32.4 ms**（int8+WebGPU 例外：90.4 ms） |
 
 **检索质量**（262 块 / 50 条查询 / 47 条有效金标，hybrid Top-10）：Recall@10 **58.5%**、nDCG@10 **50.7%**、MRR@10 **48.8%**；
 文档级 Recall@10 **93.6%**（Top-10 中出现正确文档的任意块）。FP16/FP32 两档质量完全一致，说明量化没有牺牲检索效果。
@@ -108,5 +108,6 @@ node scripts/report.mjs                # 渲染 docs/BENCHMARK.md
 
 - 评测金标由「小节正文 5-gram 覆盖率 ≥ 50%」自动生成，块粒度标注存在偏差，因此 Recall@10 的绝对值偏低而文档级 Recall 达 93.6%；
   两档之间的**相对比较**仍然有效。
-- 600 字上限在 bge 的 512 token 边界附近，超长块尾部会被 tokenizer 截断（已在 README 标注）。
+- 600 汉字约 600 token，超过 bge 的 512 上限，超长块尾部会被 tokenizer 截断；但实测 600 字切块的整体召回仍优于更短的切块，
+  因此保留该取值并在 README 中标注此行为。
 - 本机只有 Radeon 760M（核显），WebGPU 相对 WASM 的领先幅度在独显上应更明显；INT8+WebGPU 的算子回落问题也与 ORT 版本强相关。

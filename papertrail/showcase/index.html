@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>文脉 PaperTrail · 把论文，读成证据</title>
+  <meta name="description" content="文脉 PaperTrail 是一个本地优先的科研文献智能助手：中文提问，直接检索英文论文原文；seekdb 在同一条 SQL 里完成向量语义与 IK 全文召回，每条结论都能回到论文页码。" />
+  <meta name="theme-color" content="#f4f0e8" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2317150f'/%3E%3Cpath d='M18 14h12v36H18zM34 14h12v22H34z' fill='%23f4f0e8'/%3E%3Cpath d='M34 40h12v10H34z' fill='%23b84a24'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip" href="#demo">跳到交互演示</a>
+
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="文脉 PaperTrail 首页">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="brand-text"><strong>文脉</strong><em>PAPERTRAIL</em></span>
+    </a>
+    <nav class="topnav" aria-label="站点导航">
+      <a href="#demo">交互演示</a>
+      <a href="#pipeline">实现路径</a>
+      <a href="#seekdb">seekdb</a>
+      <a href="#screens">界面</a>
+      <a href="#run">本地运行</a>
+    </nav>
+    <span class="topbar-note">2026 OceanBase 大赛</span>
+  </header>
+
+  <main id="top">
+    <!-- Hero -->
+    <section class="hero wrap">
+      <div class="hero-copy">
+        <p class="eyebrow">RESEARCH WORKSPACE · LOCAL FIRST</p>
+        <h1 class="display">把论文，<br />读成<span class="accent">证据</span>。</h1>
+        <p class="lede">
+          中文提问，直接检索英文论文原文。seekdb 在同一张证据表上维护 HNSW 向量索引与 IK 全文索引，
+          两路结果经 RRF 融合，每条答案都绑定论文、页码与原始句子，可以回到原文核对。
+        </p>
+        <div class="hero-actions">
+          <a class="btn solid" href="#demo">试试真实检索记录</a>
+          <a class="btn ghost" href="#pipeline">看它怎么实现</a>
+        </div>
+        <p class="hero-meta">13 篇 arXiv 论文 · 305 页 · 2,220 个证据块 · 全部本地解析与索引</p>
+      </div>
+
+      <aside class="snapshot" aria-label="语料与检索快照">
+        <div class="snapshot-head">
+          <span class="dot" aria-hidden="true"></span>
+          <span>seekdb 1.4.0 · 127.0.0.1:2881</span>
+          <span class="mono">LIVE LOCAL</span>
+        </div>
+        <div class="snapshot-grid">
+          <div><span class="k">PAPERS</span><strong>13<small>篇</small></strong></div>
+          <div><span class="k">CHUNKS</span><strong>2,220<small>块</small></strong></div>
+          <div><span class="k">PAGES</span><strong>305<small>页</small></strong></div>
+          <div><span class="k">TERMS</span><strong>115<small>条</small></strong></div>
+        </div>
+        <div class="snapshot-topics" aria-label="语料主题分布">
+          <div><span>边缘计算</span><i style="--w:100%"></i><b>2</b></div>
+          <div><span>自然语言处理</span><i style="--w:100%"></i><b>2</b></div>
+          <div><span>检索增强</span><i style="--w:50%"></i><b>1</b></div>
+          <div><span>参数高效微调</span><i style="--w:50%"></i><b>1</b></div>
+        </div>
+        <div class="snapshot-foot">
+          <span>近期平均 <b>244 ms</b></span>
+          <span>HNSW · cosine</span>
+          <span>IK fulltext</span>
+        </div>
+      </aside>
+    </section>
+
+    <!-- Problem -->
+    <section class="problems wrap" aria-label="要解决的问题">
+      <article>
+        <span class="num">01</span>
+        <h3>读得慢</h3>
+        <p>一篇 30 页的论文，真正需要的往往只是两三段。通读之后再定位，时间都花在翻页上。</p>
+      </article>
+      <article>
+        <span class="num">02</span>
+        <h3>找不准</h3>
+        <p>中文问题、英文原文，关键词检索对不上；纯向量检索又会召回语义相近但不回答问题的段落。</p>
+      </article>
+      <article>
+        <span class="num">03</span>
+        <h3>不敢信</h3>
+        <p>生成式答案看起来流畅，却很难核实。科研场景需要的是能点回原文的证据，而不是一段话。</p>
+      </article>
+    </section>
+
+    <!-- Demo -->
+    <section id="demo" class="demo">
+      <div class="wrap">
+        <div class="section-head light">
+          <p class="eyebrow">RECORDED FROM LOCAL SEEKDB</p>
+          <h2>一条问题，两种读法</h2>
+          <p>下面是四个真实问题在本地语料上的检索与问答记录。数据录制自 seekdb 的实际返回，页面本身是静态站点，不会发起实时请求。</p>
+        </div>
+
+        <div class="demo-shell">
+          <div class="demo-controls">
+            <div class="segmented" role="tablist" aria-label="结果类型">
+              <button role="tab" id="tab-search" aria-selected="true" aria-controls="panel-result" data-mode="search">证据检索</button>
+              <button role="tab" id="tab-answer" aria-selected="false" aria-controls="panel-result" data-mode="answer">研究问答</button>
+            </div>
+            <div class="query-list" id="query-list" aria-label="示例问题"></div>
+            <p class="record-note">
+              <span class="rec-dot" aria-hidden="true"></span>
+              录制于本地 seekdb · 非实时结果
+            </p>
+          </div>
+
+          <div class="demo-panel" id="panel-result" role="tabpanel" aria-live="polite">
+            <div class="skeleton" id="demo-loading">
+              <div></div><div></div><div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pipeline -->
+    <section id="pipeline" class="wrap pipeline">
+      <div class="section-head">
+        <p class="eyebrow">HOW IT WORKS</p>
+        <h2>从 PDF 到可核验的引用</h2>
+        <p>整条链路在本机完成：解析、切块、向量化，写入 seekdb 后从两路索引召回，再用 RRF 融合排序。</p>
+      </div>
+
+      <ol class="steps">
+        <li><span>01</span><h3>解析</h3><p>pypdf 按页抽取文本，识别章节标题，修复跨行连字符，跳过参考文献。</p></li>
+        <li><span>02</span><h3>切块</h3><p>约 700 字符一块，保留一句重叠，让跨块的论证不断裂。</p></li>
+        <li><span>03</span><h3>向量化</h3><p>fastembed 本地运行多语言 MiniLM，384 维，中文问题可以直接匹配英文原文。</p></li>
+        <li><span>04</span><h3>混合召回</h3><p>seekdb 分别返回 HNSW 向量候选与 IK 全文候选，应用层用 RRF 融合两路排名。</p></li>
+        <li><span>05</span><h3>重排引用</h3><p>把候选块拆成句子重新打分，按论文去重，输出证据与页码。</p></li>
+      </ol>
+
+      <div class="code-split">
+        <div class="code-card">
+          <div class="code-title"><span>recall · 2 queries</span><span class="mono">retrieval.py</span></div>
+          <pre><code><span class="c">-- 向量召回：HNSW + cosine</span>
+<span class="k">SELECT</span> id, paper_id, page_no, section, content,
+       <span class="f">cosine_distance</span>(embedding, <span class="s">%s</span>) <span class="k">AS</span> dist
+<span class="k">FROM</span> chunks
+<span class="k">ORDER BY</span> dist <span class="k">LIMIT</span> <span class="n">30</span>;
+
+<span class="c">-- 全文召回：IK 分词 + BM25</span>
+<span class="k">SELECT</span> id, paper_id, page_no, section, content,
+       <span class="f">MATCH</span>(content) <span class="k">AGAINST</span> (<span class="s">%s</span>) <span class="k">AS</span> bm
+<span class="k">FROM</span> chunks
+<span class="k">WHERE</span> <span class="f">MATCH</span>(content) <span class="k">AGAINST</span> (<span class="s">%s</span>)
+<span class="k">ORDER BY</span> bm <span class="k">DESC</span> <span class="k">LIMIT</span> <span class="n">30</span>;
+
+<span class="c">// 应用层融合</span>
+rrf += <span class="n">1</span> / (<span class="n">60</span> + rank + <span class="n">1</span>);</code></pre>
+        </div>
+        <div class="code-card">
+          <div class="code-title"><span>schema · indexes</span><span class="mono">db.py</span></div>
+          <pre><code><span class="k">CREATE TABLE</span> chunks (
+  id <span class="k">BIGINT PRIMARY KEY</span>,
+  paper_id <span class="k">VARCHAR</span>(32),
+  page_no <span class="k">INT</span>,
+  section <span class="k">VARCHAR</span>(255),
+  content <span class="k">TEXT</span>,
+  embedding <span class="k">VECTOR</span>(<span class="n">384</span>),
+  <span class="k">FULLTEXT INDEX</span> ft_content (content)
+    <span class="k">WITH PARSER</span> ik,
+  <span class="k">VECTOR INDEX</span> vidx_vec (embedding)
+    <span class="k">WITH</span> (distance = cosine,
+          type = hnsw, lib = vsag)
+);</code></pre>
+        </div>
+      </div>
+
+      <div class="decisions">
+        <article>
+          <h3>为什么两种召回都要</h3>
+          <p>向量负责跨语言语义：中文「资源约束」能召回英文的 computation / memory / energy。全文负责精确术语：LoRA、RAG、MRR 这类缩写不会被同义改写淹没。两路结果用 RRF（k=60）融合。</p>
+        </article>
+        <article>
+          <h3>为什么不直接让大模型回答</h3>
+          <p>默认不配置大模型，答案完全由检索到的原句组成，避免编造。配置 OpenAI 兼容接口后，模型也只被允许依据给定证据作答，并逐条标注来源。</p>
+        </article>
+        <article>
+          <h3>为什么要按论文去重</h3>
+          <p>相似段落常常来自同一篇论文的相邻页面。限制每篇最多两条证据，问题涉及多篇文献时不会被单一论文刷屏。</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- seekdb -->
+    <section id="seekdb" class="seekdb">
+      <div class="wrap">
+        <div class="section-head light">
+          <p class="eyebrow">POWERED BY SEEKDB</p>
+          <h2>为什么是 seekdb</h2>
+          <p>论文语料同时需要语义召回、中文全文检索和结构化过滤。把三件事放进一个数据库，链路短，延迟也可控。</p>
+        </div>
+        <div class="seek-grid">
+          <article>
+            <span class="tag">VECTOR</span>
+            <h3>HNSW + cosine</h3>
+            <p><code>VECTOR(384)</code> 列与 <code>VECTOR INDEX … lib=vsag</code> 直接建在证据块表上，不必维护额外的向量服务。</p>
+          </article>
+          <article>
+            <span class="tag">FULLTEXT</span>
+            <h3>中文 IK 分词</h3>
+            <p>MySQL 默认分词按空格切分，中文会整段失效。切换到 <code>WITH PARSER ik</code> 后，中英文混排的全文检索都能命中。</p>
+          </article>
+          <article>
+            <span class="tag">HYBRID</span>
+            <h3>两路召回，库内完成</h3>
+            <p>HNSW 与 IK 全文的候选都由 seekdb 返回，应用层只做 RRF 融合，不需要再维护一套独立的向量存储。</p>
+          </article>
+          <article>
+            <span class="tag">OPS</span>
+            <h3>熟悉的运维方式</h3>
+            <p>兼容 MySQL 协议，Docker 单机拉起，pymysql 直接连接。备份、排查、扩表都和日常数据库一致。</p>
+          </article>
+        </div>
+        <div class="metrics">
+          <div><strong>2,220</strong><span>证据块写入 seekdb</span></div>
+          <div><strong>244 ms</strong><span>近期平均请求延迟</span></div>
+          <div><strong>1.2 s</strong><span>问答含句子重排</span></div>
+          <div><strong>0</strong><span>外部向量数据库</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screens -->
+    <section id="screens" class="wrap screens">
+      <div class="section-head">
+        <p class="eyebrow">INTERFACE</p>
+        <h2>为读证据而设计的界面</h2>
+        <p>搜索结果同时展示向量相似度、BM25 与融合分数；问答结果保留原句；阅读页可按页跳转并做笔记。</p>
+      </div>
+      <div class="gallery">
+        <figure class="wide">
+          <button class="shot" data-full="assets/search.webp" aria-label="放大证据检索界面">
+            <img src="assets/search.webp" alt="证据检索界面：RAG 问题的混合检索结果，显示向量、BM25 与 RRF 分数" loading="lazy" />
+          </button>
+          <figcaption><b>证据检索</b><span>同一问题下，向量与全文各自给出候选，再融合排序。</span></figcaption>
+        </figure>
+        <figure>
+          <button class="shot" data-full="assets/ask.webp" aria-label="放大研究问答界面">
+            <img src="assets/ask.webp" alt="研究问答界面：每条证据标注论文、页码与章节" loading="lazy" />
+          </button>
+          <figcaption><b>研究问答</b><span>答案由检索到的原句组成，逐条标注 P1 / P2 来源。</span></figcaption>
+        </figure>
+        <figure>
+          <button class="shot" data-full="assets/library.webp" aria-label="放大文献库界面">
+            <img src="assets/library.webp" alt="文献库界面：13 篇论文的主题、年份、页数与块数" loading="lazy" />
+          </button>
+          <figcaption><b>文献库</b><span>arXiv ID 或本地 PDF 入库，原始文件不离开本机。</span></figcaption>
+        </figure>
+        <figure class="wide">
+          <button class="shot" data-full="assets/reader.webp" aria-label="放大阅读页界面">
+            <img src="assets/reader.webp" alt="阅读页界面：左侧章节大纲，右侧论文正文" loading="lazy" />
+          </button>
+          <figcaption><b>阅读页</b><span>章节大纲与页码联动，命中的证据块可以回到上下文。</span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Run -->
+    <section id="run" class="run">
+      <div class="wrap run-grid">
+        <div class="section-head">
+          <p class="eyebrow">RUN IT LOCALLY</p>
+          <h2>在自己机器上跑起来</h2>
+          <p>需要 Python 3.11+ 与 Docker。首次启动会下载约 90 MB 的多语言嵌入模型，之后完全离线可用。</p>
+          <ul class="checklist">
+            <li>seekdb 1.4.0 · Docker · 127.0.0.1:2881</li>
+            <li>FastAPI + pymysql + pypdf + fastembed</li>
+            <li>PDF 解析、切块、向量化均在本地完成</li>
+            <li>可选：配置 OpenAI 兼容接口启用 LLM 综述</li>
+          </ul>
+        </div>
+        <div class="code-card dark">
+          <div class="code-title"><span>terminal</span><span class="mono">paper trail</span></div>
+          <pre><code><span class="c"># 1. 启动 seekdb</span>
+docker run -d --name seekdb --restart unless-stopped \
+  -p 2881:2881 -v seekdb_data:/var/lib/seekdb \
+  oceanbase/seekdb:latest
+
+<span class="c"># 2. 安装依赖</span>
+python -m venv .venv
+.venv/Scripts/pip install -r requirements.txt
+
+<span class="c"># 3. 建表并写入示例语料</span>
+python scripts/seed_corpus.py
+
+<span class="c"># 4. 启动工作台</span>
+python run.py
+<span class="c"># → http://127.0.0.1:8600</span></code></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-grid">
+      <div>
+        <div class="brand-text footer-brand"><strong>文脉</strong><em>PAPERTRAIL</em></div>
+        <p>把论文读成证据。一个本地优先的科研文献工作台。</p>
+      </div>
+      <div class="footer-meta">
+        <p>2026 OceanBase 数据库大赛 · 科研提效方向</p>
+        <p>王起源 · 物联242 · U202442553</p>
+        <p>使用 Qoder 开发 · 核心检索由 seekdb 驱动</p>
+      </div>
+      <a class="backtop" href="#top">回到顶部 ↑</a>
+    </div>
+  </footer>
+
+  <dialog class="lightbox" id="lightbox">
+    <button class="close" aria-label="关闭预览">×</button>
+    <img id="lightbox-img" alt="界面截图放大预览" />
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>

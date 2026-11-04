@@ -16,7 +16,7 @@
 | `app/` | FastAPI 后端：解析入库、检索、问答、对比、综述、笔记 |
 | `web/` | 原生 JS 工作台（总览 / 检索 / 问答 / 对比 / 综述 / 文献库 / 阅读页） |
 | `scripts/seed_corpus.py` | 建表并写入 13 篇 arXiv 示例论文 |
-| `site/` | Qoder Sites 展示站静态源码 |
+| `showcase/` | Qoder Sites 展示站静态源码 |
 | `提交材料.md` | 完整提交说明、seekdb 用法、性能与演示脚本 |
 
 ## 运行

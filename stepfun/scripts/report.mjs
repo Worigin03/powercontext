@@ -133,6 +133,45 @@ try {
   table4 = null;
 }
 
+// 表 5：检索策略对照（hybrid / vector / fulltext，同一集合同一批查询）
+const MODES = path.resolve(args.get('modes') || 'bench/modes.json');
+let table5 = null;
+let modesChunks = 0;
+let modesEval = 0;
+let modesNotes = '';
+try {
+  const m = JSON.parse(await fs.readFile(MODES, 'utf8'));
+  modesChunks = m.chunks;
+  modesEval = m.evaluated;
+  const by = Object.fromEntries(m.results.map((r) => [r.mode, r]));
+  const rows5 = m.results.map((r) => {
+    const name = { hybrid: 'hybrid（向量 + 全文 RRF）', vector: 'vector（仅 HNSW）', fulltext: 'fulltext（仅 ngram2）' }[r.mode] || r.mode;
+    return `| ${name} | ${pct(r.quality.recall10)} | ${pct(r.quality.ndcg10)} | ${pct(r.quality.mrr10)} | ${fmt(
+      r.search.dbMs.median,
+    )} ms |`;
+  });
+  table5 = [
+    '| 检索策略 | Recall@10 | nDCG@10 | MRR@10 | seekdb 检索 P50 |',
+    '| --- | --- | --- | --- | --- |',
+    ...rows5,
+  ].join('\n');
+
+  const d = (a, b) => ((a - b) * 100).toFixed(1);
+  modesNotes = [
+    `- 全文分支（ngram2 + \`$contains\`）并非严格子串匹配，而是按 2~3 字 n-gram 做词项匹配，因此中文标题式查询的召回很强；`,
+    `  向量分支 Recall 与之持平，但排序明显更弱（nDCG ${pct(by.vector.quality.ndcg10)} vs ${pct(by.fulltext.quality.ndcg10)}，MRR ${pct(
+      by.vector.quality.mrr10,
+    )} vs ${pct(by.fulltext.quality.mrr10)}）——语义召回能「捞到」，但对「最相关排第一」帮助有限。`,
+    `- RRF 等权融合会被较弱的一路拖累：hybrid 的 nDCG 比纯全文低 ${d(
+      by.fulltext.quality.ndcg10,
+      by.hybrid.quality.ndcg10,
+    )} pp；本评测集的查询取自文档小节标题，字面重合度天然偏高，对全文分支有利（见「说明」中的限制）。`,
+    `- 仍以 hybrid 为默认：当查询与原文用词不一致时全文分支会退化，向量分支是唯一保底；三种模式在界面可随时切换，便于按场景取舍。`,
+  ].join('\n');
+} catch {
+  table5 = null;
+}
+
 const md = `# 实测数据（Benchmark）
 
 > 由 \`node scripts/bench.mjs\` 在真实 Chrome 中运行、\`node scripts/report.mjs\` 生成。
@@ -170,12 +209,14 @@ ${table2}
 ${table3}
 
 ${table4 ? `## 表 4 · 批大小 × 长度分桶（单项优化对比）\n\n> 由 \`node scripts/sweep.mjs\` 在**同一页面、同一段语料**（${sweepSample} 块）上连续测量，避免跨页面机器负载波动；数值为纯前向吞吐，不含写库与 HTTP 开销。\n\n${table4}\n\n${sweepSummary}\n` : ''}
+${table5 ? `## 表 5 · 检索策略对照（索引策略）\n\n> 由 \`node scripts/modes.mjs\` 在**同一集合、同一批查询**上依次切换 hybrid / vector / fulltext，只有检索策略不同；集合 ${modesChunks} 块、有效金标 ${modesEval} 条。\n\n${table5}\n\n${modesNotes}\n` : ''}
 ## 说明
 
 - 每个配置使用**独立的浏览器上下文**（清空 HTTP 缓存），因此「模型加载」是冷启动口径；
 - 冷启动后先跑一次预热推理，再进入批量向量化与查询循环，二者分开统计；
 - 检索质量的金标来自文档小节正文（5-gram 覆盖率 ≥ 50% 命中块），金标缺失的查询不计入均值；
-- 「文档级 Recall@10」表示 Top-10 中是否出现金标所在文档的任意块，用于观察块粒度标注带来的偏差。
+- 「文档级 Recall@10」表示 Top-10 中是否出现金标所在文档的任意块，用于观察块粒度标注带来的偏差；
+- 表 5 的查询取自文档小节标题，字面重合度天然偏高，对全文分支有利；因此它只说明两路召回的**特性差异**，不代表通用场景下的策略排序。
 ${failed.length ? `\n- 未完成的配置：${failed.map((f) => `${f.label}（${f.error}）`).join('；')}` : ''}
 `;
 

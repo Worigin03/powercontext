@@ -1,0 +1,4250 @@
+{
+  "generatedAt": "2026-11-04T09:19:43.048Z",
+  "device": "webgpu",
+  "dtype": "fp16",
+  "repeat": 2,
+  "topK": 10,
+  "chunks": 262,
+  "queries": 50,
+  "evaluated": 47,
+  "results": [
+    {
+      "mode": "hybrid",
+      "config": {
+        "device": "webgpu",
+        "dtype": "fp16",
+        "batchSize": 16,
+        "topK": 10,
+        "repeat": 2,
+        "chunkSize": 600,
+        "chunkOverlap": 100,
+        "collection": "bench_fp16_webgpu",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+        "hardwareConcurrency": 12,
+        "adapter": "amd / rdna-3",
+        "fallback": false,
+        "loadMs": 2764.59,
+        "coldFirstInferenceMs": 748.56
+      },
+      "scale": {
+        "docs": 23,
+        "chunks": 262,
+        "chars": 78113,
+        "queries": 50,
+        "missingGold": 3
+      },
+      "ingest": {
+        "embedMs": 4250.11,
+        "chunksPerSecond": 61.6,
+        "charsPerSecond": 18379,
+        "writeMs": 3557.68,
+        "refreshMs": 653.52,
+        "vectorBytes": 536576
+      },
+      "search": {
+        "embedMs": {
+          "median": 16.47,
+          "p95": 22.13,
+          "mean": 16.84
+        },
+        "dbMs": {
+          "median": 15.62,
+          "p95": 22.85,
+          "mean": 16.45
+        },
+        "e2eMs": {
+          "median": 42.77,
+          "p95": 53.46,
+          "mean": 44.44
+        }
+      },
+      "quality": {
+        "evaluatedQueries": 47,
+        "docRecall10": 0.9149,
+        "recall10": 0.5851,
+        "mrr10": 0.4883,
+        "ndcg10": 0.5069
+      },
+      "perQuery": [
+        {
+          "id": "q01",
+          "query": "写入和演进 entry",
+          "goldCount": 1,
+          "topIds": [
+            "1ola2u3:1",
+            "0hydhhj:8",
+            "1en75ay:9",
+            "0hydhhj:9",
+            "0ouvee1:5",
+            "12so78x:13",
+            "0hydhhj:5",
+            "1ola2u3:2",
+            "12so78x:2",
+            "1n0hg9w:0"
+          ],
+          "goldIds": [
+            "1ola2u3:1"
+          ],
+          "embedMs": 19.082499999552965,
+          "dbMs": 61.34334999999919,
+          "e2eMs": 93.15000000037253,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q02",
+          "query": "容量与墓碑压缩",
+          "goldCount": 1,
+          "topIds": [
+            "1ola2u3:2",
+            "1ola2u3:7",
+            "1ola2u3:8",
+            "1ola2u3:5",
+            "1ola2u3:3",
+            "1ola2u3:4",
+            "167gco0:7",
+            "1ola2u3:6",
+            "01rnozy:2",
+            "167gco0:2"
+          ],
+          "goldIds": [
+            "1ola2u3:3"
+          ],
+          "embedMs": 24.072499999776483,
+          "dbMs": 16.9616500000011,
+          "e2eMs": 53.459999999031425,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.2,
+          "ndcg10": 0.38685280723454163
+        },
+        {
+          "id": "q03",
+          "query": "检索、展开与引用",
+          "goldCount": 1,
+          "topIds": [
+            "1ola2u3:10",
+            "01rnozy:10",
+            "0hydhhj:5",
+            "0zg29ve:14",
+            "0hydhhj:9",
+            "1en75ay:5",
+            "0ouvee1:4",
+            "01rnozy:1",
+            "1en75ay:2",
+            "01rnozy:9"
+          ],
+          "goldIds": [
+            "1ola2u3:10"
+          ],
+          "embedMs": 15.869999999180436,
+          "dbMs": 16.805099999997765,
+          "e2eMs": 46.54999999888241,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q04",
+          "query": "插件必须报告什么",
+          "goldCount": 1,
+          "topIds": [
+            "0v7ynxe:1",
+            "0v7ynxe:4",
+            "0v7ynxe:9",
+            "0v7ynxe:2",
+            "0v7ynxe:0",
+            "0v7ynxe:6",
+            "1kegnc0:6",
+            "0eef7q7:8",
+            "0v7ynxe:3",
+            "1bqqqwp:0"
+          ],
+          "goldIds": [
+            "0v7ynxe:1"
+          ],
+          "embedMs": 19.669999999925494,
+          "dbMs": 19.245449999998527,
+          "e2eMs": 49.65499999932945,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q05",
+          "query": "插件展示约定",
+          "goldCount": 1,
+          "topIds": [
+            "0v7ynxe:0",
+            "0v7ynxe:9",
+            "0v7ynxe:4",
+            "0v7ynxe:1",
+            "0svyxm3:3",
+            "0eef7q7:8",
+            "0zg29ve:14",
+            "0v7ynxe:2",
+            "0v7ynxe:7",
+            "0v7ynxe:6"
+          ],
+          "goldIds": [
+            "0v7ynxe:4"
+          ],
+          "embedMs": 15.700000001117587,
+          "dbMs": 14.503199999999197,
+          "e2eMs": 41.02749999985099,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.3333333333333333,
+          "ndcg10": 0.5
+        },
+        {
+          "id": "q06",
+          "query": "Fail-open、隐私和展示边界",
+          "goldCount": 1,
+          "topIds": [
+            "0zg29ve:14",
+            "0zg29ve:7",
+            "15o5unm:12",
+            "0v7ynxe:4",
+            "0zg29ve:13",
+            "0zg29ve:0",
+            "1jmm64v:6",
+            "0zg29ve:8",
+            "1en75ay:0",
+            "1ola2u3:11"
+          ],
+          "goldIds": [
+            "0v7ynxe:6"
+          ],
+          "embedMs": 18.44249999895692,
+          "dbMs": 21.59165000000212,
+          "e2eMs": 52.419999999925494,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q07",
+          "query": "配置 Server",
+          "goldCount": 1,
+          "topIds": [
+            "0eef7q7:0",
+            "1n0hg9w:2",
+            "08jkf1l:0",
+            "0eef7q7:10",
+            "0eef7q7:5",
+            "08jkf1l:8",
+            "0eef7q7:8",
+            "0eef7q7:3",
+            "12so78x:1",
+            "0eef7q7:4"
+          ],
+          "goldIds": [
+            "08jkf1l:0"
+          ],
+          "embedMs": 21.39000000245869,
+          "dbMs": 17.298900000001595,
+          "e2eMs": 56.169999999925494,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.3333333333333333,
+          "ndcg10": 0.5
+        },
+        {
+          "id": "q08",
+          "query": "直接组合 generation",
+          "goldCount": 1,
+          "topIds": [
+            "08jkf1l:9",
+            "0ouvee1:3",
+            "12so78x:5",
+            "12so78x:11",
+            "1n0hg9w:9",
+            "12so78x:3",
+            "12so78x:1",
+            "1en75ay:10",
+            "1en75ay:0",
+            "0ouvee1:0"
+          ],
+          "goldIds": [
+            "08jkf1l:9"
+          ],
+          "embedMs": 14.904999999329448,
+          "dbMs": 22.853100000000268,
+          "e2eMs": 49.42499999888241,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q09",
+          "query": "直接组合 embedding",
+          "goldCount": 1,
+          "topIds": [
+            "08jkf1l:9",
+            "0ouvee1:12",
+            "0ouvee1:10",
+            "08jkf1l:8",
+            "0ouvee1:3",
+            "1n0hg9w:9",
+            "01rnozy:3",
+            "0ouvee1:0",
+            "12so78x:11",
+            "0ouvee1:4"
+          ],
+          "goldIds": [
+            "08jkf1l:10"
+          ],
+          "embedMs": 14.535000000149012,
+          "dbMs": 16.461049999998068,
+          "e2eMs": 41.665000000968575,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q10",
+          "query": "复现验证",
+          "goldCount": 2,
+          "topIds": [
+            "1bqqqwp:1",
+            "16ikxmy:7",
+            "1jmm64v:2",
+            "1bqqqwp:4",
+            "167gco0:11",
+            "1kegnc0:5",
+            "1bbda0e:4",
+            "1kegnc0:3",
+            "1bbda0e:3",
+            "0zg29ve:14"
+          ],
+          "goldIds": [
+            "1bqqqwp:1",
+            "1bqqqwp:2"
+          ],
+          "embedMs": 22.134999999776483,
+          "dbMs": 15.053799999997864,
+          "e2eMs": 51.34999999962747,
+          "docRecall10": 1,
+          "recall10": 0.5,
+          "mrr10": 1,
+          "ndcg10": 0.6131471927654584
+        },
+        {
+          "id": "q11",
+          "query": "适配器与结果陈述验收",
+          "goldCount": 1,
+          "topIds": [
+            "1bqqqwp:0",
+            "1bqqqwp:6",
+            "1bqqqwp:1",
+            "1bqqqwp:8",
+            "16ikxmy:7",
+            "1r92ab6:1",
+            "1r92ab6:2",
+            "0ouvee1:12",
+            "1jmm64v:12",
+            "01rnozy:3"
+          ],
+          "goldIds": [
+            "1bqqqwp:5"
+          ],
+          "embedMs": 24.172499999403954,
+          "dbMs": 15.637900000001537,
+          "e2eMs": 52.05750000104308,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q12",
+          "query": "安装和启动",
+          "goldCount": 1,
+          "topIds": [
+            "1n0hg9w:0",
+            "0eef7q7:3",
+            "0eef7q7:7",
+            "1ola2u3:11",
+            "0eef7q7:8",
+            "0eef7q7:10",
+            "1r92ab6:3",
+            "1kegnc0:1",
+            "1n0hg9w:7",
+            "1kgo586:6"
+          ],
+          "goldIds": [
+            "1n0hg9w:1"
+          ],
+          "embedMs": 21.884999997913837,
+          "dbMs": 13.84860000000117,
+          "e2eMs": 47.09749999828637,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q13",
+          "query": "Server 配置",
+          "goldCount": 1,
+          "topIds": [
+            "1n0hg9w:2",
+            "08jkf1l:0",
+            "0eef7q7:0",
+            "0eef7q7:10",
+            "0eef7q7:5",
+            "08jkf1l:8",
+            "0eef7q7:8",
+            "0eef7q7:3",
+            "12so78x:1",
+            "1en75ay:0"
+          ],
+          "goldIds": [
+            "1n0hg9w:2"
+          ],
+          "embedMs": 16.125,
+          "dbMs": 14.657199999997829,
+          "e2eMs": 40.38250000216067,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q14",
+          "query": "HTTP 接口",
+          "goldCount": 1,
+          "topIds": [
+            "1kgo586:0",
+            "0eef7q7:6",
+            "0eef7q7:5",
+            "0ouvee1:8",
+            "1jmm64v:2",
+            "1kgo586:9",
+            "0eef7q7:4",
+            "0eef7q7:7",
+            "1en75ay:3",
+            "0v7ynxe:9"
+          ],
+          "goldIds": [
+            "1n0hg9w:3"
+          ],
+          "embedMs": 12.765000000596046,
+          "dbMs": 11.266650000001391,
+          "e2eMs": 34.290000000968575,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q15",
+          "query": "验收与验证",
+          "goldCount": 1,
+          "topIds": [
+            "1bqqqwp:4",
+            "1kegnc0:5",
+            "1bqqqwp:0",
+            "1r92ab6:1",
+            "16ikxmy:7",
+            "1r92ab6:2",
+            "1bqqqwp:1",
+            "1jmm64v:4",
+            "1jmm64v:2",
+            "1r92ab6:4"
+          ],
+          "goldIds": [
+            "1r92ab6:5"
+          ],
+          "embedMs": 14.737499997019768,
+          "dbMs": 11.11160000000018,
+          "e2eMs": 35.35249999910593,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q16",
+          "query": "查看契约",
+          "goldCount": 1,
+          "topIds": [
+            "1kgo586:0",
+            "0zg29ve:14",
+            "0zg29ve:9",
+            "1n0hg9w:3",
+            "1r92ab6:0",
+            "1r92ab6:1",
+            "1kgo586:1",
+            "0zg29ve:12",
+            "1kegnc0:2",
+            "167gco0:1"
+          ],
+          "goldIds": [
+            "1kgo586:0"
+          ],
+          "embedMs": 16.71499999985099,
+          "dbMs": 14.213050000002113,
+          "e2eMs": 40.787500001490116,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q17",
+          "query": "Scope 内的操作提示词",
+          "goldCount": 1,
+          "topIds": [
+            "1kgo586:3",
+            "1kgo586:6",
+            "01rnozy:3",
+            "1kgo586:5",
+            "0hydhhj:13",
+            "1en75ay:12",
+            "0zg29ve:10",
+            "0zg29ve:12",
+            "0zg29ve:9",
+            "12so78x:13"
+          ],
+          "goldIds": [
+            "1kgo586:3"
+          ],
+          "embedMs": 16.677500002086163,
+          "dbMs": 15.643299999999726,
+          "e2eMs": 42.75,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q18",
+          "query": "把一个逻辑 Handoff 授予接收者",
+          "goldCount": 1,
+          "topIds": [
+            "1kgo586:8",
+            "1kgo586:9",
+            "1kgo586:12",
+            "0ouvee1:2",
+            "1r92ab6:1",
+            "1kegnc0:2",
+            "0zg29ve:14",
+            "1bqqqwp:0",
+            "01rnozy:3",
+            "0ouvee1:4"
+          ],
+          "goldIds": [
+            "1kgo586:8"
+          ],
+          "embedMs": 12.93500000052154,
+          "dbMs": 17.042749999996886,
+          "e2eMs": 40.45500000193715,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q19",
+          "query": "模型连接怎么选",
+          "goldCount": 1,
+          "topIds": [
+            "16ikxmy:0",
+            "16ikxmy:2",
+            "0ouvee1:0",
+            "0eef7q7:1",
+            "0ouvee1:1",
+            "16ikxmy:4",
+            "0ouvee1:2",
+            "08jkf1l:3",
+            "16ikxmy:1",
+            "15o5unm:8"
+          ],
+          "goldIds": [
+            "16ikxmy:0"
+          ],
+          "embedMs": 20.875,
+          "dbMs": 16.564699999998993,
+          "e2eMs": 48.709999999031425,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q20",
+          "query": "使用同一份配置启动",
+          "goldCount": 1,
+          "topIds": [
+            "0eef7q7:10",
+            "1n0hg9w:0",
+            "0eef7q7:5",
+            "1n0hg9w:2",
+            "0eef7q7:8",
+            "0eef7q7:7",
+            "0eef7q7:3",
+            "15o5unm:6",
+            "08jkf1l:0",
+            "12so78x:12"
+          ],
+          "goldIds": [
+            "0eef7q7:10"
+          ],
+          "embedMs": 15.512499997392297,
+          "dbMs": 15.331300000001647,
+          "e2eMs": 41.557499999180436,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q21",
+          "query": "实现方案与选型",
+          "goldCount": 1,
+          "topIds": [
+            "1r92ab6:7",
+            "0ouvee1:12",
+            "1en75ay:10",
+            "0svyxm3:0",
+            "0v7ynxe:12",
+            "0ouvee1:0",
+            "0zg29ve:13",
+            "0ouvee1:10",
+            "1r92ab6:6",
+            "0v7ynxe:9"
+          ],
+          "goldIds": [
+            "0svyxm3:1"
+          ],
+          "embedMs": 14.610000001266599,
+          "dbMs": 11.545200000000477,
+          "e2eMs": 36.37250000052154,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q22",
+          "query": "有序任务列表",
+          "goldCount": 1,
+          "topIds": [
+            "0svyxm3:10",
+            "1jmm64v:6",
+            "0w46rs6:8",
+            "01rnozy:4",
+            "1en75ay:7",
+            "16ikxmy:7",
+            "0ouvee1:4",
+            "1jmm64v:9",
+            "1ola2u3:10",
+            "0ouvee1:7"
+          ],
+          "goldIds": [
+            "0svyxm3:10"
+          ],
+          "embedMs": 14.250000001862645,
+          "dbMs": 12.426499999997759,
+          "e2eMs": 36.477500000968575,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q23",
+          "query": "依赖与共享知识（跨文件约定）",
+          "goldCount": 0,
+          "topIds": [
+            "0svyxm3:3",
+            "0ouvee1:4",
+            "12so78x:6",
+            "12so78x:15",
+            "0svyxm3:4",
+            "1jmm64v:13",
+            "1kgo586:1",
+            "0v7ynxe:0",
+            "08jkf1l:2",
+            "0svyxm3:8"
+          ],
+          "goldIds": [],
+          "embedMs": 17.25,
+          "dbMs": 11.49210000000312,
+          "e2eMs": 38.897499999031425,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q24",
+          "query": "与 RFC 0002 的关系",
+          "goldCount": 1,
+          "topIds": [
+            "01rnozy:0",
+            "0hydhhj:3",
+            "0zg29ve:13",
+            "167gco0:0",
+            "1en75ay:12",
+            "167gco0:3",
+            "0zg29ve:1",
+            "0zg29ve:14",
+            "1r92ab6:1",
+            "0hydhhj:0"
+          ],
+          "goldIds": [
+            "0hydhhj:4"
+          ],
+          "embedMs": 14.942499998956919,
+          "dbMs": 10.732950000001438,
+          "e2eMs": 36.25999999791384,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q25",
+          "query": "设计目标",
+          "goldCount": 1,
+          "topIds": [
+            "0hydhhj:6",
+            "0hydhhj:4",
+            "0hydhhj:0",
+            "0svyxm3:10",
+            "1kgo586:13",
+            "1en75ay:9",
+            "0ouvee1:0",
+            "1jmm64v:6",
+            "1en75ay:10",
+            "1r92ab6:2"
+          ],
+          "goldIds": [
+            "0hydhhj:5"
+          ],
+          "embedMs": 16.907499998807907,
+          "dbMs": 12.849650000003749,
+          "e2eMs": 39.99000000022352,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q26",
+          "query": "非目标",
+          "goldCount": 1,
+          "topIds": [
+            "0hydhhj:6",
+            "0ouvee1:8",
+            "0hydhhj:3",
+            "1jmm64v:6",
+            "0svyxm3:10",
+            "0ouvee1:1",
+            "0hydhhj:4",
+            "1r92ab6:2",
+            "1en75ay:12",
+            "1jmm64v:5"
+          ],
+          "goldIds": [
+            "0hydhhj:7"
+          ],
+          "embedMs": 14.394999999552965,
+          "dbMs": 15.606299999999464,
+          "e2eMs": 41.88750000111759,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q27",
+          "query": "扩展做什么",
+          "goldCount": 0,
+          "topIds": [
+            "167gco0:2",
+            "0zg29ve:8",
+            "0zg29ve:14",
+            "0hydhhj:9",
+            "167gco0:11",
+            "0svyxm3:0",
+            "0v7ynxe:4",
+            "167gco0:3",
+            "1ola2u3:5",
+            "167gco0:9"
+          ],
+          "goldIds": [],
+          "embedMs": 14.00249999947846,
+          "dbMs": 12.068500000001222,
+          "e2eMs": 37.23499999940395,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q28",
+          "query": "可以观测到什么",
+          "goldCount": 0,
+          "topIds": [
+            "1bqqqwp:8",
+            "0v7ynxe:9",
+            "16ikxmy:7",
+            "1kegnc0:6",
+            "1jmm64v:8",
+            "0svyxm3:0",
+            "1jmm64v:2",
+            "0w46rs6:0",
+            "15o5unm:2",
+            "0hydhhj:13"
+          ],
+          "goldIds": [],
+          "embedMs": 18.01749999821186,
+          "dbMs": 13.801699999996345,
+          "e2eMs": 42.26249999925494,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q29",
+          "query": "一个 Artifact 表示一个主题",
+          "goldCount": 1,
+          "topIds": [
+            "01rnozy:1",
+            "01rnozy:5",
+            "01rnozy:6",
+            "0hydhhj:1",
+            "01rnozy:4",
+            "01rnozy:10",
+            "1jmm64v:0",
+            "0w46rs6:3",
+            "0zg29ve:14",
+            "0hydhhj:9"
+          ],
+          "goldIds": [
+            "01rnozy:5"
+          ],
+          "embedMs": 14.467500001192093,
+          "dbMs": 19.46505000000252,
+          "e2eMs": 46.47499999962747,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.5,
+          "ndcg10": 0.6309297535714575
+        },
+        {
+          "id": "q30",
+          "query": "Source、Window、Cursor 与 Pending",
+          "goldCount": 1,
+          "topIds": [
+            "01rnozy:7",
+            "01rnozy:2",
+            "12so78x:3",
+            "12so78x:5",
+            "01rnozy:10",
+            "0hydhhj:9",
+            "1jmm64v:0",
+            "0hydhhj:8",
+            "0zg29ve:11",
+            "1en75ay:3"
+          ],
+          "goldIds": [
+            "01rnozy:7"
+          ],
+          "embedMs": 12.647499999031425,
+          "dbMs": 20.589100000001054,
+          "e2eMs": 43.40249999798834,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q31",
+          "query": "Topic 与 Source 的证据关联",
+          "goldCount": 1,
+          "topIds": [
+            "01rnozy:9",
+            "01rnozy:8",
+            "1jmm64v:0",
+            "0m3471y:1",
+            "12so78x:0",
+            "1r92ab6:1",
+            "0hydhhj:9",
+            "1bbda0e:0",
+            "0hydhhj:3",
+            "0svyxm3:7"
+          ],
+          "goldIds": [
+            "01rnozy:9"
+          ],
+          "embedMs": 14.81000000052154,
+          "dbMs": 16.912900000002992,
+          "e2eMs": 43.67750000022352,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q32",
+          "query": "日常路径",
+          "goldCount": 1,
+          "topIds": [
+            "0zg29ve:2",
+            "167gco0:8",
+            "1ola2u3:11",
+            "0svyxm3:7",
+            "12so78x:13",
+            "0svyxm3:5",
+            "0m3471y:1",
+            "1kegnc0:3",
+            "167gco0:6",
+            "0m3471y:0"
+          ],
+          "goldIds": [
+            "0zg29ve:3"
+          ],
+          "embedMs": 15.250000001862645,
+          "dbMs": 11.673150000002352,
+          "e2eMs": 38.47499999962747,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q33",
+          "query": "Core 不变量",
+          "goldCount": 1,
+          "topIds": [
+            "167gco0:2",
+            "08jkf1l:7",
+            "0hydhhj:4",
+            "1jmm64v:5",
+            "1jmm64v:1",
+            "1ola2u3:2",
+            "1ola2u3:5",
+            "01rnozy:2",
+            "167gco0:5",
+            "1kgo586:10"
+          ],
+          "goldIds": [
+            "0zg29ve:5"
+          ],
+          "embedMs": 15.787500001490116,
+          "dbMs": 15.372299999999086,
+          "e2eMs": 42.64750000089407,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q34",
+          "query": "Composition root 与上游对象",
+          "goldCount": 1,
+          "topIds": [
+            "0zg29ve:6",
+            "0zg29ve:11",
+            "1jmm64v:11",
+            "15o5unm:10",
+            "1n0hg9w:7",
+            "1kgo586:12",
+            "0hydhhj:8",
+            "1n0hg9w:9",
+            "16ikxmy:6",
+            "1kegnc0:0"
+          ],
+          "goldIds": [
+            "0zg29ve:7"
+          ],
+          "embedMs": 12.849999999627471,
+          "dbMs": 23.680749999995896,
+          "e2eMs": 52.11249999888241,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q35",
+          "query": "LLM 解决什么问题",
+          "goldCount": 1,
+          "topIds": [
+            "0ouvee1:4",
+            "0w46rs6:0",
+            "0w46rs6:2",
+            "0w46rs6:1",
+            "12so78x:5",
+            "1en75ay:9",
+            "1kegnc0:6",
+            "1r92ab6:2",
+            "1bqqqwp:3",
+            "1bbda0e:5"
+          ],
+          "goldIds": [
+            "0ouvee1:4"
+          ],
+          "embedMs": 18.667500000447035,
+          "dbMs": 12.892149999999674,
+          "e2eMs": 41.94999999925494,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q36",
+          "query": "写入流程",
+          "goldCount": 1,
+          "topIds": [
+            "12so78x:13",
+            "1bqqqwp:0",
+            "1kegnc0:0",
+            "1kegnc0:6",
+            "12so78x:2",
+            "0m3471y:1",
+            "0zg29ve:2",
+            "0ouvee1:5",
+            "0hydhhj:13",
+            "1kegnc0:2"
+          ],
+          "goldIds": [
+            "0ouvee1:6"
+          ],
+          "embedMs": 16.757499998435378,
+          "dbMs": 10.336150000002817,
+          "e2eMs": 36.75249999947846,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q37",
+          "query": "Coding Agent 示例",
+          "goldCount": 1,
+          "topIds": [
+            "0ouvee1:12",
+            "0v7ynxe:4",
+            "0zg29ve:14",
+            "1n0hg9w:8",
+            "01rnozy:1",
+            "1en75ay:5",
+            "1jmm64v:12",
+            "1jmm64v:0",
+            "0hydhhj:9",
+            "01rnozy:2"
+          ],
+          "goldIds": [
+            "0ouvee1:6"
+          ],
+          "embedMs": 17.47499999962747,
+          "dbMs": 16.0921500000004,
+          "e2eMs": 43.619999999180436,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q38",
+          "query": "Runtime 组合",
+          "goldCount": 1,
+          "topIds": [
+            "12so78x:11",
+            "12so78x:3",
+            "12so78x:1",
+            "12so78x:5",
+            "1n0hg9w:9",
+            "08jkf1l:9",
+            "1en75ay:0",
+            "0zg29ve:1",
+            "0hydhhj:8",
+            "0ouvee1:3"
+          ],
+          "goldIds": [
+            "12so78x:6"
+          ],
+          "embedMs": 17.469999998807907,
+          "dbMs": 17.030650000000605,
+          "e2eMs": 46.67749999836087,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q39",
+          "query": "显式 Memory 写入",
+          "goldCount": 1,
+          "topIds": [
+            "12so78x:12",
+            "12so78x:2",
+            "1ola2u3:1",
+            "12so78x:13",
+            "0ouvee1:6",
+            "0zg29ve:4",
+            "0zg29ve:3",
+            "0hydhhj:4",
+            "0ouvee1:12",
+            "01rnozy:10"
+          ],
+          "goldIds": [
+            "12so78x:13"
+          ],
+          "embedMs": 17.919999999925494,
+          "dbMs": 17.012000000002445,
+          "e2eMs": 46.03749999962747,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.25,
+          "ndcg10": 0.43067655807339306
+        },
+        {
+          "id": "q40",
+          "query": "捕获 Source",
+          "goldCount": 1,
+          "topIds": [
+            "1bqqqwp:0",
+            "1kgo586:9",
+            "01rnozy:10",
+            "1n0hg9w:8",
+            "01rnozy:3",
+            "1en75ay:2",
+            "1kegnc0:6",
+            "1en75ay:9",
+            "0hydhhj:9",
+            "0hydhhj:13"
+          ],
+          "goldIds": [
+            "12so78x:14"
+          ],
+          "embedMs": 19.574999999254942,
+          "dbMs": 15.411349999998492,
+          "e2eMs": 46.21499999798834,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q41",
+          "query": "当前实现修订：approved Experience recall",
+          "goldCount": 1,
+          "topIds": [
+            "1en75ay:4",
+            "1en75ay:5",
+            "16ikxmy:6",
+            "1ola2u3:2",
+            "1jmm64v:2",
+            "15o5unm:4",
+            "01rnozy:3",
+            "12so78x:15",
+            "1en75ay:2",
+            "01rnozy:11"
+          ],
+          "goldIds": [
+            "1en75ay:4"
+          ],
+          "embedMs": 17.49500000104308,
+          "dbMs": 19.29859999999826,
+          "e2eMs": 46.79749999940395,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q42",
+          "query": "Product positioning and v1 profile",
+          "goldCount": 1,
+          "topIds": [
+            "1en75ay:11",
+            "0zg29ve:0",
+            "1ola2u3:12",
+            "0ouvee1:10",
+            "08jkf1l:8",
+            "12so78x:1",
+            "1ola2u3:10",
+            "08jkf1l:2",
+            "1kgo586:12",
+            "1jmm64v:6"
+          ],
+          "goldIds": [
+            "1en75ay:11"
+          ],
+          "embedMs": 16.24500000104308,
+          "dbMs": 17.590299999999843,
+          "e2eMs": 44.294999999925494,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q43",
+          "query": "Agent context and handoff boundary",
+          "goldCount": 1,
+          "topIds": [
+            "1en75ay:12",
+            "1en75ay:9",
+            "1en75ay:0",
+            "0v7ynxe:4",
+            "1en75ay:2",
+            "1en75ay:11",
+            "12so78x:1",
+            "1jmm64v:12",
+            "12so78x:12",
+            "0hydhhj:8"
+          ],
+          "goldIds": [
+            "1en75ay:12"
+          ],
+          "embedMs": 17.992499999701977,
+          "dbMs": 17.01850000000195,
+          "e2eMs": 45.03749999962747,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q44",
+          "query": "启用 rerank",
+          "goldCount": 1,
+          "topIds": [
+            "15o5unm:3",
+            "08jkf1l:6",
+            "15o5unm:2",
+            "15o5unm:6",
+            "15o5unm:4",
+            "15o5unm:0",
+            "15o5unm:10",
+            "0ouvee1:3",
+            "12so78x:13",
+            "0hydhhj:13"
+          ],
+          "goldIds": [
+            "15o5unm:2"
+          ],
+          "embedMs": 15.605000000447035,
+          "dbMs": 13.37735000000248,
+          "e2eMs": 39.22000000067055,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.3333333333333333,
+          "ndcg10": 0.5
+        },
+        {
+          "id": "q45",
+          "query": "观测一次搜索",
+          "goldCount": 1,
+          "topIds": [
+            "1en75ay:2",
+            "1bqqqwp:8",
+            "01rnozy:10",
+            "15o5unm:4",
+            "167gco0:1",
+            "0w46rs6:0",
+            "1kegnc0:6",
+            "15o5unm:2",
+            "1r92ab6:2",
+            "0eef7q7:8"
+          ],
+          "goldIds": [
+            "15o5unm:5"
+          ],
+          "embedMs": 16.56499999947846,
+          "dbMs": 12.065150000002177,
+          "e2eMs": 38.90750000067055,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q46",
+          "query": "配置 contract",
+          "goldCount": 1,
+          "topIds": [
+            "1en75ay:11",
+            "12so78x:1",
+            "08jkf1l:0",
+            "1en75ay:0",
+            "1jmm64v:12",
+            "1n0hg9w:2",
+            "1n0hg9w:3",
+            "08jkf1l:1",
+            "0eef7q7:10",
+            "08jkf1l:8"
+          ],
+          "goldIds": [
+            "15o5unm:6"
+          ],
+          "embedMs": 16.382500000298023,
+          "dbMs": 14.785299999999552,
+          "e2eMs": 42.53500000014901,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q47",
+          "query": "Harness-driven development",
+          "goldCount": 1,
+          "topIds": [
+            "1jmm64v:5",
+            "1jmm64v:2",
+            "01rnozy:13",
+            "1jmm64v:6",
+            "1ola2u3:11",
+            "0zg29ve:0",
+            "12so78x:1",
+            "15o5unm:10",
+            "1en75ay:3",
+            "1n0hg9w:2"
+          ],
+          "goldIds": [
+            "1jmm64v:2"
+          ],
+          "embedMs": 17.09999999962747,
+          "dbMs": 17.38955000000351,
+          "e2eMs": 44.75750000029802,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.5,
+          "ndcg10": 0.6309297535714575
+        },
+        {
+          "id": "q48",
+          "query": "Evaluation target 与 evidence mode",
+          "goldCount": 1,
+          "topIds": [
+            "1jmm64v:5",
+            "1jmm64v:6",
+            "0hydhhj:4",
+            "08jkf1l:5",
+            "0ouvee1:7",
+            "01rnozy:9",
+            "12so78x:2",
+            "1ola2u3:10",
+            "08jkf1l:12",
+            "0svyxm3:7"
+          ],
+          "goldIds": [
+            "1jmm64v:5"
+          ],
+          "embedMs": 17.467499999329448,
+          "dbMs": 19.68800000000192,
+          "e2eMs": 46.79249999858439,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q49",
+          "query": "架构边界",
+          "goldCount": 1,
+          "topIds": [
+            "0zg29ve:0",
+            "1jmm64v:6",
+            "0zg29ve:13",
+            "0zg29ve:14",
+            "0ouvee1:1",
+            "15o5unm:12",
+            "08jkf1l:0",
+            "1en75ay:0",
+            "0zg29ve:8",
+            "0v7ynxe:12"
+          ],
+          "goldIds": [
+            "1jmm64v:6"
+          ],
+          "embedMs": 15.257500000298023,
+          "dbMs": 10.359450000003562,
+          "e2eMs": 35.03000000119209,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.5,
+          "ndcg10": 0.6309297535714575
+        },
+        {
+          "id": "q50",
+          "query": "按内容类型选择入口",
+          "goldCount": 1,
+          "topIds": [
+            "0m3471y:1",
+            "0svyxm3:1",
+            "0svyxm3:10",
+            "0v7ynxe:9",
+            "0hydhhj:5",
+            "01rnozy:6",
+            "0ouvee1:4",
+            "0ouvee1:0",
+            "0zg29ve:12",
+            "01rnozy:12"
+          ],
+          "goldIds": [
+            "0m3471y:1"
+          ],
+          "embedMs": 15.452499998733401,
+          "dbMs": 16.55319999999847,
+          "e2eMs": 42.78500000014901,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        }
+      ],
+      "backend": {
+        "device": "webgpu",
+        "dtype": "fp16",
+        "requested": "webgpu",
+        "fallback": false,
+        "reason": "WebGPU 可用，已显式指定",
+        "adapter": "amd / rdna-3"
+      }
+    },
+    {
+      "mode": "vector",
+      "config": {
+        "device": "webgpu",
+        "dtype": "fp16",
+        "batchSize": 16,
+        "topK": 10,
+        "repeat": 2,
+        "chunkSize": 600,
+        "chunkOverlap": 100,
+        "collection": "bench_fp16_webgpu",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+        "hardwareConcurrency": 12,
+        "adapter": "amd / rdna-3",
+        "fallback": false,
+        "loadMs": 2764.59,
+        "coldFirstInferenceMs": 14.05
+      },
+      "scale": {
+        "docs": 23,
+        "chunks": 262,
+        "chars": 78113,
+        "queries": 50,
+        "missingGold": 3
+      },
+      "ingest": {
+        "embedMs": 0,
+        "chunksPerSecond": null,
+        "charsPerSecond": null,
+        "writeMs": 0,
+        "refreshMs": 0,
+        "vectorBytes": 0
+      },
+      "search": {
+        "embedMs": {
+          "median": 16.29,
+          "p95": 26.29,
+          "mean": 16.92
+        },
+        "dbMs": {
+          "median": 3.45,
+          "p95": 4.35,
+          "mean": 3.56
+        },
+        "e2eMs": {
+          "median": 30.95,
+          "p95": 41.97,
+          "mean": 31.42
+        }
+      },
+      "quality": {
+        "evaluatedQueries": 47,
+        "docRecall10": 0.8511,
+        "recall10": 0.5851,
+        "mrr10": 0.3368,
+        "ndcg10": 0.3947
+      },
+      "perQuery": [
+        {
+          "id": "q01",
+          "query": "写入和演进 entry",
+          "goldCount": 1,
+          "topIds": [
+            "1ola2u3:1",
+            "0hydhhj:8",
+            "1en75ay:9",
+            "12so78x:13",
+            "0hydhhj:5",
+            "0ouvee1:5",
+            "0hydhhj:9",
+            "1ola2u3:2",
+            "12so78x:2",
+            "1n0hg9w:0"
+          ],
+          "goldIds": [
+            "1ola2u3:1"
+          ],
+          "embedMs": 23.359999999403954,
+          "dbMs": 6.264850000003207,
+          "e2eMs": 43.57499999925494,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q02",
+          "query": "容量与墓碑压缩",
+          "goldCount": 1,
+          "topIds": [
+            "1ola2u3:2",
+            "1ola2u3:7",
+            "1ola2u3:8",
+            "1ola2u3:5",
+            "1ola2u3:3",
+            "1ola2u3:4",
+            "01rnozy:2",
+            "167gco0:2",
+            "167gco0:7",
+            "167gco0:4"
+          ],
+          "goldIds": [
+            "1ola2u3:3"
+          ],
+          "embedMs": 15.250000001862645,
+          "dbMs": 3.8770500000027823,
+          "e2eMs": 29.387500001117587,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.2,
+          "ndcg10": 0.38685280723454163
+        },
+        {
+          "id": "q03",
+          "query": "检索、展开与引用",
+          "goldCount": 1,
+          "topIds": [
+            "1ola2u3:10",
+            "1en75ay:5",
+            "01rnozy:10",
+            "0hydhhj:5",
+            "0ouvee1:4",
+            "0hydhhj:9",
+            "0zg29ve:14",
+            "1en75ay:2",
+            "01rnozy:1",
+            "0v7ynxe:4"
+          ],
+          "goldIds": [
+            "1ola2u3:10"
+          ],
+          "embedMs": 12.774999998509884,
+          "dbMs": 3.586699999999837,
+          "e2eMs": 29.174999998882413,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q04",
+          "query": "插件必须报告什么",
+          "goldCount": 1,
+          "topIds": [
+            "0v7ynxe:1",
+            "0v7ynxe:9",
+            "0v7ynxe:4",
+            "0v7ynxe:0",
+            "0v7ynxe:2",
+            "0v7ynxe:3",
+            "1kegnc0:6",
+            "0v7ynxe:6",
+            "1bqqqwp:0",
+            "0eef7q7:8"
+          ],
+          "goldIds": [
+            "0v7ynxe:1"
+          ],
+          "embedMs": 17.100000001490116,
+          "dbMs": 3.8425999999999476,
+          "e2eMs": 32.144999999552965,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q05",
+          "query": "插件展示约定",
+          "goldCount": 1,
+          "topIds": [
+            "0v7ynxe:0",
+            "0v7ynxe:9",
+            "0v7ynxe:1",
+            "0v7ynxe:4",
+            "0zg29ve:14",
+            "0eef7q7:8",
+            "0svyxm3:3",
+            "0v7ynxe:2",
+            "0eef7q7:4",
+            "01rnozy:5"
+          ],
+          "goldIds": [
+            "0v7ynxe:4"
+          ],
+          "embedMs": 18.969999998807907,
+          "dbMs": 3.727999999999156,
+          "e2eMs": 33.08750000037253,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.25,
+          "ndcg10": 0.43067655807339306
+        },
+        {
+          "id": "q06",
+          "query": "Fail-open、隐私和展示边界",
+          "goldCount": 1,
+          "topIds": [
+            "1jmm64v:6",
+            "0zg29ve:14",
+            "0zg29ve:0",
+            "1ola2u3:11",
+            "0zg29ve:7",
+            "0zg29ve:8",
+            "1en75ay:0",
+            "15o5unm:12",
+            "0zg29ve:13",
+            "0v7ynxe:4"
+          ],
+          "goldIds": [
+            "0v7ynxe:6"
+          ],
+          "embedMs": 12.042500000447035,
+          "dbMs": 3.7638499999993655,
+          "e2eMs": 25.9850000012666,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q07",
+          "query": "配置 Server",
+          "goldCount": 1,
+          "topIds": [
+            "0eef7q7:0",
+            "08jkf1l:8",
+            "1n0hg9w:2",
+            "0eef7q7:3",
+            "0eef7q7:8",
+            "0eef7q7:10",
+            "08jkf1l:0",
+            "0eef7q7:5",
+            "12so78x:1",
+            "01rnozy:2"
+          ],
+          "goldIds": [
+            "08jkf1l:0"
+          ],
+          "embedMs": 17.862499998882413,
+          "dbMs": 3.4487999999983003,
+          "e2eMs": 31.047499999403954,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.14285714285714285,
+          "ndcg10": 0.3333333333333333
+        },
+        {
+          "id": "q08",
+          "query": "直接组合 generation",
+          "goldCount": 1,
+          "topIds": [
+            "08jkf1l:9",
+            "12so78x:5",
+            "12so78x:3",
+            "0ouvee1:3",
+            "1n0hg9w:9",
+            "12so78x:1",
+            "12so78x:11",
+            "1en75ay:0",
+            "0ouvee1:0",
+            "1en75ay:10"
+          ],
+          "goldIds": [
+            "08jkf1l:9"
+          ],
+          "embedMs": 13.477500000968575,
+          "dbMs": 3.3000499999980093,
+          "e2eMs": 27.575000001117587,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q09",
+          "query": "直接组合 embedding",
+          "goldCount": 1,
+          "topIds": [
+            "0ouvee1:3",
+            "0ouvee1:12",
+            "08jkf1l:9",
+            "0ouvee1:10",
+            "0ouvee1:0",
+            "1n0hg9w:9",
+            "08jkf1l:8",
+            "12so78x:11",
+            "0ouvee1:4",
+            "01rnozy:3"
+          ],
+          "goldIds": [
+            "08jkf1l:10"
+          ],
+          "embedMs": 15.487499998882413,
+          "dbMs": 3.04884999999922,
+          "e2eMs": 28.72499999962747,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q10",
+          "query": "复现验证",
+          "goldCount": 2,
+          "topIds": [
+            "16ikxmy:7",
+            "1jmm64v:2",
+            "1bqqqwp:1",
+            "1bbda0e:4",
+            "1bqqqwp:4",
+            "1bbda0e:3",
+            "167gco0:11",
+            "1r92ab6:2",
+            "1kegnc0:5",
+            "0svyxm3:0"
+          ],
+          "goldIds": [
+            "1bqqqwp:1",
+            "1bqqqwp:2"
+          ],
+          "embedMs": 16.330000000074506,
+          "dbMs": 3.1194499999983236,
+          "e2eMs": 30.015000000596046,
+          "docRecall10": 1,
+          "recall10": 0.5,
+          "mrr10": 0.3333333333333333,
+          "ndcg10": 0.3065735963827292
+        },
+        {
+          "id": "q11",
+          "query": "适配器与结果陈述验收",
+          "goldCount": 1,
+          "topIds": [
+            "1bqqqwp:0",
+            "16ikxmy:7",
+            "0ouvee1:12",
+            "1jmm64v:12",
+            "1bqqqwp:1",
+            "1bqqqwp:6",
+            "1r92ab6:2",
+            "1r92ab6:1",
+            "01rnozy:3",
+            "1bqqqwp:8"
+          ],
+          "goldIds": [
+            "1bqqqwp:5"
+          ],
+          "embedMs": 16.647499999031425,
+          "dbMs": 3.3048999999991793,
+          "e2eMs": 30.949999999254942,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q12",
+          "query": "安装和启动",
+          "goldCount": 1,
+          "topIds": [
+            "0eef7q7:3",
+            "1n0hg9w:0",
+            "1ola2u3:11",
+            "0eef7q7:7",
+            "0eef7q7:8",
+            "1kgo586:6",
+            "12so78x:6",
+            "0zg29ve:7",
+            "01rnozy:3",
+            "0eef7q7:10"
+          ],
+          "goldIds": [
+            "1n0hg9w:1"
+          ],
+          "embedMs": 11.957499999552965,
+          "dbMs": 3.115750000000844,
+          "e2eMs": 25.03999999910593,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q13",
+          "query": "Server 配置",
+          "goldCount": 1,
+          "topIds": [
+            "08jkf1l:8",
+            "1n0hg9w:2",
+            "0eef7q7:0",
+            "0eef7q7:3",
+            "0eef7q7:10",
+            "08jkf1l:0",
+            "0eef7q7:5",
+            "0eef7q7:8",
+            "12so78x:1",
+            "1en75ay:0"
+          ],
+          "goldIds": [
+            "1n0hg9w:2"
+          ],
+          "embedMs": 12.657500000670552,
+          "dbMs": 3.2835500000001048,
+          "e2eMs": 26.012500001117587,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.5,
+          "ndcg10": 0.6309297535714575
+        },
+        {
+          "id": "q14",
+          "query": "HTTP 接口",
+          "goldCount": 1,
+          "topIds": [
+            "0eef7q7:5",
+            "0eef7q7:4",
+            "0eef7q7:6",
+            "0v7ynxe:9",
+            "1jmm64v:2",
+            "1kgo586:9",
+            "0ouvee1:8",
+            "1kgo586:0",
+            "1bbda0e:0",
+            "0ouvee1:2"
+          ],
+          "goldIds": [
+            "1n0hg9w:3"
+          ],
+          "embedMs": 17.21499999985099,
+          "dbMs": 3.823150000003807,
+          "e2eMs": 31.657499998807907,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q15",
+          "query": "验收与验证",
+          "goldCount": 1,
+          "topIds": [
+            "16ikxmy:7",
+            "1bqqqwp:4",
+            "1r92ab6:2",
+            "1jmm64v:2",
+            "1kegnc0:5",
+            "1jmm64v:4",
+            "1r92ab6:1",
+            "1bqqqwp:0",
+            "1kegnc0:2",
+            "1bqqqwp:1"
+          ],
+          "goldIds": [
+            "1r92ab6:5"
+          ],
+          "embedMs": 16.16000000014901,
+          "dbMs": 3.3493500000004133,
+          "e2eMs": 29.72999999858439,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q16",
+          "query": "查看契约",
+          "goldCount": 1,
+          "topIds": [
+            "1kgo586:0",
+            "1kgo586:1",
+            "0zg29ve:14",
+            "1r92ab6:1",
+            "1n0hg9w:3",
+            "0zg29ve:9",
+            "1r92ab6:0",
+            "167gco0:1",
+            "0zg29ve:12",
+            "1kegnc0:2"
+          ],
+          "goldIds": [
+            "1kgo586:0"
+          ],
+          "embedMs": 15.707499999552965,
+          "dbMs": 3.4587499999979627,
+          "e2eMs": 29.987499998882413,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q17",
+          "query": "Scope 内的操作提示词",
+          "goldCount": 1,
+          "topIds": [
+            "1kgo586:3",
+            "1kgo586:6",
+            "0hydhhj:13",
+            "0zg29ve:12",
+            "01rnozy:3",
+            "1kgo586:5",
+            "0zg29ve:10",
+            "1en75ay:12",
+            "0zg29ve:9",
+            "12so78x:13"
+          ],
+          "goldIds": [
+            "1kgo586:3"
+          ],
+          "embedMs": 12.33500000089407,
+          "dbMs": 3.2659500000008848,
+          "e2eMs": 26.044999999925494,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q18",
+          "query": "把一个逻辑 Handoff 授予接收者",
+          "goldCount": 1,
+          "topIds": [
+            "1kgo586:9",
+            "1kgo586:8",
+            "0ouvee1:2",
+            "01rnozy:3",
+            "1r92ab6:1",
+            "1bqqqwp:0",
+            "1kgo586:12",
+            "0ouvee1:4",
+            "1kegnc0:2",
+            "0zg29ve:14"
+          ],
+          "goldIds": [
+            "1kgo586:8"
+          ],
+          "embedMs": 12.417500000447035,
+          "dbMs": 3.065099999999802,
+          "e2eMs": 25.239999998360872,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.5,
+          "ndcg10": 0.6309297535714575
+        },
+        {
+          "id": "q19",
+          "query": "模型连接怎么选",
+          "goldCount": 1,
+          "topIds": [
+            "0ouvee1:0",
+            "16ikxmy:2",
+            "16ikxmy:0",
+            "0ouvee1:2",
+            "0ouvee1:1",
+            "16ikxmy:4",
+            "08jkf1l:3",
+            "0eef7q7:1",
+            "16ikxmy:1",
+            "15o5unm:8"
+          ],
+          "goldIds": [
+            "16ikxmy:0"
+          ],
+          "embedMs": 13.105000000447035,
+          "dbMs": 2.7550499999997555,
+          "e2eMs": 25.81749999895692,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.3333333333333333,
+          "ndcg10": 0.5
+        },
+        {
+          "id": "q20",
+          "query": "使用同一份配置启动",
+          "goldCount": 1,
+          "topIds": [
+            "0eef7q7:3",
+            "0eef7q7:5",
+            "0eef7q7:8",
+            "1n0hg9w:0",
+            "1n0hg9w:2",
+            "15o5unm:6",
+            "0eef7q7:7",
+            "08jkf1l:0",
+            "0eef7q7:10",
+            "12so78x:6"
+          ],
+          "goldIds": [
+            "0eef7q7:10"
+          ],
+          "embedMs": 12.659999998286366,
+          "dbMs": 3.2631000000001222,
+          "e2eMs": 26.28500000014901,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.1111111111111111,
+          "ndcg10": 0.3010299956639812
+        },
+        {
+          "id": "q21",
+          "query": "实现方案与选型",
+          "goldCount": 1,
+          "topIds": [
+            "1r92ab6:7",
+            "0ouvee1:0",
+            "0ouvee1:12",
+            "0ouvee1:10",
+            "1en75ay:10",
+            "0hydhhj:5",
+            "12so78x:3",
+            "1jmm64v:10",
+            "1bqqqwp:0",
+            "1n0hg9w:2"
+          ],
+          "goldIds": [
+            "0svyxm3:1"
+          ],
+          "embedMs": 16.717500001192093,
+          "dbMs": 3.311600000000908,
+          "e2eMs": 30.950000001117587,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q22",
+          "query": "有序任务列表",
+          "goldCount": 1,
+          "topIds": [
+            "0svyxm3:10",
+            "1jmm64v:6",
+            "1jmm64v:9",
+            "1ola2u3:10",
+            "1ola2u3:4",
+            "1en75ay:7",
+            "0v7ynxe:4",
+            "01rnozy:4",
+            "0zg29ve:12",
+            "0w46rs6:8"
+          ],
+          "goldIds": [
+            "0svyxm3:10"
+          ],
+          "embedMs": 16.257500000298023,
+          "dbMs": 3.2268000000003667,
+          "e2eMs": 29.677500002086163,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q23",
+          "query": "依赖与共享知识（跨文件约定）",
+          "goldCount": 0,
+          "topIds": [
+            "0ouvee1:4",
+            "08jkf1l:2",
+            "0svyxm3:4",
+            "0svyxm3:3",
+            "1kgo586:12",
+            "1n0hg9w:4",
+            "12so78x:6",
+            "1jmm64v:13",
+            "1kgo586:1",
+            "12so78x:15"
+          ],
+          "goldIds": [],
+          "embedMs": 20.859999999403954,
+          "dbMs": 2.9394000000029337,
+          "e2eMs": 33.32000000029802,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q24",
+          "query": "与 RFC 0002 的关系",
+          "goldCount": 1,
+          "topIds": [
+            "1en75ay:12",
+            "0zg29ve:1",
+            "0hydhhj:3",
+            "0w46rs6:3",
+            "167gco0:3",
+            "01rnozy:0",
+            "1r92ab6:1",
+            "0zg29ve:13",
+            "0zg29ve:14",
+            "167gco0:0"
+          ],
+          "goldIds": [
+            "0hydhhj:4"
+          ],
+          "embedMs": 13.04500000178814,
+          "dbMs": 3.6499500000027183,
+          "e2eMs": 27.175000000745058,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q25",
+          "query": "设计目标",
+          "goldCount": 1,
+          "topIds": [
+            "0hydhhj:6",
+            "0hydhhj:0",
+            "0ouvee1:0",
+            "0hydhhj:4",
+            "1kgo586:13",
+            "1jmm64v:6",
+            "0svyxm3:10",
+            "0zg29ve:0",
+            "0ouvee1:1",
+            "1en75ay:9"
+          ],
+          "goldIds": [
+            "0hydhhj:5"
+          ],
+          "embedMs": 12.820000000298023,
+          "dbMs": 3.641250000000582,
+          "e2eMs": 28.9850000012666,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q26",
+          "query": "非目标",
+          "goldCount": 1,
+          "topIds": [
+            "0hydhhj:6",
+            "0ouvee1:1",
+            "0ouvee1:8",
+            "0hydhhj:3",
+            "1jmm64v:5",
+            "0ouvee1:4",
+            "1jmm64v:8",
+            "1jmm64v:6",
+            "0hydhhj:5",
+            "1en75ay:5"
+          ],
+          "goldIds": [
+            "0hydhhj:7"
+          ],
+          "embedMs": 26.287500001490116,
+          "dbMs": 3.970899999996618,
+          "e2eMs": 41.96750000119209,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q27",
+          "query": "扩展做什么",
+          "goldCount": 0,
+          "topIds": [
+            "0zg29ve:8",
+            "167gco0:2",
+            "0v7ynxe:4",
+            "0zg29ve:14",
+            "1ola2u3:5",
+            "01rnozy:1",
+            "0hydhhj:9",
+            "01rnozy:2",
+            "01rnozy:5",
+            "0zg29ve:7"
+          ],
+          "goldIds": [],
+          "embedMs": 19.564999997615814,
+          "dbMs": 3.657099999996717,
+          "e2eMs": 34.64499999769032,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q28",
+          "query": "可以观测到什么",
+          "goldCount": 0,
+          "topIds": [
+            "0v7ynxe:9",
+            "1jmm64v:2",
+            "0w46rs6:0",
+            "0hydhhj:13",
+            "16ikxmy:7",
+            "1jmm64v:7",
+            "0hydhhj:9",
+            "1bqqqwp:8",
+            "1kegnc0:6",
+            "1jmm64v:8"
+          ],
+          "goldIds": [],
+          "embedMs": 15.679999997839332,
+          "dbMs": 3.533100000000559,
+          "e2eMs": 34.937499998137355,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q29",
+          "query": "一个 Artifact 表示一个主题",
+          "goldCount": 1,
+          "topIds": [
+            "01rnozy:1",
+            "01rnozy:4",
+            "01rnozy:6",
+            "01rnozy:5",
+            "1jmm64v:0",
+            "0hydhhj:1",
+            "0w46rs6:3",
+            "01rnozy:10",
+            "0hydhhj:9",
+            "0zg29ve:14"
+          ],
+          "goldIds": [
+            "01rnozy:5"
+          ],
+          "embedMs": 39.502499997615814,
+          "dbMs": 3.3153000000020256,
+          "e2eMs": 52.94999999925494,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.25,
+          "ndcg10": 0.43067655807339306
+        },
+        {
+          "id": "q30",
+          "query": "Source、Window、Cursor 与 Pending",
+          "goldCount": 1,
+          "topIds": [
+            "12so78x:3",
+            "01rnozy:7",
+            "0hydhhj:9",
+            "0hydhhj:8",
+            "01rnozy:10",
+            "01rnozy:2",
+            "0zg29ve:11",
+            "1jmm64v:0",
+            "12so78x:5",
+            "1en75ay:3"
+          ],
+          "goldIds": [
+            "01rnozy:7"
+          ],
+          "embedMs": 12.577500000596046,
+          "dbMs": 3.281699999999546,
+          "e2eMs": 26.22999999858439,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.5,
+          "ndcg10": 0.6309297535714575
+        },
+        {
+          "id": "q31",
+          "query": "Topic 与 Source 的证据关联",
+          "goldCount": 1,
+          "topIds": [
+            "1jmm64v:0",
+            "0hydhhj:9",
+            "1bbda0e:0",
+            "12so78x:0",
+            "01rnozy:9",
+            "0svyxm3:7",
+            "0hydhhj:3",
+            "01rnozy:8",
+            "1r92ab6:1",
+            "0m3471y:1"
+          ],
+          "goldIds": [
+            "01rnozy:9"
+          ],
+          "embedMs": 12.230000000447035,
+          "dbMs": 3.2133500000018103,
+          "e2eMs": 25.919999999925494,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.2,
+          "ndcg10": 0.38685280723454163
+        },
+        {
+          "id": "q32",
+          "query": "日常路径",
+          "goldCount": 1,
+          "topIds": [
+            "167gco0:8",
+            "0m3471y:1",
+            "0zg29ve:2",
+            "0svyxm3:7",
+            "167gco0:6",
+            "12so78x:13",
+            "1ola2u3:11",
+            "0v7ynxe:4",
+            "0hydhhj:5",
+            "0ouvee1:12"
+          ],
+          "goldIds": [
+            "0zg29ve:3"
+          ],
+          "embedMs": 15.81000000052154,
+          "dbMs": 3.9187000000056287,
+          "e2eMs": 32.11500000022352,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q33",
+          "query": "Core 不变量",
+          "goldCount": 1,
+          "topIds": [
+            "01rnozy:2",
+            "167gco0:2",
+            "08jkf1l:7",
+            "0hydhhj:4",
+            "1ola2u3:5",
+            "1ola2u3:2",
+            "1jmm64v:1",
+            "1kgo586:10",
+            "167gco0:5",
+            "1jmm64v:5"
+          ],
+          "goldIds": [
+            "0zg29ve:5"
+          ],
+          "embedMs": 18.03500000014901,
+          "dbMs": 3.2664000000004307,
+          "e2eMs": 31.79250000230968,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q34",
+          "query": "Composition root 与上游对象",
+          "goldCount": 1,
+          "topIds": [
+            "0zg29ve:6",
+            "0zg29ve:11",
+            "0hydhhj:8",
+            "15o5unm:10",
+            "1n0hg9w:7",
+            "16ikxmy:6",
+            "1n0hg9w:9",
+            "1jmm64v:11",
+            "1kgo586:12",
+            "1kegnc0:0"
+          ],
+          "goldIds": [
+            "0zg29ve:7"
+          ],
+          "embedMs": 28.342499999329448,
+          "dbMs": 3.3809000000001106,
+          "e2eMs": 41.8899999987334,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q35",
+          "query": "LLM 解决什么问题",
+          "goldCount": 1,
+          "topIds": [
+            "1en75ay:9",
+            "12so78x:5",
+            "01rnozy:3",
+            "0w46rs6:2",
+            "0w46rs6:0",
+            "01rnozy:4",
+            "0ouvee1:4",
+            "0w46rs6:1",
+            "1kegnc0:6",
+            "1r92ab6:2"
+          ],
+          "goldIds": [
+            "0ouvee1:4"
+          ],
+          "embedMs": 16.570000000298023,
+          "dbMs": 3.4422499999964202,
+          "e2eMs": 31.695000000298023,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.14285714285714285,
+          "ndcg10": 0.3333333333333333
+        },
+        {
+          "id": "q36",
+          "query": "写入流程",
+          "goldCount": 1,
+          "topIds": [
+            "0m3471y:1",
+            "12so78x:13",
+            "12so78x:2",
+            "0hydhhj:13",
+            "1bqqqwp:0",
+            "1kegnc0:6",
+            "0svyxm3:10",
+            "1jmm64v:4",
+            "1kegnc0:0",
+            "0zg29ve:2"
+          ],
+          "goldIds": [
+            "0ouvee1:6"
+          ],
+          "embedMs": 19.83250000141561,
+          "dbMs": 4.3532000000013795,
+          "e2eMs": 37.73750000074506,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q37",
+          "query": "Coding Agent 示例",
+          "goldCount": 1,
+          "topIds": [
+            "0v7ynxe:4",
+            "0zg29ve:14",
+            "01rnozy:1",
+            "1jmm64v:12",
+            "1jmm64v:0",
+            "1en75ay:5",
+            "0hydhhj:9",
+            "01rnozy:2",
+            "1n0hg9w:8",
+            "0ouvee1:12"
+          ],
+          "goldIds": [
+            "0ouvee1:6"
+          ],
+          "embedMs": 16.612499998882413,
+          "dbMs": 4.392699999996694,
+          "e2eMs": 33.707499999552965,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q38",
+          "query": "Runtime 组合",
+          "goldCount": 1,
+          "topIds": [
+            "12so78x:3",
+            "12so78x:11",
+            "12so78x:5",
+            "08jkf1l:9",
+            "0zg29ve:1",
+            "1n0hg9w:9",
+            "12so78x:1",
+            "0ouvee1:3",
+            "0hydhhj:8",
+            "1en75ay:0"
+          ],
+          "goldIds": [
+            "12so78x:6"
+          ],
+          "embedMs": 20.99750000052154,
+          "dbMs": 3.917349999999715,
+          "e2eMs": 37.42249999940395,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q39",
+          "query": "显式 Memory 写入",
+          "goldCount": 1,
+          "topIds": [
+            "0zg29ve:4",
+            "12so78x:2",
+            "1ola2u3:1",
+            "12so78x:13",
+            "12so78x:12",
+            "0hydhhj:4",
+            "0zg29ve:3",
+            "0ouvee1:6",
+            "0ouvee1:12",
+            "01rnozy:10"
+          ],
+          "goldIds": [
+            "12so78x:13"
+          ],
+          "embedMs": 15.212500002235174,
+          "dbMs": 3.670700000002398,
+          "e2eMs": 29.96250000037253,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.25,
+          "ndcg10": 0.43067655807339306
+        },
+        {
+          "id": "q40",
+          "query": "捕获 Source",
+          "goldCount": 1,
+          "topIds": [
+            "01rnozy:10",
+            "1kegnc0:6",
+            "1en75ay:2",
+            "0hydhhj:9",
+            "1bqqqwp:0",
+            "1kgo586:9",
+            "0hydhhj:13",
+            "1n0hg9w:8",
+            "1en75ay:9",
+            "01rnozy:3"
+          ],
+          "goldIds": [
+            "12so78x:14"
+          ],
+          "embedMs": 18.612499998882413,
+          "dbMs": 3.77335000000312,
+          "e2eMs": 33.12749999947846,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q41",
+          "query": "当前实现修订：approved Experience recall",
+          "goldCount": 1,
+          "topIds": [
+            "1jmm64v:2",
+            "01rnozy:3",
+            "1en75ay:2",
+            "15o5unm:4",
+            "1en75ay:4",
+            "16ikxmy:6",
+            "1en75ay:5",
+            "1ola2u3:2",
+            "12so78x:15",
+            "01rnozy:11"
+          ],
+          "goldIds": [
+            "1en75ay:4"
+          ],
+          "embedMs": 18.742499999701977,
+          "dbMs": 3.58980000000156,
+          "e2eMs": 33.147499999031425,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.2,
+          "ndcg10": 0.38685280723454163
+        },
+        {
+          "id": "q42",
+          "query": "Product positioning and v1 profile",
+          "goldCount": 1,
+          "topIds": [
+            "1en75ay:11",
+            "0zg29ve:0",
+            "0ouvee1:10",
+            "08jkf1l:8",
+            "1ola2u3:10",
+            "1kgo586:12",
+            "1jmm64v:6",
+            "12so78x:1",
+            "1ola2u3:12",
+            "08jkf1l:2"
+          ],
+          "goldIds": [
+            "1en75ay:11"
+          ],
+          "embedMs": 17.772499999031425,
+          "dbMs": 3.808499999999185,
+          "e2eMs": 32.29499999806285,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q43",
+          "query": "Agent context and handoff boundary",
+          "goldCount": 1,
+          "topIds": [
+            "1en75ay:12",
+            "1en75ay:0",
+            "1jmm64v:12",
+            "1en75ay:9",
+            "1en75ay:11",
+            "12so78x:12",
+            "1en75ay:2",
+            "0hydhhj:8",
+            "0v7ynxe:4",
+            "12so78x:1"
+          ],
+          "goldIds": [
+            "1en75ay:12"
+          ],
+          "embedMs": 18.072500001639128,
+          "dbMs": 3.6779499999975087,
+          "e2eMs": 32.00750000216067,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q44",
+          "query": "启用 rerank",
+          "goldCount": 1,
+          "topIds": [
+            "15o5unm:6",
+            "15o5unm:3",
+            "15o5unm:2",
+            "15o5unm:4",
+            "15o5unm:0",
+            "08jkf1l:6",
+            "0hydhhj:13",
+            "15o5unm:10",
+            "0ouvee1:3",
+            "12so78x:13"
+          ],
+          "goldIds": [
+            "15o5unm:2"
+          ],
+          "embedMs": 18.365000000223517,
+          "dbMs": 4.218450000003941,
+          "e2eMs": 33.46000000089407,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.3333333333333333,
+          "ndcg10": 0.5
+        },
+        {
+          "id": "q45",
+          "query": "观测一次搜索",
+          "goldCount": 1,
+          "topIds": [
+            "01rnozy:10",
+            "1en75ay:2",
+            "0w46rs6:0",
+            "1bqqqwp:8",
+            "1kegnc0:6",
+            "1r92ab6:2",
+            "0hydhhj:9",
+            "1ola2u3:10",
+            "16ikxmy:7",
+            "1r92ab6:7"
+          ],
+          "goldIds": [
+            "15o5unm:5"
+          ],
+          "embedMs": 18.914999997243285,
+          "dbMs": 3.804149999999936,
+          "e2eMs": 32.94749999791384,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q46",
+          "query": "配置 contract",
+          "goldCount": 1,
+          "topIds": [
+            "08jkf1l:0",
+            "12so78x:1",
+            "1en75ay:0",
+            "1en75ay:11",
+            "1n0hg9w:2",
+            "1n0hg9w:3",
+            "08jkf1l:1",
+            "0eef7q7:10",
+            "08jkf1l:8",
+            "1jmm64v:12"
+          ],
+          "goldIds": [
+            "15o5unm:6"
+          ],
+          "embedMs": 17.05750000104308,
+          "dbMs": 3.094099999998434,
+          "e2eMs": 30.96000000089407,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q47",
+          "query": "Harness-driven development",
+          "goldCount": 1,
+          "topIds": [
+            "1jmm64v:5",
+            "1ola2u3:11",
+            "0zg29ve:0",
+            "1jmm64v:2",
+            "01rnozy:13",
+            "15o5unm:10",
+            "1jmm64v:6",
+            "12so78x:1",
+            "1n0hg9w:2",
+            "1en75ay:3"
+          ],
+          "goldIds": [
+            "1jmm64v:2"
+          ],
+          "embedMs": 15.81000000052154,
+          "dbMs": 3.1700499999969907,
+          "e2eMs": 28.82999999821186,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.25,
+          "ndcg10": 0.43067655807339306
+        },
+        {
+          "id": "q48",
+          "query": "Evaluation target 与 evidence mode",
+          "goldCount": 1,
+          "topIds": [
+            "1jmm64v:5",
+            "08jkf1l:12",
+            "0svyxm3:7",
+            "08jkf1l:5",
+            "0ouvee1:7",
+            "1ola2u3:10",
+            "12so78x:2",
+            "0hydhhj:4",
+            "01rnozy:9",
+            "1jmm64v:6"
+          ],
+          "goldIds": [
+            "1jmm64v:5"
+          ],
+          "embedMs": 12.597500000149012,
+          "dbMs": 3.7220500000003085,
+          "e2eMs": 26.62749999947846,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q49",
+          "query": "架构边界",
+          "goldCount": 1,
+          "topIds": [
+            "1jmm64v:6",
+            "0zg29ve:0",
+            "0zg29ve:13",
+            "0ouvee1:1",
+            "15o5unm:12",
+            "0zg29ve:14",
+            "08jkf1l:0",
+            "0zg29ve:8",
+            "1en75ay:0",
+            "1ola2u3:11"
+          ],
+          "goldIds": [
+            "1jmm64v:6"
+          ],
+          "embedMs": 15.577500000596046,
+          "dbMs": 3.2298999999984517,
+          "e2eMs": 29.612500000745058,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q50",
+          "query": "按内容类型选择入口",
+          "goldCount": 1,
+          "topIds": [
+            "0svyxm3:1",
+            "0ouvee1:0",
+            "0m3471y:1",
+            "01rnozy:6",
+            "0hydhhj:5",
+            "0v7ynxe:9",
+            "0ouvee1:12",
+            "0ouvee1:4",
+            "0zg29ve:12",
+            "0svyxm3:10"
+          ],
+          "goldIds": [
+            "0m3471y:1"
+          ],
+          "embedMs": 14.06499999947846,
+          "dbMs": 3.115849999998318,
+          "e2eMs": 27.269999999552965,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.3333333333333333,
+          "ndcg10": 0.5
+        }
+      ],
+      "backend": {
+        "device": "webgpu",
+        "dtype": "fp16",
+        "requested": "webgpu",
+        "fallback": false,
+        "reason": "WebGPU 可用，已显式指定",
+        "adapter": "amd / rdna-3"
+      }
+    },
+    {
+      "mode": "fulltext",
+      "config": {
+        "device": "webgpu",
+        "dtype": "fp16",
+        "batchSize": 16,
+        "topK": 10,
+        "repeat": 2,
+        "chunkSize": 600,
+        "chunkOverlap": 100,
+        "collection": "bench_fp16_webgpu",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+        "hardwareConcurrency": 12,
+        "adapter": "amd / rdna-3",
+        "fallback": false,
+        "loadMs": 2764.59,
+        "coldFirstInferenceMs": 14.71
+      },
+      "scale": {
+        "docs": 23,
+        "chunks": 262,
+        "chars": 78113,
+        "queries": 50,
+        "missingGold": 3
+      },
+      "ingest": {
+        "embedMs": 0,
+        "chunksPerSecond": null,
+        "charsPerSecond": null,
+        "writeMs": 0,
+        "refreshMs": 0,
+        "vectorBytes": 0
+      },
+      "search": {
+        "embedMs": {
+          "median": 15.95,
+          "p95": 19.32,
+          "mean": 16.29
+        },
+        "dbMs": {
+          "median": 10.14,
+          "p95": 19.73,
+          "mean": 11.01
+        },
+        "e2eMs": {
+          "median": 36.64,
+          "p95": 48.88,
+          "mean": 37.69
+        }
+      },
+      "quality": {
+        "evaluatedQueries": 47,
+        "docRecall10": 1,
+        "recall10": 0.7128,
+        "mrr10": 0.5686,
+        "ndcg10": 0.5978
+      },
+      "perQuery": [
+        {
+          "id": "q01",
+          "query": "写入和演进 entry",
+          "goldCount": 1,
+          "topIds": [
+            "1ola2u3:1",
+            "0hydhhj:1",
+            "0zg29ve:4",
+            "1en75ay:4",
+            "0ouvee1:4",
+            "0hydhhj:10",
+            "0hydhhj:8",
+            "0ouvee1:7",
+            "0hydhhj:2",
+            "01rnozy:4"
+          ],
+          "goldIds": [
+            "1ola2u3:1"
+          ],
+          "embedMs": 16.887499999254942,
+          "dbMs": 13.118549999999232,
+          "e2eMs": 39.93250000104308,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q02",
+          "query": "容量与墓碑压缩",
+          "goldCount": 1,
+          "topIds": [
+            "1ola2u3:2",
+            "1ola2u3:7",
+            "1ola2u3:8",
+            "1ola2u3:5",
+            "1ola2u3:3",
+            "1ola2u3:6",
+            "167gco0:7",
+            "1ola2u3:4"
+          ],
+          "goldIds": [
+            "1ola2u3:3"
+          ],
+          "embedMs": 15.167500000447035,
+          "dbMs": 8.316549999999552,
+          "e2eMs": 33.794999999925494,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.2,
+          "ndcg10": 0.38685280723454163
+        },
+        {
+          "id": "q03",
+          "query": "检索、展开与引用",
+          "goldCount": 1,
+          "topIds": [
+            "1ola2u3:10",
+            "01rnozy:10",
+            "01rnozy:9",
+            "0hydhhj:5",
+            "0zg29ve:14",
+            "0hydhhj:9",
+            "01rnozy:6",
+            "08jkf1l:12",
+            "1kgo586:5",
+            "01rnozy:3"
+          ],
+          "goldIds": [
+            "1ola2u3:10"
+          ],
+          "embedMs": 19.8125,
+          "dbMs": 8.039100000001781,
+          "e2eMs": 37.957499999552965,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q04",
+          "query": "插件必须报告什么",
+          "goldCount": 1,
+          "topIds": [
+            "0v7ynxe:1",
+            "0v7ynxe:4",
+            "0v7ynxe:9",
+            "0v7ynxe:2",
+            "0svyxm3:0",
+            "0v7ynxe:6",
+            "0v7ynxe:0",
+            "0v7ynxe:7",
+            "1kegnc0:6",
+            "0eef7q7:8"
+          ],
+          "goldIds": [
+            "0v7ynxe:1"
+          ],
+          "embedMs": 17.095000000670552,
+          "dbMs": 8.45535000000018,
+          "e2eMs": 36.542500000447035,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q05",
+          "query": "插件展示约定",
+          "goldCount": 1,
+          "topIds": [
+            "0v7ynxe:4",
+            "0v7ynxe:9",
+            "0v7ynxe:0",
+            "0svyxm3:3",
+            "0v7ynxe:1",
+            "0v7ynxe:7",
+            "0v7ynxe:6",
+            "0eef7q7:8",
+            "0v7ynxe:11",
+            "0zg29ve:14"
+          ],
+          "goldIds": [
+            "0v7ynxe:4"
+          ],
+          "embedMs": 16.87999999895692,
+          "dbMs": 7.161149999999907,
+          "e2eMs": 34.25499999895692,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q06",
+          "query": "Fail-open、隐私和展示边界",
+          "goldCount": 1,
+          "topIds": [
+            "0v7ynxe:5",
+            "0v7ynxe:6",
+            "15o5unm:11",
+            "08jkf1l:12",
+            "1bqqqwp:5",
+            "0svyxm3:1",
+            "0v7ynxe:10",
+            "0v7ynxe:7",
+            "0svyxm3:0",
+            "0v7ynxe:12"
+          ],
+          "goldIds": [
+            "0v7ynxe:6"
+          ],
+          "embedMs": 16.699999999254942,
+          "dbMs": 11.075749999999971,
+          "e2eMs": 37.982499999925494,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.5,
+          "ndcg10": 0.6309297535714575
+        },
+        {
+          "id": "q07",
+          "query": "配置 Server",
+          "goldCount": 1,
+          "topIds": [
+            "0eef7q7:4",
+            "1n0hg9w:0",
+            "08jkf1l:0",
+            "1ola2u3:13",
+            "1n0hg9w:2",
+            "0eef7q7:10",
+            "0eef7q7:0",
+            "1n0hg9w:1",
+            "0eef7q7:7",
+            "1kgo586:0"
+          ],
+          "goldIds": [
+            "08jkf1l:0"
+          ],
+          "embedMs": 13.367499999701977,
+          "dbMs": 10.681400000001304,
+          "e2eMs": 34.33999999985099,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.3333333333333333,
+          "ndcg10": 0.5
+        },
+        {
+          "id": "q08",
+          "query": "直接组合 generation",
+          "goldCount": 1,
+          "topIds": [
+            "08jkf1l:9",
+            "08jkf1l:6",
+            "15o5unm:4",
+            "15o5unm:6",
+            "0zg29ve:11",
+            "08jkf1l:3",
+            "0zg29ve:8",
+            "1n0hg9w:3",
+            "08jkf1l:2",
+            "08jkf1l:0"
+          ],
+          "goldIds": [
+            "08jkf1l:9"
+          ],
+          "embedMs": 18.509999999776483,
+          "dbMs": 13.690350000000763,
+          "e2eMs": 42.642500000074506,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q09",
+          "query": "直接组合 embedding",
+          "goldCount": 1,
+          "topIds": [
+            "08jkf1l:9",
+            "08jkf1l:8",
+            "0ouvee1:12",
+            "0ouvee1:10",
+            "12so78x:8",
+            "08jkf1l:12",
+            "08jkf1l:11",
+            "1ola2u3:11",
+            "16ikxmy:2",
+            "0ouvee1:3"
+          ],
+          "goldIds": [
+            "08jkf1l:10"
+          ],
+          "embedMs": 18.78999999910593,
+          "dbMs": 10.216400000001158,
+          "e2eMs": 38.522499999031425,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q10",
+          "query": "复现验证",
+          "goldCount": 2,
+          "topIds": [
+            "1bqqqwp:1",
+            "1bqqqwp:4",
+            "16ikxmy:7",
+            "1jmm64v:2",
+            "1kegnc0:3",
+            "0zg29ve:14",
+            "0zg29ve:11",
+            "1kegnc0:4",
+            "167gco0:11",
+            "1bqqqwp:3"
+          ],
+          "goldIds": [
+            "1bqqqwp:1",
+            "1bqqqwp:2"
+          ],
+          "embedMs": 13.23250000178814,
+          "dbMs": 14.304400000000896,
+          "e2eMs": 38.19500000216067,
+          "docRecall10": 1,
+          "recall10": 0.5,
+          "mrr10": 1,
+          "ndcg10": 0.6131471927654584
+        },
+        {
+          "id": "q11",
+          "query": "适配器与结果陈述验收",
+          "goldCount": 1,
+          "topIds": [
+            "1bqqqwp:5",
+            "1bqqqwp:8",
+            "1bqqqwp:0",
+            "1bqqqwp:6",
+            "1bqqqwp:1",
+            "1kegnc0:1",
+            "0v7ynxe:0",
+            "1r92ab6:0",
+            "1r92ab6:5",
+            "0eef7q7:11"
+          ],
+          "goldIds": [
+            "1bqqqwp:5"
+          ],
+          "embedMs": 14.075000001117587,
+          "dbMs": 9.371499999997468,
+          "e2eMs": 33.15750000067055,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q12",
+          "query": "安装和启动",
+          "goldCount": 1,
+          "topIds": [
+            "1n0hg9w:0",
+            "0eef7q7:3",
+            "0eef7q7:7",
+            "1r92ab6:3",
+            "1kegnc0:1",
+            "1n0hg9w:7",
+            "1r92ab6:4",
+            "0eef7q7:8",
+            "1bbda0e:3",
+            "1ola2u3:11"
+          ],
+          "goldIds": [
+            "1n0hg9w:1"
+          ],
+          "embedMs": 17.875,
+          "dbMs": 7.760600000001432,
+          "e2eMs": 35.267500000074506,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q13",
+          "query": "Server 配置",
+          "goldCount": 1,
+          "topIds": [
+            "0eef7q7:4",
+            "1n0hg9w:0",
+            "08jkf1l:0",
+            "1ola2u3:13",
+            "1n0hg9w:2",
+            "0eef7q7:10",
+            "0eef7q7:0",
+            "1n0hg9w:1",
+            "0eef7q7:7",
+            "1kgo586:0"
+          ],
+          "goldIds": [
+            "1n0hg9w:2"
+          ],
+          "embedMs": 19.02500000037253,
+          "dbMs": 11.01734999999826,
+          "e2eMs": 41.61500000022352,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.2,
+          "ndcg10": 0.38685280723454163
+        },
+        {
+          "id": "q14",
+          "query": "HTTP 接口",
+          "goldCount": 1,
+          "topIds": [
+            "1kgo586:0",
+            "0eef7q7:7",
+            "1en75ay:3",
+            "1n0hg9w:4",
+            "0v7ynxe:10",
+            "1ola2u3:6",
+            "1n0hg9w:3",
+            "0eef7q7:6",
+            "0svyxm3:10",
+            "0eef7q7:9"
+          ],
+          "goldIds": [
+            "1n0hg9w:3"
+          ],
+          "embedMs": 17.340000001713634,
+          "dbMs": 10.072800000001735,
+          "e2eMs": 38.05750000104308,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.14285714285714285,
+          "ndcg10": 0.3333333333333333
+        },
+        {
+          "id": "q15",
+          "query": "验收与验证",
+          "goldCount": 1,
+          "topIds": [
+            "1r92ab6:4",
+            "1r92ab6:0",
+            "1bqqqwp:4",
+            "1bqqqwp:0",
+            "1kegnc0:5",
+            "0eef7q7:11",
+            "1r92ab6:1",
+            "16ikxmy:5",
+            "1kegnc0:3",
+            "12so78x:8"
+          ],
+          "goldIds": [
+            "1r92ab6:5"
+          ],
+          "embedMs": 11.932500001043081,
+          "dbMs": 8.22425000000294,
+          "e2eMs": 31.127500001341105,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q16",
+          "query": "查看契约",
+          "goldCount": 1,
+          "topIds": [
+            "1kgo586:0",
+            "16ikxmy:6",
+            "1kgo586:6",
+            "0zg29ve:9",
+            "0zg29ve:14",
+            "0eef7q7:6",
+            "1r92ab6:0",
+            "1n0hg9w:3",
+            "0w46rs6:0",
+            "0w46rs6:2"
+          ],
+          "goldIds": [
+            "1kgo586:0"
+          ],
+          "embedMs": 16.277500001713634,
+          "dbMs": 8.39404999999897,
+          "e2eMs": 35.71499999985099,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q17",
+          "query": "Scope 内的操作提示词",
+          "goldCount": 1,
+          "topIds": [
+            "1kgo586:3",
+            "1kgo586:7",
+            "1kgo586:6",
+            "1kgo586:4",
+            "1kgo586:13",
+            "16ikxmy:6",
+            "0eef7q7:2",
+            "12so78x:9",
+            "12so78x:11",
+            "16ikxmy:5"
+          ],
+          "goldIds": [
+            "1kgo586:3"
+          ],
+          "embedMs": 15.679999999701977,
+          "dbMs": 10.896149999996851,
+          "e2eMs": 36.73499999940395,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q18",
+          "query": "把一个逻辑 Handoff 授予接收者",
+          "goldCount": 1,
+          "topIds": [
+            "1kgo586:8",
+            "1kgo586:7",
+            "1kgo586:9",
+            "1en75ay:12",
+            "1kegnc0:6",
+            "01rnozy:7",
+            "1bqqqwp:7",
+            "1r92ab6:4",
+            "1bqqqwp:4",
+            "0hydhhj:5"
+          ],
+          "goldIds": [
+            "1kgo586:8"
+          ],
+          "embedMs": 15.5,
+          "dbMs": 13.874650000001566,
+          "e2eMs": 41.669999999925494,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q19",
+          "query": "模型连接怎么选",
+          "goldCount": 1,
+          "topIds": [
+            "16ikxmy:0",
+            "0eef7q7:1",
+            "0eef7q7:6",
+            "16ikxmy:2",
+            "0eef7q7:8",
+            "16ikxmy:4",
+            "0ouvee1:1",
+            "0ouvee1:10",
+            "0ouvee1:0",
+            "0ouvee1:2"
+          ],
+          "goldIds": [
+            "16ikxmy:0"
+          ],
+          "embedMs": 14.03999999910593,
+          "dbMs": 9.334199999997509,
+          "e2eMs": 34.125,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q20",
+          "query": "使用同一份配置启动",
+          "goldCount": 1,
+          "topIds": [
+            "0eef7q7:10",
+            "12so78x:12",
+            "16ikxmy:5",
+            "1en75ay:7",
+            "1ola2u3:12",
+            "1n0hg9w:9",
+            "1n0hg9w:0",
+            "1n0hg9w:2",
+            "0ouvee1:0",
+            "0eef7q7:5"
+          ],
+          "goldIds": [
+            "0eef7q7:10"
+          ],
+          "embedMs": 15.797500001266599,
+          "dbMs": 8.136650000000373,
+          "e2eMs": 34.040000000968575,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q21",
+          "query": "实现方案与选型",
+          "goldCount": 1,
+          "topIds": [
+            "0svyxm3:0",
+            "0v7ynxe:12",
+            "1r92ab6:7",
+            "0zg29ve:13",
+            "1r92ab6:6",
+            "0v7ynxe:9",
+            "0hydhhj:9",
+            "0zg29ve:9",
+            "0zg29ve:14",
+            "12so78x:5"
+          ],
+          "goldIds": [
+            "0svyxm3:1"
+          ],
+          "embedMs": 15.232499999925494,
+          "dbMs": 8.957949999999983,
+          "e2eMs": 35.01500000059605,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q22",
+          "query": "有序任务列表",
+          "goldCount": 1,
+          "topIds": [
+            "0svyxm3:10",
+            "16ikxmy:7",
+            "0ouvee1:4",
+            "0ouvee1:7",
+            "0w46rs6:8",
+            "15o5unm:0",
+            "1r92ab6:4",
+            "1jmm64v:6",
+            "0hydhhj:5",
+            "0hydhhj:1"
+          ],
+          "goldIds": [
+            "0svyxm3:10"
+          ],
+          "embedMs": 16.102500000968575,
+          "dbMs": 8.940549999999348,
+          "e2eMs": 35.78250000067055,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q23",
+          "query": "依赖与共享知识（跨文件约定）",
+          "goldCount": 0,
+          "topIds": [
+            "0svyxm3:3",
+            "0v7ynxe:0",
+            "0svyxm3:8",
+            "0eef7q7:10",
+            "0eef7q7:8",
+            "0v7ynxe:9",
+            "0ouvee1:4",
+            "0svyxm3:10",
+            "0eef7q7:0",
+            "1jmm64v:4"
+          ],
+          "goldIds": [],
+          "embedMs": 14.312499998137355,
+          "dbMs": 10.611450000000332,
+          "e2eMs": 36.36749999970198,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q24",
+          "query": "与 RFC 0002 的关系",
+          "goldCount": 1,
+          "topIds": [
+            "01rnozy:0",
+            "0hydhhj:0",
+            "167gco0:0",
+            "0zg29ve:13",
+            "0hydhhj:3",
+            "1jmm64v:0",
+            "1en75ay:0",
+            "0zg29ve:0",
+            "15o5unm:0",
+            "0ouvee1:0"
+          ],
+          "goldIds": [
+            "0hydhhj:4"
+          ],
+          "embedMs": 16.217500001192093,
+          "dbMs": 7.874599999995553,
+          "e2eMs": 34.107499999925494,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q25",
+          "query": "设计目标",
+          "goldCount": 1,
+          "topIds": [
+            "0hydhhj:6",
+            "0hydhhj:4",
+            "0svyxm3:10",
+            "1en75ay:10",
+            "1r92ab6:2",
+            "1r92ab6:7",
+            "12so78x:0",
+            "0hydhhj:0",
+            "1en75ay:12",
+            "1en75ay:9"
+          ],
+          "goldIds": [
+            "0hydhhj:5"
+          ],
+          "embedMs": 16.865000000223517,
+          "dbMs": 8.430749999995896,
+          "e2eMs": 35.49000000022352,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q26",
+          "query": "非目标",
+          "goldCount": 1,
+          "topIds": [
+            "0hydhhj:6",
+            "0svyxm3:10",
+            "0hydhhj:4",
+            "1r92ab6:2",
+            "1en75ay:12",
+            "0zg29ve:9",
+            "1kgo586:13",
+            "0ouvee1:8",
+            "0zg29ve:12",
+            "0hydhhj:3"
+          ],
+          "goldIds": [
+            "0hydhhj:7"
+          ],
+          "embedMs": 14.609999999403954,
+          "dbMs": 6.824650000002293,
+          "e2eMs": 31.33250000141561,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q27",
+          "query": "扩展做什么",
+          "goldCount": 0,
+          "topIds": [
+            "167gco0:11",
+            "0svyxm3:0",
+            "167gco0:3",
+            "167gco0:2",
+            "167gco0:9",
+            "0zg29ve:14",
+            "0zg29ve:8",
+            "0ouvee1:4",
+            "0ouvee1:1",
+            "1en75ay:9"
+          ],
+          "goldIds": [],
+          "embedMs": 15.140000000596046,
+          "dbMs": 7.961750000002212,
+          "e2eMs": 33.83999999985099,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q28",
+          "query": "可以观测到什么",
+          "goldCount": 0,
+          "topIds": [
+            "0svyxm3:0",
+            "1bqqqwp:8",
+            "15o5unm:2",
+            "0ouvee1:10",
+            "167gco0:11",
+            "15o5unm:4",
+            "0ouvee1:2",
+            "0zg29ve:13",
+            "0ouvee1:4",
+            "0ouvee1:1"
+          ],
+          "goldIds": [],
+          "embedMs": 16.584999999031425,
+          "dbMs": 8.472799999999552,
+          "e2eMs": 36.03249999880791,
+          "docRecall10": 0,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q29",
+          "query": "一个 Artifact 表示一个主题",
+          "goldCount": 1,
+          "topIds": [
+            "01rnozy:5",
+            "01rnozy:1",
+            "0hydhhj:1",
+            "01rnozy:6",
+            "1kgo586:12",
+            "1kgo586:13",
+            "0hydhhj:8",
+            "0hydhhj:4",
+            "1kgo586:11",
+            "0hydhhj:12"
+          ],
+          "goldIds": [
+            "01rnozy:5"
+          ],
+          "embedMs": 14.160000000149012,
+          "dbMs": 12.250950000001467,
+          "e2eMs": 36.2825000025332,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q30",
+          "query": "Source、Window、Cursor 与 Pending",
+          "goldCount": 1,
+          "topIds": [
+            "01rnozy:8",
+            "01rnozy:7",
+            "01rnozy:13",
+            "01rnozy:9",
+            "1r92ab6:2",
+            "01rnozy:3",
+            "12so78x:1",
+            "1n0hg9w:4",
+            "12so78x:7",
+            "0eef7q7:4"
+          ],
+          "goldIds": [
+            "01rnozy:7"
+          ],
+          "embedMs": 13.540000000968575,
+          "dbMs": 17.308750000003783,
+          "e2eMs": 41.482499999925494,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.5,
+          "ndcg10": 0.6309297535714575
+        },
+        {
+          "id": "q31",
+          "query": "Topic 与 Source 的证据关联",
+          "goldCount": 1,
+          "topIds": [
+            "01rnozy:8",
+            "01rnozy:9",
+            "01rnozy:13",
+            "01rnozy:7",
+            "01rnozy:11",
+            "01rnozy:12",
+            "12so78x:14",
+            "01rnozy:2",
+            "01rnozy:5",
+            "01rnozy:1"
+          ],
+          "goldIds": [
+            "01rnozy:9"
+          ],
+          "embedMs": 17.467500001192093,
+          "dbMs": 11.601800000000367,
+          "e2eMs": 39.22000000067055,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.5,
+          "ndcg10": 0.6309297535714575
+        },
+        {
+          "id": "q32",
+          "query": "日常路径",
+          "goldCount": 1,
+          "topIds": [
+            "0zg29ve:2",
+            "0svyxm3:5",
+            "1ola2u3:11",
+            "1kegnc0:3",
+            "167gco0:8",
+            "0m3471y:0",
+            "0svyxm3:7",
+            "1kgo586:0",
+            "01rnozy:2",
+            "0eef7q7:10"
+          ],
+          "goldIds": [
+            "0zg29ve:3"
+          ],
+          "embedMs": 15.012499999254942,
+          "dbMs": 7.461799999997311,
+          "e2eMs": 31.679999999701977,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q33",
+          "query": "Core 不变量",
+          "goldCount": 1,
+          "topIds": [
+            "0zg29ve:4",
+            "0zg29ve:14",
+            "0zg29ve:10",
+            "0zg29ve:0",
+            "12so78x:9",
+            "0zg29ve:1",
+            "12so78x:5",
+            "1n0hg9w:4",
+            "0zg29ve:8",
+            "12so78x:3"
+          ],
+          "goldIds": [
+            "0zg29ve:5"
+          ],
+          "embedMs": 17.409999998286366,
+          "dbMs": 9.370449999998527,
+          "e2eMs": 37.042500000447035,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q34",
+          "query": "Composition root 与上游对象",
+          "goldCount": 1,
+          "topIds": [
+            "0zg29ve:6",
+            "15o5unm:6",
+            "1kgo586:13",
+            "0zg29ve:11",
+            "1jmm64v:11",
+            "12so78x:9",
+            "1kgo586:3",
+            "1ola2u3:6",
+            "08jkf1l:3",
+            "1en75ay:3"
+          ],
+          "goldIds": [
+            "0zg29ve:7"
+          ],
+          "embedMs": 14.915000000968575,
+          "dbMs": 12.219550000001618,
+          "e2eMs": 37.19999999925494,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q35",
+          "query": "LLM 解决什么问题",
+          "goldCount": 1,
+          "topIds": [
+            "0ouvee1:4",
+            "1bqqqwp:3",
+            "1bbda0e:5",
+            "0svyxm3:0",
+            "0ouvee1:8",
+            "0w46rs6:0",
+            "0w46rs6:9",
+            "0w46rs6:1",
+            "0ouvee1:9",
+            "0ouvee1:5"
+          ],
+          "goldIds": [
+            "0ouvee1:4"
+          ],
+          "embedMs": 13.924999998882413,
+          "dbMs": 7.257050000003801,
+          "e2eMs": 30.78749999962747,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q36",
+          "query": "写入流程",
+          "goldCount": 1,
+          "topIds": [
+            "0ouvee1:5",
+            "12so78x:13",
+            "1kegnc0:0",
+            "1bqqqwp:0",
+            "1kegnc0:2",
+            "1kegnc0:3",
+            "12so78x:12",
+            "1kegnc0:6",
+            "1bbda0e:3",
+            "0ouvee1:6"
+          ],
+          "goldIds": [
+            "0ouvee1:6"
+          ],
+          "embedMs": 15.407499998807907,
+          "dbMs": 10.866799999999785,
+          "e2eMs": 35.83999999985099,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.1,
+          "ndcg10": 0.2890648263178879
+        },
+        {
+          "id": "q37",
+          "query": "Coding Agent 示例",
+          "goldCount": 1,
+          "topIds": [
+            "0ouvee1:12",
+            "0ouvee1:6",
+            "1en75ay:12",
+            "0ouvee1:8",
+            "0hydhhj:3",
+            "08jkf1l:8",
+            "16ikxmy:0",
+            "1en75ay:7",
+            "0hydhhj:13",
+            "0eef7q7:2"
+          ],
+          "goldIds": [
+            "0ouvee1:6"
+          ],
+          "embedMs": 18.297499999403954,
+          "dbMs": 13.600850000002538,
+          "e2eMs": 43.41499999910593,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.5,
+          "ndcg10": 0.6309297535714575
+        },
+        {
+          "id": "q38",
+          "query": "Runtime 组合",
+          "goldCount": 1,
+          "topIds": [
+            "12so78x:6",
+            "12so78x:11",
+            "12so78x:9",
+            "1ola2u3:5",
+            "1ola2u3:13",
+            "12so78x:1",
+            "1ola2u3:0",
+            "12so78x:3",
+            "1en75ay:2",
+            "12so78x:12"
+          ],
+          "goldIds": [
+            "12so78x:6"
+          ],
+          "embedMs": 15.557500001043081,
+          "dbMs": 11.351299999994808,
+          "e2eMs": 37.32250000163913,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q39",
+          "query": "显式 Memory 写入",
+          "goldCount": 1,
+          "topIds": [
+            "12so78x:12",
+            "0hydhhj:12",
+            "1ola2u3:6",
+            "0ouvee1:4",
+            "12so78x:2",
+            "0hydhhj:1",
+            "0ouvee1:6",
+            "167gco0:11",
+            "1ola2u3:1",
+            "0hydhhj:8"
+          ],
+          "goldIds": [
+            "12so78x:13"
+          ],
+          "embedMs": 13.984999999403954,
+          "dbMs": 12.00764999999592,
+          "e2eMs": 36.83750000037253,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q40",
+          "query": "捕获 Source",
+          "goldCount": 1,
+          "topIds": [
+            "12so78x:14",
+            "01rnozy:7",
+            "01rnozy:8",
+            "12so78x:4",
+            "01rnozy:9",
+            "0zg29ve:3",
+            "1bbda0e:2",
+            "01rnozy:13",
+            "1bqqqwp:0",
+            "0ouvee1:7"
+          ],
+          "goldIds": [
+            "12so78x:14"
+          ],
+          "embedMs": 29.43999999947846,
+          "dbMs": 10.515550000003714,
+          "e2eMs": 50.48499999940395,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q41",
+          "query": "当前实现修订：approved Experience recall",
+          "goldCount": 1,
+          "topIds": [
+            "1en75ay:4",
+            "0svyxm3:11",
+            "167gco0:10",
+            "1en75ay:6",
+            "1en75ay:5",
+            "1n0hg9w:8",
+            "0svyxm3:1",
+            "0svyxm3:6",
+            "0m3471y:1",
+            "0svyxm3:0"
+          ],
+          "goldIds": [
+            "1en75ay:4"
+          ],
+          "embedMs": 17.03999999910593,
+          "dbMs": 19.734400000001187,
+          "e2eMs": 48.88499999977648,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q42",
+          "query": "Product positioning and v1 profile",
+          "goldCount": 1,
+          "topIds": [
+            "1en75ay:11",
+            "12so78x:8",
+            "0zg29ve:6",
+            "1ola2u3:12",
+            "0zg29ve:0",
+            "08jkf1l:11",
+            "15o5unm:6",
+            "0zg29ve:12",
+            "0zg29ve:11",
+            "12so78x:6"
+          ],
+          "goldIds": [
+            "1en75ay:11"
+          ],
+          "embedMs": 14.907500000670552,
+          "dbMs": 17.795799999996234,
+          "e2eMs": 42.69999999925494,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q43",
+          "query": "Agent context and handoff boundary",
+          "goldCount": 1,
+          "topIds": [
+            "1en75ay:12",
+            "1kgo586:8",
+            "1en75ay:9",
+            "0v7ynxe:4",
+            "0w46rs6:9",
+            "1jmm64v:2",
+            "1kegnc0:6",
+            "1bqqqwp:7",
+            "12so78x:10",
+            "01rnozy:7"
+          ],
+          "goldIds": [
+            "1en75ay:12"
+          ],
+          "embedMs": 16.18250000104308,
+          "dbMs": 22.458200000000943,
+          "e2eMs": 48.36250000074506,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q44",
+          "query": "启用 rerank",
+          "goldCount": 1,
+          "topIds": [
+            "08jkf1l:6",
+            "15o5unm:3",
+            "15o5unm:7",
+            "15o5unm:2",
+            "15o5unm:4",
+            "15o5unm:9",
+            "15o5unm:0",
+            "15o5unm:6",
+            "15o5unm:12",
+            "08jkf1l:3"
+          ],
+          "goldIds": [
+            "15o5unm:2"
+          ],
+          "embedMs": 14.83250000141561,
+          "dbMs": 9.807000000000698,
+          "e2eMs": 34.48750000074506,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.25,
+          "ndcg10": 0.43067655807339306
+        },
+        {
+          "id": "q45",
+          "query": "观测一次搜索",
+          "goldCount": 1,
+          "topIds": [
+            "15o5unm:4",
+            "167gco0:1",
+            "1bqqqwp:8",
+            "1en75ay:2",
+            "15o5unm:2",
+            "0eef7q7:8",
+            "167gco0:11",
+            "01rnozy:6",
+            "01rnozy:10",
+            "1bbda0e:1"
+          ],
+          "goldIds": [
+            "15o5unm:5"
+          ],
+          "embedMs": 17.18999999947846,
+          "dbMs": 7.525550000002113,
+          "e2eMs": 34.48499999940395,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q46",
+          "query": "配置 contract",
+          "goldCount": 1,
+          "topIds": [
+            "0hydhhj:10",
+            "15o5unm:5",
+            "1bqqqwp:5",
+            "1kgo586:11",
+            "1en75ay:9",
+            "1en75ay:11",
+            "1jmm64v:12",
+            "1en75ay:4",
+            "15o5unm:12",
+            "12so78x:1"
+          ],
+          "goldIds": [
+            "15o5unm:6"
+          ],
+          "embedMs": 14.97749999910593,
+          "dbMs": 11.714950000001409,
+          "e2eMs": 36.75999999977648,
+          "docRecall10": 1,
+          "recall10": 0,
+          "mrr10": 0,
+          "ndcg10": 0
+        },
+        {
+          "id": "q47",
+          "query": "Harness-driven development",
+          "goldCount": 1,
+          "topIds": [
+            "1jmm64v:2",
+            "1jmm64v:5",
+            "1jmm64v:3",
+            "1jmm64v:7",
+            "1jmm64v:4",
+            "0hydhhj:10",
+            "1jmm64v:10",
+            "0zg29ve:2",
+            "1jmm64v:8",
+            "1jmm64v:6"
+          ],
+          "goldIds": [
+            "1jmm64v:2"
+          ],
+          "embedMs": 14.782499998807907,
+          "dbMs": 19.092450000003737,
+          "e2eMs": 43.582499999552965,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q48",
+          "query": "Evaluation target 与 evidence mode",
+          "goldCount": 1,
+          "topIds": [
+            "1jmm64v:5",
+            "1jmm64v:6",
+            "1jmm64v:10",
+            "0w46rs6:1",
+            "1jmm64v:4",
+            "1jmm64v:3",
+            "1en75ay:6",
+            "0w46rs6:5",
+            "1jmm64v:7",
+            "1n0hg9w:4"
+          ],
+          "goldIds": [
+            "1jmm64v:5"
+          ],
+          "embedMs": 19.322499999776483,
+          "dbMs": 21.537100000001374,
+          "e2eMs": 51.16249999962747,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        },
+        {
+          "id": "q49",
+          "query": "架构边界",
+          "goldCount": 1,
+          "topIds": [
+            "0zg29ve:0",
+            "1jmm64v:6",
+            "0v7ynxe:12",
+            "0hydhhj:0",
+            "0ouvee1:8",
+            "0zg29ve:14",
+            "0zg29ve:11",
+            "0zg29ve:13",
+            "1r92ab6:0",
+            "1jmm64v:7"
+          ],
+          "goldIds": [
+            "1jmm64v:6"
+          ],
+          "embedMs": 18.00499999895692,
+          "dbMs": 6.9936000000016065,
+          "e2eMs": 35.03999999910593,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 0.5,
+          "ndcg10": 0.6309297535714575
+        },
+        {
+          "id": "q50",
+          "query": "按内容类型选择入口",
+          "goldCount": 1,
+          "topIds": [
+            "0m3471y:1",
+            "01rnozy:12",
+            "1ola2u3:8",
+            "1r92ab6:2",
+            "1kegnc0:1",
+            "0eef7q7:8",
+            "0eef7q7:6",
+            "0svyxm3:10",
+            "0eef7q7:7",
+            "1bqqqwp:3"
+          ],
+          "goldIds": [
+            "0m3471y:1"
+          ],
+          "embedMs": 18.880000000819564,
+          "dbMs": 7.957000000002154,
+          "e2eMs": 37.69250000268221,
+          "docRecall10": 1,
+          "recall10": 1,
+          "mrr10": 1,
+          "ndcg10": 1
+        }
+      ],
+      "backend": {
+        "device": "webgpu",
+        "dtype": "fp16",
+        "requested": "webgpu",
+        "fallback": false,
+        "reason": "WebGPU 可用，已显式指定",
+        "adapter": "amd / rdna-3"
+      }
+    }
+  ],
+  "consoleErrors": []
+}

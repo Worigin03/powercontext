@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Sequence
 from dataclasses import dataclass, replace
 from itertools import chain
@@ -106,6 +107,7 @@ class PreparedContextBuild:
     origins: tuple[PreparedContextOrigin, ...]
     omissions: PreparedContextOmissions = PreparedContextOmissions()
     code_origins: tuple[CodeEvidenceRef, ...] = ()
+    fragments: tuple[EvidenceFragment, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -115,6 +117,37 @@ class MemoryEntryAddress:
     memory: ArtifactAddress
     entry_id: str
     entry_version_id: str
+
+
+@dataclass(frozen=True)
+class _ChosenEntry:
+    """Accumulated literal spans already accepted for one Memory entry version."""
+
+    address: MemoryEntryAddress
+    text: str
+    spans: tuple[tuple[int, int], ...]
+
+
+@dataclass(frozen=True)
+class _EvidenceCandidate:
+    """One sentence-like span competing for the byte budget."""
+
+    score: float
+    order: int
+    address: MemoryEntryAddress
+    start: int
+    end: int
+    text: str
+
+
+@dataclass(frozen=True)
+class EvidenceFragment:
+    """One literal span of a Memory entry version, selected for the current query."""
+
+    address: MemoryEntryAddress
+    start: int
+    end: int
+    text: str
 
 
 PreparedContextOrigin = MemoryCitation | ArtifactRef | MemoryEntryAddress | ArtifactAddress
@@ -234,6 +267,9 @@ class PreparedContextBuilder:
             raise PreparedContextInvariantError("topic-memory-candidate-limit")
         if sum(len(candidates.hits) for candidates in experience_candidates) > self.experience_candidate_limit:
             raise PreparedContextInvariantError("experience-candidate-limit")
+
+        if request.evidence_selection:
+            return self._build_evidence_result(request=request, memory_candidates=memory_candidates)
 
         content, origins, omissions = self._select_entries(
             request=request,
@@ -432,6 +468,84 @@ class PreparedContextBuilder:
             return None, (), omissions
         content = render_context_text(included, assembly)
         return content, tuple(origins), omissions
+
+    def _build_evidence_result(
+        self,
+        *,
+        request: PrepareContextRequest,
+        memory_candidates: Sequence[PreparedMemoryCandidates],
+    ) -> PreparedContextBuild:
+        """Deliver literal Memory spans chosen for the query inside the byte budget."""
+
+        fragments, omissions = self._select_fragments(request, memory_candidates)
+        if not fragments:
+            return PreparedContextBuild(context=self.empty(), origins=(), omissions=omissions)
+        content = _render_evidence(fragments)
+        return PreparedContextBuild(
+            context=PreparedContext(
+                status="ready",
+                content=content,
+                content_bytes=len(content.encode("utf-8")),
+            ),
+            origins=tuple(fragment.address for fragment in fragments),
+            omissions=omissions,
+            fragments=fragments,
+        )
+
+    def _select_fragments(
+        self,
+        request: PrepareContextRequest,
+        memory_candidates: Sequence[PreparedMemoryCandidates],
+    ) -> tuple[tuple[EvidenceFragment, ...], PreparedContextOmissions]:
+        terms, numbers = _evidence_terms(request.query)
+        candidates: list[_EvidenceCandidate] = []
+        for group in memory_candidates:
+            for hit in group.hits:
+                if hit.memory_ref is None or not hit.text.strip():
+                    continue
+                address = MemoryEntryAddress(
+                    memory=ArtifactAddress(scope_id=group.scope_id, artifact=hit.memory_ref),
+                    entry_id=hit.entry_id,
+                    entry_version_id=hit.entry_version_id,
+                )
+                for start, end in _sentence_spans(hit.text):
+                    candidates.append(
+                        _EvidenceCandidate(
+                            score=_span_score(hit.text[start:end], terms, numbers),
+                            order=len(candidates),
+                            address=address,
+                            start=start,
+                            end=end,
+                            text=hit.text,
+                        )
+                    )
+        if not candidates:
+            return (), PreparedContextOmissions()
+        # Highest query overlap first; equal scores keep the original candidate order.
+        candidates.sort(key=lambda candidate: (-candidate.score, candidate.order))
+
+        chosen: dict[tuple[str, str, str], _ChosenEntry] = {}
+        dropped = 0
+        for candidate in candidates:
+            if len(_fragments_of(chosen)) >= self.entry_limit:
+                break
+            key = (
+                candidate.address.memory.scope_id,
+                candidate.address.entry_id,
+                candidate.address.entry_version_id,
+            )
+            existing = chosen.get(key)
+            trial = dict(chosen)
+            trial[key] = _ChosenEntry(
+                address=candidate.address,
+                text=candidate.text,
+                spans=(*(existing.spans if existing is not None else ()), (candidate.start, candidate.end)),
+            )
+            if len(_render_evidence(_fragments_of(trial)).encode("utf-8")) <= request.max_bytes:
+                chosen = trial
+            else:
+                dropped += 1
+        return _fragments_of(chosen), PreparedContextOmissions(dropped_items=dropped)
 
     def _profile_entries(self, candidates: Sequence[PreparedProfileCandidate]) -> tuple[_PreparedContextEntry, ...]:
         entries = []
@@ -683,6 +797,107 @@ def _interleave_groups(groups: Sequence[Sequence[_Item]]) -> tuple[_Item, ...]:
     for index in range(max((len(group) for group in groups), default=0)):
         ordered.extend(group[index] for group in groups if index < len(group))
     return tuple(ordered)
+
+
+_EVIDENCE_TOKENS = re.compile(r"[a-z0-9]+|[\u4e00-\u9fff]")
+_EVIDENCE_STOPWORDS = frozenset(
+    """
+    a an and are as at be been by did do does for from had has have how in into is it its of on or
+    over per than that the their then there these this those to was were what when where which who why
+    with within without
+    """.split()  # noqa: SIM905 - readable term list
+)
+_SPAN_BREAK = re.compile(r"[.!?]+(?=\s|$)|\n")
+_MAX_SPAN_CHARS = 400
+_SPAN_WINDOW_CHARS = 300
+
+
+def _evidence_terms(query: str) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """Split the query into evidence-bearing words and the numbers it names."""
+
+    tokens = _EVIDENCE_TOKENS.findall(query.lower())
+    terms = tuple(
+        dict.fromkeys(token for token in tokens if token not in _EVIDENCE_STOPWORDS and not token.isdigit())
+    )
+    numbers = tuple(dict.fromkeys(token for token in tokens if any(character.isdigit() for character in token)))
+    return terms, numbers
+
+
+def _span_score(text: str, terms: Sequence[str], numbers: Sequence[str]) -> float:
+    tokens = set(_EVIDENCE_TOKENS.findall(text.lower()))
+    score = float(sum(1 for term in terms if term in tokens))
+    return score + 3.0 * sum(1 for number in numbers if number in tokens)
+
+
+def _sentence_spans(text: str) -> tuple[tuple[int, int], ...]:
+    """Split one entry into sentence-sized spans, further bounded for long sentences."""
+
+    spans: list[tuple[int, int]] = []
+    start = 0
+    for match in _SPAN_BREAK.finditer(text):
+        _append_span(spans, text, start, match.end())
+        start = match.end()
+    _append_span(spans, text, start, len(text))
+    return tuple(spans)
+
+
+def _append_span(spans: list[tuple[int, int]], text: str, start: int, end: int) -> None:
+    while start < end and text[start].isspace():
+        start += 1
+    while end > start and text[end - 1].isspace():
+        end -= 1
+    while end - start > _MAX_SPAN_CHARS:
+        cut = text.rfind(" ", start + _SPAN_WINDOW_CHARS // 2, start + _SPAN_WINDOW_CHARS)
+        if cut <= start:
+            cut = start + _SPAN_WINDOW_CHARS
+        spans.append((start, cut))
+        start = cut
+        while start < end and text[start].isspace():
+            start += 1
+    if start < end:
+        spans.append((start, end))
+
+
+def _merge_spans(spans: Sequence[tuple[int, int]]) -> tuple[tuple[int, int], ...]:
+    merged: list[tuple[int, int]] = []
+    for start, end in sorted(spans):
+        if merged and start <= merged[-1][1] + 1:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], end))
+        else:
+            merged.append((start, end))
+    return tuple(merged)
+
+
+def _fragments_of(chosen: dict[tuple[str, str, str], _ChosenEntry]) -> tuple[EvidenceFragment, ...]:
+    fragments: list[EvidenceFragment] = []
+    for entry in chosen.values():
+        for start, end in _merge_spans(entry.spans):
+            fragments.append(
+                EvidenceFragment(address=entry.address, start=start, end=end, text=entry.text[start:end])
+            )
+    return tuple(fragments)
+
+
+def _render_evidence(fragments: Sequence[EvidenceFragment]) -> str:
+    envelope = {
+        "trust": "untrusted_history",
+        "items": [
+            {
+                "citation": {
+                    "scope_id": fragment.address.memory.scope_id,
+                    "memory_ref": fragment.address.memory.artifact.model_dump(mode="json"),
+                    "entry_id": fragment.address.entry_id,
+                    "entry_version_id": fragment.address.entry_version_id,
+                },
+                "content": fragment.text,
+                "start": fragment.start,
+                "end": fragment.end,
+            }
+            for fragment in fragments
+        ],
+    }
+    encoded = json.dumps(envelope, ensure_ascii=False, separators=(",", ":"))
+    return "\n\n".join((TRUST_POLICY, f"{_BEGIN_MARKER}\n{encoded}\n{_END_MARKER}"))
 
 
 def _render(entries: Sequence[_PreparedContextEntry]) -> str:

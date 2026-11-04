@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>文脉 PaperTrail · 科研文献智能助手</title>
+<meta name="description" content="中文提问，跨语言检索英文论文，答案精确到页码。基于 seekdb 向量 + 全文混合检索。" />
+<link rel="icon" href="/assets/logo.svg" />
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+<div class="app">
+  <aside class="rail">
+    <a class="brand" href="#/overview">
+      <img src="/assets/logo.svg" alt="" class="brand-mark" />
+      <span class="brand-text">
+        <strong>文脉</strong>
+        <em>PaperTrail</em>
+      </span>
+    </a>
+
+    <nav class="nav" id="nav">
+      <a href="#/overview" data-view="overview"><span class="nav-idx">01</span>总览</a>
+      <a href="#/search" data-view="search"><span class="nav-idx">02</span>证据检索</a>
+      <a href="#/ask" data-view="ask"><span class="nav-idx">03</span>研究问答</a>
+      <a href="#/compare" data-view="compare"><span class="nav-idx">04</span>跨论文对比</a>
+      <a href="#/review" data-view="review"><span class="nav-idx">05</span>综述素材</a>
+      <a href="#/library" data-view="library"><span class="nav-idx">06</span>文献库</a>
+    </nav>
+
+    <div class="rail-foot">
+      <div class="pulse-row">
+        <span class="pulse" id="db-pulse"></span>
+        <span id="db-label">连接 seekdb…</span>
+      </div>
+      <div class="rail-meta" id="rail-meta">向量 384 维 · IK 分词</div>
+      <div class="rail-note">中文提问 · 英文原文 · 页码可核验</div>
+    </div>
+  </aside>
+
+  <main class="main" id="view">
+    <div class="loading-page"><span></span><span></span><span></span></div>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+<script src="/app.js"></script>
+</body>
+</html>

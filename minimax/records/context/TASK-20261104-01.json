@@ -1,6 +1,6 @@
 {
   "schema": "sdd-context-pack/1",
-  "generated_at": "2026-11-04T08:03:02Z",
+  "generated_at": "2026-11-04T08:04:59Z",
   "task": {
     "task_id": "TASK-20261104-01",
     "title": "订单查询支持金额区间筛选",
@@ -262,29 +262,16 @@
   },
   "code": [
     {
-      "symbol": "ledgerflow.models.Order",
-      "kind": "class",
-      "path": "src/ledgerflow/models.py",
-      "lines": [
-        11,
-        31
-      ],
-      "signature": "class Order",
-      "docstring": "One immutable ledger order row.",
-      "source": "src/ledgerflow/models.py#L11-L31",
-      "module": "order-query"
-    },
-    {
       "symbol": "ledgerflow.service.OrderQueryService.__init__",
       "kind": "function",
       "path": "src/ledgerflow/service.py",
       "lines": [
-        24,
-        25
+        28,
+        29
       ],
       "signature": "def __init__(self, repository: OrderRepository | None=None) -> None",
       "docstring": "",
-      "source": "src/ledgerflow/service.py#L24-L25",
+      "source": "src/ledgerflow/service.py#L28-L29",
       "module": "order-query"
     },
     {
@@ -292,12 +279,25 @@
       "kind": "function",
       "path": "src/ledgerflow/service.py",
       "lines": [
-        27,
-        50
+        31,
+        70
       ],
       "signature": "def search(self, payload: Mapping[str, Any]) -> dict[str, Any]",
       "docstring": "",
-      "source": "src/ledgerflow/service.py#L27-L50",
+      "source": "src/ledgerflow/service.py#L31-L70",
+      "module": "order-query"
+    },
+    {
+      "symbol": "ledgerflow.service._matches_amount",
+      "kind": "function",
+      "path": "src/ledgerflow/service.py",
+      "lines": [
+        81,
+        96
+      ],
+      "signature": "def _matches_amount(order: Order, *, amount_min: Decimal | None, amount_max: Decimal | None, currency: str | None) -> bool",
+      "docstring": "Closed-interval amount filter; both bounds are inclusive (REQ-ORD-014).",
+      "source": "src/ledgerflow/service.py#L81-L96",
       "module": "order-query"
     },
     {
@@ -305,12 +305,12 @@
       "kind": "function",
       "path": "src/ledgerflow/service.py",
       "lines": [
-        94,
-        98
+        143,
+        147
       ],
       "signature": "def default_service() -> OrderQueryService",
       "docstring": "",
-      "source": "src/ledgerflow/service.py#L94-L98",
+      "source": "src/ledgerflow/service.py#L143-L147",
       "module": "order-query"
     },
     {
@@ -318,12 +318,12 @@
       "kind": "function",
       "path": "src/ledgerflow/service.py",
       "lines": [
-        101,
-        121
+        150,
+        170
       ],
       "signature": "def handle_search(payload: Mapping[str, Any], *, service: OrderQueryService | None=None) -> dict[str, Any]",
       "docstring": "Handle one ``POST /orders/search`` call and return status + JSON body.",
-      "source": "src/ledgerflow/service.py#L101-L121",
+      "source": "src/ledgerflow/service.py#L150-L170",
       "module": "order-query"
     }
   ],
@@ -694,13 +694,13 @@
   },
   "state": {
     "task_id": "TASK-20261104-01",
-    "updated_at": "2026-11-04T08:03:01Z",
+    "updated_at": "2026-11-04T08:04:57Z",
     "done": [
-      "已导入规格、代码与测试索引"
+      "已导入规格、代码与测试索引（seekdb）",
+      "已按 REQ-ORD-014 与 ADR-007 实现金额区间筛选（src/ledgerflow/service.py）"
     ],
     "todo": [
-      "实现 REQ-ORD-014 金额区间筛选",
-      "运行目标与回归测试"
+      "如需重放完整验证样例，执行 scripts/run_validation.py --reset"
     ],
     "verified": [
       {
@@ -772,15 +772,17 @@
         "output_tail": ".................                                                        [100%]\n17 passed, 17 deselected in 0.11s\n\n--- stderr ---\no the \"fixture\" caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to \"function\" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))\n"
       }
     ],
-    "changed_files": [],
-    "notes": "",
-    "source": "powercontext:memory/art_433734bab2bc49ed9cb8a12b7910e460"
+    "changed_files": [
+      "src/ledgerflow/service.py"
+    ],
+    "notes": "改动只涉及金额筛选逻辑，未修改 tests/ 下任何断言；目标测试 17 项与回归测试 17 项全部通过。",
+    "source": "powercontext:memory/art_b51823907f194f659ef26c26fe1c0ae2"
   },
   "database": {
     "dsn": "mysql://root@127.0.0.1:2881/sdd_context",
     "counts": {
       "spec_item": 12,
-      "code_symbol": 20,
+      "code_symbol": 22,
       "test_case": 30,
       "ingest_run": 3
     },

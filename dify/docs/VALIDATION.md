@@ -115,6 +115,8 @@ player: verify-2026 coins: 157
 
 导入文件：[`dsl/memory-pawnshop-lite.yml`](../dsl/memory-pawnshop-lite.yml)。
 
+初始条件：记忆当铺服务与 seekdb 已启动（第 2 节），Dify 使用一个新账号（首次对话自动获得 120 枚），lite DSL 已导入并发布；六句按下列顺序发送，余额会依次变为 158、205、173、163。中途失败时按第 8 节重置该 Dify 账号后重来。
+
 步骤：
 
 1. Dify 控制台 → 创建空白应用 → 导入 DSL 文件。
@@ -138,7 +140,7 @@ player: verify-2026 coins: 157
 
 导入文件：[`dsl/memory-pawnshop.yml`](../dsl/memory-pawnshop.yml)。
 
-前置条件：安装 MiniMax 插件 `langgenius/minimax:0.0.23`，在「模型供应商」中配置 API Key（仓库内不含任何真实凭据），模型选择 `MiniMax-M2.5`。
+前置条件：安装 MiniMax 插件 `langgenius/minimax:0.0.23`，在「模型供应商」中配置 API Key（仓库内不含任何真实凭据），模型选择 `MiniMax-M2.5`。本节沿用第 5 节结束时的账号状态（余额 163、存当 1、赎回 1），只验证掌柜人格与数字是否一致。
 
 实际对话见 [`records/dify-e2e-minimax.json`](../records/dify-e2e-minimax.json)，数字与离线版完全一致：
 

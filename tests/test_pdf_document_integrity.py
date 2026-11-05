@@ -93,6 +93,15 @@ def test_invalid_header_is_not_repaired_into_another_document():
         parse(b"not a PDF\n" + raw)
 
 
+@pytest.mark.parametrize("append_revision", [False, True])
+def test_truncated_final_revision_fails_atomically(append_revision):
+    raw = serialize(report())
+    assert raw.rstrip().endswith(b"%%EOF")
+    damaged = raw + b"99 0 obj\n<< /Type /Page" if append_revision else raw.rstrip()[:-1]
+    with pytest.raises(ValueError):
+        parse(damaged)
+
+
 def test_parser_accepts_the_document_as_a_keyword_argument():
     document = PDFDocumentInput(document_id="keyword", content=serialize(report()))
     assert parse_pdf_document(value=document) == parse_pdf_document(document)
@@ -106,6 +115,19 @@ def test_transformed_kerned_word_is_not_split_into_different_terms():
     page[NameObject("/Contents")] = writer._add_object(stream)
     pages = parse(serialize(writer))
     assert re.findall(r"[a-z]+|\d+", pages[0].text.lower()) == ["income"]
+
+
+def test_close_table_columns_keep_separate_labels():
+    writer = report()
+    stream = DecodedStreamObject()
+    stream.set_data(
+        b"BT /F1 12 Tf 72 700 Td (Net) Tj ET "
+        b"BT /F1 12 Tf 87 690 Td (Operating) Tj ET "
+        b"BT /F1 12 Tf 139 700 Td (Income) Tj ET"
+    )
+    writer.pages[0][NameObject("/Contents")] = writer._add_object(stream)
+    text = parse(serialize(writer))[0].text
+    assert re.findall(r"[a-z]+", text.lower()) == ["net", "operating", "income"]
 
 
 @pytest.mark.parametrize(

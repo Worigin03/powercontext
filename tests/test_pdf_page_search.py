@@ -284,6 +284,39 @@ async def test_adjacent_continuation_is_retained_after_restart(tmp_path):
 
 
 @pytest.mark.asyncio
+async def test_cash_flow_subsection_is_recalled_without_query_terms():
+    definitions = registry()
+    original = PDFPageInput(
+        document_id="ACME_2022_10K",
+        document_sha256="a" * 64,
+        page_number=30,
+        text="Consolidated Statements of Cash Flows\n2022 2021\nOperations 34 20\nDepreciation 6 4",
+    )
+    following = original.model_copy(
+        update={
+            "page_number": 31,
+            "text": "Investing Activities\nPurchases 25 19\nProceeds 12 7",
+        }
+    )
+    references = [
+        original.model_copy(
+            update={
+                "page_number": number,
+                "text": f"Discussion {number}\nCash flow statement and cash flows from operating activities.",
+            }
+        )
+        for number in (1, 3, 5)
+    ]
+    async with open_builtin_runtime(BuiltinConfig(), candidate_pipeline=EvidencePipeline()) as runtime:
+        memory = await seed(runtime, definitions, [original, following, *references])
+        citations = await search_pdf_pages(memory, "Show Acme's cash flow statement", limit=2)
+        assert await source_ids(memory, citations) == {
+            (await definitions.resolve(original)).name,
+            (await definitions.resolve(following)).name,
+        }
+
+
+@pytest.mark.asyncio
 async def test_fragmented_navigation_header_does_not_hide_financial_statements():
     definitions = registry()
     pages = [

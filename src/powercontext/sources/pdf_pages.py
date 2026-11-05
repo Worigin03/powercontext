@@ -148,6 +148,10 @@ def parse_pdf_document(value: PDFDocumentInput) -> tuple[PDFPageInput, ...]:
     content = value.content
     if not content:
         raise ValueError("pdf content must not be empty")  # noqa: TRY003
+    # pypdf's strict reader can recover a partial marker or fall back to an
+    # older revision when an incremental update is truncated after its EOF.
+    if not content.rstrip(b"\x00\t\n\f\r ").endswith((b"\n%%EOF", b"\r%%EOF")):
+        raise ValueError("pdf content must end with a complete EOF marker")  # noqa: TRY003
     document_sha256 = hashlib.sha256(content).hexdigest()
     try:
         # Lenient recovery can silently drop a broken /Kids entry and report a
@@ -215,7 +219,37 @@ def _extract_page_text(page: PageObject, active_forms: frozenset[int] = frozense
         # Preserve the original letter/number multiset before accepting layout.
         if plain_chars != _text_characters(layout):
             return plain
+        layout = _separate_column_labels(plain, layout)
     return "\n".join(re.sub(r"[ \t]+", " ", line).strip() for line in layout.splitlines()).strip()
+
+
+def _separate_column_labels(plain: str, layout: str) -> str:
+    """Restore intact labels lost to layout's horizontal column grouping."""
+    plain_terms = Counter(_TOKEN_PATTERN.findall(plain.lower()))
+    missing = plain_terms - Counter(_TOKEN_PATTERN.findall(layout.lower()))
+
+    def separate(match: re.Match[str]) -> str:
+        original = match.group()
+        word = original.lower()
+        if plain_terms[word] or len(word) > 128:
+            return original
+        boundaries: dict[int, tuple[int, ...]] = {0: ()}
+        for end in range(2, len(word) + 1):
+            for start, cuts in boundaries.items():
+                if end - start >= 2 and missing[word[start:end]]:
+                    boundaries[end] = (*cuts, end)
+                    break
+        cuts = boundaries.get(len(word), ())
+        if len(cuts) < 3:
+            return original
+        parts = [original[start:end] for start, end in zip((0, *cuts[:-1]), cuts, strict=True)]
+        used = Counter(part.lower() for part in parts)
+        if used - missing:
+            return original
+        missing.subtract(used)
+        return " ".join(parts)
+
+    return re.sub(r"[a-zA-Z]{12,}", separate, layout)
 
 
 def _restore_form_text(page: PageObject, layout: str, missing: Counter[str], active: frozenset[int]) -> str:
@@ -259,7 +293,7 @@ async def search_pdf_pages(
 ) -> tuple[MemoryCitation, ...]:
     """Return up to ``limit`` distinct page citations for one natural-language question."""
 
-    from powercontext.builtin.runtime import GetMemoryEntryRequest, SearchMemoryRequest
+    from powercontext.builtin.runtime import SearchMemoryRequest
 
     if not isinstance(limit, int) or isinstance(limit, bool) or limit < 1 or not question.strip():
         return ()
@@ -277,26 +311,23 @@ async def search_pdf_pages(
         return ()
 
     native_ranks: dict[tuple[str, str], float] = {}
-    recall_limit = max(limit, min(512, max(64, limit * 16)))
-    for query in _query_variants(question)[:8]:
-        page = await memory.search(SearchMemoryRequest(query=query, mode="fts", limit=recall_limit))
+    query = " ".join(dict.fromkeys(_word_terms(_question_text(question))))
+    if query:
+        page = await memory.search(SearchMemoryRequest(query=query, mode="fts", limit=min(64, len(candidates))))
         for rank, hit in enumerate(page.hits, 1):
             key = (hit.entry_id, hit.entry_version_id)
-            native_ranks[key] = native_ranks.get(key, 0.0) + 1 / (60 + rank)
+            native_ranks[key] = 1 / (60 + rank)
 
     ranked = _rank_pages(tuple(candidates), question, native_ranks)
-    ordered = _with_continuations(ranked, limit)
+    ordered = _with_continuations(ranked, tuple(candidates), limit)
 
     citations: list[MemoryCitation] = []
     seen_pages: set[str] = set()
     for hit in ordered:
-        citation = hit.citation
-        entry = (await memory.get(GetMemoryEntryRequest(citation=citation))).entry
-        identity = _page_identity(entry.sources)
-        if identity is None or identity in seen_pages:
+        if hit.identity in seen_pages:
             continue
-        seen_pages.add(identity)
-        citations.append(citation)
+        seen_pages.add(hit.identity)
+        citations.append(hit.citation)
         if len(citations) >= limit:
             break
     return tuple(citations)
@@ -320,23 +351,43 @@ def _heading_lines(body: str) -> list[str]:
     return [line.strip() for line in body.splitlines() if line.strip()]
 
 
-def _continuation_neighbors(hits: tuple[_PDFCandidate, ...]) -> dict[str, _PDFCandidate]:
+def _continuation_neighbors(
+    ranked: tuple[_PDFCandidate, ...], candidates: tuple[_PDFCandidate, ...]
+) -> dict[str, _PDFCandidate]:
     """Keep a physical continuation anchored to the same persisted PDF revision."""
     pages = {}
-    for hit in hits:
+    for hit in candidates:
         parts = hit.identity.rsplit(":", 2)
         if len(parts) == 3 and re.fullmatch(r"[0-9a-f]{64}", parts[1]) and parts[2].isdigit():
             pages[(parts[0], parts[1], int(parts[2]))] = hit
     result = {}
+    ranked_ids = {hit.identity for hit in ranked}
     for (document, digest, number), hit in pages.items():
+        if hit.identity not in ranked_ids:
+            continue
         following = pages.get((document, digest, number + 1))
-        if following is not None and _starts_continuation(following.body):
+        if following is not None and (
+            _starts_continuation(following.body)
+            or (
+                _statement_role(hit.body) == "cash"
+                and any(
+                    re.fullmatch(
+                        r"(?:(?:cash flows? from|net cash (?:used in|provided by))\s+)?"
+                        r"(?:investing|financing|operating) activities[:.]?",
+                        line.casefold(),
+                    )
+                    for line in _heading_lines(following.body)[:3]
+                )
+            )
+        ):
             result[hit.identity] = following
     return result
 
 
-def _with_continuations(hits: tuple[_PDFCandidate, ...], limit: int) -> tuple[_PDFCandidate, ...]:
-    neighbors = _continuation_neighbors(hits)
+def _with_continuations(
+    hits: tuple[_PDFCandidate, ...], candidates: tuple[_PDFCandidate, ...], limit: int
+) -> tuple[_PDFCandidate, ...]:
+    neighbors = _continuation_neighbors(hits, candidates)
     ordered = []
     continuations = 0
     for hit in hits:
@@ -359,21 +410,6 @@ def _expansions(text: str) -> tuple[str, ...]:
     # General financial vocabulary only; never document IDs, benchmark queries,
     # evidence pages, annotations, answers, or report-specific numbers.
     return tuple(phrase for pattern, phrases in _FINANCIAL_EXPANSIONS if re.search(pattern, text) for phrase in phrases)
-
-
-def _query_variants(question: str) -> tuple[str, ...]:
-    """Short queries avoid rejecting evidence that lacks the question's instruction words."""
-    text = _question_text(question)
-    terms = tuple(dict.fromkeys(token for token in _TOKEN_PATTERN.findall(text) if token not in _STOPWORDS))
-    variants = [question.strip()]
-    if terms:
-        variants.append(" ".join(terms))
-    variants.extend(_expansions(text))
-    words = tuple(term for term in terms if not term.isdigit())
-    variants.extend(" ".join(words[start : start + 3]) for start in range(0, len(words), 3))
-    variants.extend(words)
-    variants.extend(term for term in terms if term.isdigit())
-    return tuple(dict.fromkeys(variant for variant in variants if variant))[:24]
 
 
 def _word_terms(text: str) -> tuple[str, ...]:

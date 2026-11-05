@@ -150,6 +150,16 @@ player: verify-2026 coins: 157
 
 MiniMax-M2.5 会把推理过程写进 `<think>` 块，工作流中「去掉思考块」Code 节点会在流式输出前剥掉，客人只看到掌柜的话。主 DSL 也可以换成任意聊天模型，只需保证 HTTP 节点返回的 JSON 不变。
 
+### 6.1 已发布 WebApp 的实测界面与 API 记录
+
+打开 WebApp（`http://127.0.0.1:8080/chat/<site_code>`），点「我还有多少记忆币？」再点「我想当掉一段记忆：去年冬天奶奶在厨房煮姜汤，窗外下着雪。」，实际界面如下：
+
+![记忆当铺 WebApp 实测](../records/webapp.png)
+
+截图由无头 Chrome 对真实页面拍摄：第一轮余额 120；第二轮掌柜收下记忆，估价 38，余额 158。未做合成或手工修改。
+
+同一发布版本还通过 Web API 跑了一段连续会话（请求用户 `verify-webapp`），记录在 [`records/dify-webapp-e2e.json`](../records/dify-webapp-e2e.json)：典当「夏天傍晚的操场…」估价 43、余额 163 → 逛黑市 → 查账（余额 163、存当 1、赎回 0）。WebApp 地址使用的是「发布 → 访问 API」里的 `site code`，不是应用 ID。
+
 ## 7. 样例五：柜台服务不可用时的兜底
 
 目的：验证「服务没启动 / 地址填错」时应用不崩，而是给出可执行的提示。
@@ -216,5 +226,7 @@ python -m app.main
 | [`records/seekdb-evidence.log`](../records/seekdb-evidence.log) | seekdb 版本、建表语句、向量/全文检索、钱包账本 |
 | [`records/dify-e2e-lite.json`](../records/dify-e2e-lite.json) | 离线版 DSL 在 Dify 中的六轮真实回答 |
 | [`records/dify-e2e-minimax.json`](../records/dify-e2e-minimax.json) | 主 DSL + MiniMax 的真实回答 |
+| [`records/dify-webapp-e2e.json`](../records/dify-webapp-e2e.json) | 已发布 WebApp 的连续会话（Web API） |
+| [`records/webapp.png`](../records/webapp.png) | 已发布 WebApp 的实测截图（余额 120 → 典当 38 → 158） |
 | [`records/dify-e2e-fallback-lite.json`](../records/dify-e2e-fallback-lite.json) | 服务停机时离线版的兜底回答 |
 | [`records/dify-e2e-fallback.json`](../records/dify-e2e-fallback.json) | 服务停机时主 DSL 的兜底回答 |

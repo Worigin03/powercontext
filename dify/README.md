@@ -189,6 +189,8 @@ python -m scripts.verify_seekdb --player verify-2026 --query "关东煮"
 - [`records/seekdb-evidence.log`](records/seekdb-evidence.log)
 - [`records/dify-e2e-lite.json`](records/dify-e2e-lite.json)：离线版六轮对话
 - [`records/dify-e2e-minimax.json`](records/dify-e2e-minimax.json)：完整版两轮对话
+- [`records/dify-webapp-e2e.json`](records/dify-webapp-e2e.json)：已发布 WebApp 的连续会话
+- [`records/webapp.png`](records/webapp.png)：已发布 WebApp 的实测截图
 - [`records/dify-e2e-fallback-lite.json`](records/dify-e2e-fallback-lite.json)、[`records/dify-e2e-fallback.json`](records/dify-e2e-fallback.json)：服务停机时的兜底回答
 
 重置某个玩家（钱包、账本、当票一起删除）：

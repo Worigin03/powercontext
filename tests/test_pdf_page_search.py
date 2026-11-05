@@ -431,3 +431,65 @@ async def test_statement_with_individual_numeric_cell_lines_is_retrieved():
         memory = await seed(runtime, definitions, pages)
         citations = await search_pdf_pages(memory, "What was Acme's FY2022 EBITDA?", limit=1)
         assert await source_ids(memory, citations) == {(await definitions.resolve(statement)).name}
+
+
+@pytest.mark.asyncio
+async def test_comparative_year_evidence_is_not_excluded_by_report_date():
+    definitions = registry()
+    pages = [
+        PDFPageInput(
+            document_id="ACME_2021_10K",
+            document_sha256="a" * 64,
+            page_number=i,
+            text=f"Pension costs for 2021. Retirement costs and pension expense. Plan discussion {i}.",
+        )
+        for i in range(1, 26)
+    ]
+    comparative = PDFPageInput(
+        document_id="ACME_2022_10K",
+        document_sha256="b" * 64,
+        page_number=30,
+        text="Retirement benefits\nPension costs for 2022, 2021 and 2020 were 150, 120 and 110, respectively.",
+    )
+    pages.append(comparative)
+    async with open_builtin_runtime(BuiltinConfig(), candidate_pipeline=EvidencePipeline()) as runtime:
+        memory = await seed(runtime, definitions, pages)
+        citations = await search_pdf_pages(memory, "What were Acme's pension costs in FY2021?", limit=20)
+        assert (await definitions.resolve(comparative)).name in await source_ids(memory, citations)
+
+
+@pytest.mark.asyncio
+async def test_statements_remain_available_across_same_issuer_reports():
+    definitions = registry()
+    pages = []
+    for year, digest in ((2019, "a"), (2020, "b"), (2021, "c"), (2022, "d")):
+        pages.extend(
+            PDFPageInput(
+                document_id=f"ACME_{year}_10K",
+                document_sha256=digest * 64,
+                page_number=i,
+                text="Operating cash flows and revenue growth. Net income, depreciation and amortization. "
+                f"Discussion of 2019 EBITDA and capital expenditures. Note {i}.",
+            )
+            for i in range(1, 8)
+        )
+        pages.extend([
+            PDFPageInput(
+                document_id=f"ACME_{year}_10K",
+                document_sha256=digest * 64,
+                page_number=40,
+                text=f"Consolidated Statements of Income\n{year} {year - 1}\nRevenue 100 90\nOperating income 20 18",
+            ),
+            PDFPageInput(
+                document_id=f"ACME_{year}_10K",
+                document_sha256=digest * 64,
+                page_number=42,
+                text=f"Consolidated Statements of Cash Flows\n{year} {year - 1}\nNet income 15 14\n"
+                "Depreciation and amortization 5 4\nCapital expenditures 10 9",
+            ),
+        ])
+    statements = {(await definitions.resolve(page)).name for page in pages if page.page_number in {40, 42}}
+    async with open_builtin_runtime(BuiltinConfig(), candidate_pipeline=EvidencePipeline()) as runtime:
+        memory = await seed(runtime, definitions, pages)
+        citations = await search_pdf_pages(memory, "What was Acme's EBITDA less capex in FY2019?", limit=20)
+        assert statements <= await source_ids(memory, citations)

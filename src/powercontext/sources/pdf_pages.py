@@ -28,8 +28,8 @@ from typing import TYPE_CHECKING, Annotated
 from urllib.parse import quote
 
 from pydantic import BaseModel, Field, field_validator
-from pypdf import PdfReader
-from pypdf.generic import ArrayObject, DictionaryObject, NullObject, StreamObject
+from pypdf import PageObject, PdfReader
+from pypdf.generic import ArrayObject, DictionaryObject, NameObject, NullObject, StreamObject
 
 from powercontext.limits import MAX_SOURCE_ID_LENGTH
 from powercontext.sources import TEXT_EVIDENCE_PROJECTION_KEY, AdapterSourceDefinition, TextEvidence
@@ -141,7 +141,7 @@ def pdf_page_source_id(document_id: str, document_sha256: str, page_number: int,
     return f"pdf:{digest}"
 
 
-def parse_pdf_document(value: PDFDocumentInput, /) -> tuple[PDFPageInput, ...]:
+def parse_pdf_document(value: PDFDocumentInput) -> tuple[PDFPageInput, ...]:
     """Extract every physical page in order, or fail without partial output."""
 
     document_id = _require_document_id(value.document_id)
@@ -189,8 +189,61 @@ def _extract_complete_document(reader: PdfReader) -> tuple[str, ...]:
                 # must not be ignored by pypdf's ContentStream concatenation.
                 if not isinstance(resolved, (StreamObject, NullObject)):
                     raise TypeError("PDF page content is not a stream")  # noqa: TRY003
-        texts.append(page.extract_text() or "")
+        texts.append(_extract_page_text(page))
     return tuple(texts)
+
+
+def _text_characters(text: str) -> Counter[str]:
+    return Counter(char for char in unicodedata.normalize("NFKC", text).casefold() if char.isalnum())
+
+
+def _extract_page_text(page: PageObject, active_forms: frozenset[int] = frozenset()) -> str:
+    """Reconstruct word boundaries without dropping text in forms or rotations."""
+    plain = page.extract_text() or ""
+    try:
+        layout = page.extract_text(extraction_mode="layout", layout_mode_strip_rotated=False) or ""
+    except Exception:  # Layout support can be narrower than plain extraction.
+        return plain
+    if plain.strip():
+        plain_chars = _text_characters(plain)
+        if not plain_chars:
+            return plain
+        try:
+            layout = _restore_form_text(page, layout, plain_chars - _text_characters(layout), active_forms)
+        except Exception:  # A layout-only limitation must not discard plain text.
+            return plain
+        # Preserve the original letter/number multiset before accepting layout.
+        if plain_chars != _text_characters(layout):
+            return plain
+    return "\n".join(re.sub(r"[ \t]+", " ", line).strip() for line in layout.splitlines()).strip()
+
+
+def _restore_form_text(page: PageObject, layout: str, missing: Counter[str], active: frozenset[int]) -> str:
+    """Recover text from actually drawn forms omitted by pypdf layout mode."""
+    if not missing:
+        return layout
+    resources = page.get("/Resources", DictionaryObject()).get_object()
+    objects = resources.get("/XObject", DictionaryObject()).get_object()
+    contents = page.get_contents()
+    if contents is None:
+        return layout
+    for operands, operator in contents.operations:
+        if operator != b"Do":
+            continue
+        form = objects[operands[0]].get_object()
+        if form.get("/Subtype") != "/Form" or id(form) in active:
+            continue
+        # Text extraction uses content coordinates and resources, not page size.
+        view = PageObject.create_blank_page(pdf=page.pdf, width=1, height=1)
+        del view["/Parent"]  # Detached view: use its explicit resources only.
+        view[NameObject("/Contents")] = form
+        view[NameObject("/Resources")] = form.get("/Resources", resources)
+        text = _extract_page_text(view, active | {id(form)})
+        characters = _text_characters(text)
+        if characters and not characters - missing:
+            layout += "\n" + text
+            missing -= characters
+    return layout
 
 
 @dataclass(frozen=True)
@@ -434,11 +487,38 @@ def _cover_statement_roles(
     selected = []
     for depth in range(2):
         for role in roles:
-            statements = [row for row in scored if page_roles[row[2]] == role]
+            statements = [row for row in scored if page_roles[row[1]] == role]
             if len(statements) > depth:
                 selected.append(statements[depth])
-    selected_indices = {row[2] for row in selected}
-    return tuple(row[3] for row in selected + [row for row in scored if row[2] not in selected_indices])
+    selected_indices = {row[1] for row in selected}
+    return tuple(row[2] for row in selected + [row for row in scored if row[1] not in selected_indices])
+
+
+def _report_identity(page: _PDFCandidate) -> str:
+    parts = page.identity.rsplit(":", 2)
+    if len(parts) == 3 and re.fullmatch(r"[0-9a-f]{64}", parts[1]) and parts[2].isdigit():
+        return f"{parts[0]}:{parts[1]}"
+    return page.document_id
+
+
+def _diversify_reports(scored, page_roles: tuple[str | None, ...], roles: tuple[str, ...]) -> tuple[_PDFCandidate, ...]:
+    """Retain comparative evidence across reports of the same issuer.
+
+    The fiscal period in a question need not be the report's publication year.
+    Each report contributes complementary statements or its strongest passages
+    before the remaining global ranking fills the page budget.
+    """
+    reports = {}
+    for row in scored:
+        reports.setdefault(_report_identity(row[2]), []).append(row)
+    if len(reports) <= 1:
+        return _cover_statement_roles(scored, page_roles, roles)
+    rankings = tuple(_cover_statement_roles(rows, page_roles, roles) for rows in reports.values())
+    selected = tuple(
+        ranking[depth] for depth in range(max(2, len(roles))) for ranking in rankings if depth < len(ranking)
+    )
+    selected_ids = {page.identity for page in selected}
+    return selected + tuple(row[2] for row in scored if row[2].identity not in selected_ids)
 
 
 def _rank_pages(
@@ -462,11 +542,9 @@ def _rank_pages(
     years = set(re.findall(r"\b(?:19|20)\d{2}\b", question_text))
     roles = _question_roles(question_text)
     page_roles = tuple(_statement_role(hit.body) for hit in hits)
-    # A historical outlook mentioning the requested year is not that year's
-    # report. Prefer a matching report when one is present; retain other years
-    # as fallbacks rather than treating body occurrences as document identity.
+    # Report dates provide a soft contextual signal. A later report can contain
+    # the exact historical comparative evidence requested by the question.
     report_matches = tuple(bool(years.intersection(re.findall(r"(?:19|20)\d{2}", hit.document_id))) for hit in hits)
-    prefer_report_year = len(years) == 1 and any(report_matches)
     geographic = bool(re.search(r"\b(?:geograph\w*|regions?|countries|operates)\b", question_text))
     scored = []
     for index, (hit, words, count) in enumerate(zip(hits, terms, counts, strict=True)):
@@ -491,12 +569,11 @@ def _rank_pages(
             score *= 1.15
         key = (hit.citation.entry_id, hit.citation.entry_version_id)
         score += 0.5 * native_ranks.get(key, 0.0)
-        priority = int(prefer_report_year and not report_matches[index])
-        scored.append((priority, score, index, hit))
-    scored.sort(key=lambda item: (item[0], -item[1], item[3].identity))
+        scored.append((score, index, hit))
+    scored.sort(key=lambda item: (-item[0], item[2].identity))
     # A multi-part financial question may require different statements. Preserve
     # the best evidence for each requested role before filling with global ranks.
-    return _cover_statement_roles(scored, page_roles, roles)
+    return _diversify_reports(scored, page_roles, roles)
 
 
 def _bm25_score(

@@ -93,6 +93,48 @@ def test_invalid_header_is_not_repaired_into_another_document():
         parse(b"not a PDF\n" + raw)
 
 
+def test_parser_accepts_the_document_as_a_keyword_argument():
+    document = PDFDocumentInput(document_id="keyword", content=serialize(report()))
+    assert parse_pdf_document(value=document) == parse_pdf_document(document)
+
+
+def test_transformed_kerned_word_is_not_split_into_different_terms():
+    writer = report()
+    page = writer.pages[0]
+    stream = DecodedStreamObject()
+    stream.set_data(b"q 1 0 0 -1 0 800 cm q 1 0 0 -1 72 100 cm BT /F1 12 Tf [(In) -13 (come)] TJ ET Q Q")
+    page[NameObject("/Contents")] = writer._add_object(stream)
+    pages = parse(serialize(writer))
+    assert re.findall(r"[a-z]+|\d+", pages[0].text.lower()) == ["income"]
+
+
+@pytest.mark.parametrize(
+    ("program", "terms"),
+    [
+        (b"BT /F1 12 Tf 72 600 Td (Form evidence 123) Tj ET", ["form", "evidence", "123"]),
+        (b"q 1 0 0 -1 0 800 cm q 1 0 0 -1 72 100 cm BT /F1 12 Tf [(Re) -13 (venue)] TJ ET Q Q", ["revenue"]),
+    ],
+)
+def test_layout_does_not_omit_text_in_a_form_xobject(program, terms):
+    writer = report()
+    page = writer.pages[0]
+    form = DecodedStreamObject()
+    form.set_data(program)
+    form.update({
+        NameObject("/Type"): NameObject("/XObject"),
+        NameObject("/Subtype"): NameObject("/Form"),
+        NameObject("/BBox"): ArrayObject([NumberObject(0), NumberObject(0), NumberObject(600), NumberObject(800)]),
+        NameObject("/Resources"): page["/Resources"],
+    })
+    resources = page["/Resources"]
+    resources[NameObject("/XObject")] = DictionaryObject({NameObject("/Evidence"): writer._add_object(form)})
+    stream = DecodedStreamObject()
+    stream.set_data(b"BT /F1 12 Tf 72 700 Td (Body evidence 200) Tj ET /Evidence Do")
+    page[NameObject("/Contents")] = writer._add_object(stream)
+    text = parse(serialize(writer))[0].text
+    assert re.findall(r"[a-z]+|\d+", text.lower()) == ["body", "evidence", "200", *terms]
+
+
 @pytest.mark.parametrize("encrypted", [False, True])
 def test_valid_mixed_text_and_empty_pages_survive_integrity_checks(encrypted):
     writer = report()

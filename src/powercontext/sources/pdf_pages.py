@@ -23,6 +23,7 @@ import re
 import unicodedata
 from collections import Counter
 from collections.abc import Mapping
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Annotated
 from urllib.parse import quote
 
@@ -35,7 +36,7 @@ from powercontext.sources import TEXT_EVIDENCE_PROJECTION_KEY, AdapterSourceDefi
 from powercontext.sources.models import Source, SourceMaterialization
 
 if TYPE_CHECKING:
-    from powercontext.builtin.artifacts.memory.models import MemoryCitation, MemoryHit
+    from powercontext.builtin.artifacts.memory.models import MemoryCitation
     from powercontext.builtin.runtime.application import ScopedMemoryApplication
     from powercontext.sources import SourceRef
 
@@ -56,6 +57,17 @@ _STOPWORDS = frozenset(
     """.split()  # noqa: SIM905 - readable term list
 )
 _FINANCIAL_EXPANSIONS = (
+    (r"\b(?:quick|acid test)\s+ratio\b", ("cash equivalents marketable securities receivables", "current liabilities")),
+    (r"\b(?:current ratio|working capital)\b", ("current assets", "current liabilities")),
+    (r"\b(?:r&d|research and development)\b", ("research development",)),
+    (r"\b(?:sg&a|selling general|general and administrative)\b", ("selling general administrative expenses",)),
+    (r"\b(?:pp&e|ppe|fixed assets?)\b", ("property plant equipment",)),
+    (r"\b(?:roa|return on assets?)\b", ("net income", "total assets")),
+    (r"\b(?:roe|return on equity)\b", ("net income", "shareholders equity", "stockholders equity")),
+    (r"\b(?:inventory turnover|days inventory)\b", ("cost sales", "cost goods sold", "inventories")),
+    (r"\b(?:dso|days sales outstanding)\b", ("net sales revenue", "accounts receivable")),
+    (r"\b(?:tax|taxes|taxation)\b", ("income taxes", "effective tax rate")),
+    (r"\b(?:dividends?|payout)\b", ("dividends paid", "net income")),
     (r"\bebitda\b", ("operating income", "operating profit", "depreciation amortization", "cash flows")),
     (r"\b(?:capex|capital expenditures?)\b", ("capital expenditures", "property plant equipment")),
     (r"\b(?:legal|litigation|lawsuits?|battles?)\b", ("legal proceedings", "litigation contingencies")),
@@ -181,46 +193,51 @@ def _extract_complete_document(reader: PdfReader) -> tuple[str, ...]:
     return tuple(texts)
 
 
+@dataclass(frozen=True)
+class _PDFCandidate:
+    citation: MemoryCitation
+    identity: str
+    document_id: str
+    body: str
+
+
 async def search_pdf_pages(
     memory: ScopedMemoryApplication, question: str, limit: int = DEFAULT_PDF_SEARCH_LIMIT
 ) -> tuple[MemoryCitation, ...]:
     """Return up to ``limit`` distinct page citations for one natural-language question."""
 
-    from powercontext.builtin.artifacts.memory.models import MemoryCitation
     from powercontext.builtin.runtime import GetMemoryEntryRequest, SearchMemoryRequest
 
-    if not isinstance(limit, int) or isinstance(limit, bool) or limit < 1:
-        return ()
-    if not question.strip():
+    if not isinstance(limit, int) or isinstance(limit, bool) or limit < 1 or not question.strip():
         return ()
 
-    # A broad question, a fiscal year and a short financial phrase have different
-    # admission/FTS rankings. Pool them before applying the caller's page limit.
-    candidates: dict[tuple[str, str, str], MemoryHit] = {}
+    # The native lexical admission gate cannot match an acronym or a derived
+    # ratio to its unstated components. Read the active, scoped Memory snapshot
+    # as well, so its genuine page records remain eligible for offline ranking.
+    candidates = []
+    for record in (await memory.list()).entries:
+        identity = _page_identity(record.entry.sources)
+        document_id, separator, body = record.entry.text.partition("\n")
+        if identity is not None and separator and body.strip():
+            candidates.append(_PDFCandidate(record.citation, identity, document_id, body))
+    if not candidates:
+        return ()
+
+    native_ranks: dict[tuple[str, str], float] = {}
     recall_limit = max(limit, min(512, max(64, limit * 16)))
-    for query in _query_variants(question):
+    for query in _query_variants(question)[:8]:
         page = await memory.search(SearchMemoryRequest(query=query, mode="fts", limit=recall_limit))
-        for hit in page.hits:
-            key = (hit.memory_ref.artifact_id, hit.entry_id, hit.entry_version_id)
-            candidates[key] = hit
+        for rank, hit in enumerate(page.hits, 1):
+            key = (hit.entry_id, hit.entry_version_id)
+            native_ranks[key] = native_ranks.get(key, 0.0) + 1 / (60 + rank)
 
-    ranked = _rank_page_hits(tuple(candidates.values()), question)
-    neighbors = await _continuation_neighbors(memory, ranked)
-    ordered = []
-    continuations = 0
-    for hit in ranked:
-        ordered.append(hit)
-        neighbor = neighbors.get((hit.entry_id, hit.entry_version_id))
-        if neighbor is not None and continuations < max(1, limit // 5):
-            ordered.append(neighbor)
-            continuations += 1
+    ranked = _rank_pages(tuple(candidates), question, native_ranks)
+    ordered = _with_continuations(ranked, limit)
 
     citations: list[MemoryCitation] = []
     seen_pages: set[str] = set()
     for hit in ordered:
-        citation = MemoryCitation(
-            memory_ref=hit.memory_ref, entry_id=hit.entry_id, entry_version_id=hit.entry_version_id
-        )
+        citation = hit.citation
         entry = (await memory.get(GetMemoryEntryRequest(citation=citation))).entry
         identity = _page_identity(entry.sources)
         if identity is None or identity in seen_pages:
@@ -250,32 +267,32 @@ def _heading_lines(body: str) -> list[str]:
     return [line.strip() for line in body.splitlines() if line.strip()]
 
 
-async def _continuation_neighbors(
-    memory: ScopedMemoryApplication, hits: tuple[MemoryHit, ...]
-) -> dict[tuple[str, str], MemoryHit]:
-    """Use persisted page identities to include search-recalled continuation pages.
-
-    At most one public list read supplies identity metadata for the bounded search
-    pool. It never supplies synthetic citations or substitutes pre-parsed assets.
-    """
-    if not any(_starts_continuation(hit.text.partition("\n")[2]) for hit in hits):
-        return {}
-    candidates = {(hit.entry_id, hit.entry_version_id): hit for hit in hits}
+def _continuation_neighbors(hits: tuple[_PDFCandidate, ...]) -> dict[str, _PDFCandidate]:
+    """Keep a physical continuation anchored to the same persisted PDF revision."""
     pages = {}
-    for record in (await memory.list()).entries:
-        key = (record.entry.entry_id, record.entry.entry_version_id)
-        identity = _page_identity(record.entry.sources)
-        if key not in candidates or identity is None:
-            continue
-        parts = identity.rsplit(":", 2)
+    for hit in hits:
+        parts = hit.identity.rsplit(":", 2)
         if len(parts) == 3 and re.fullmatch(r"[0-9a-f]{64}", parts[1]) and parts[2].isdigit():
-            pages[(parts[0], parts[1], int(parts[2]))] = candidates[key]
+            pages[(parts[0], parts[1], int(parts[2]))] = hit
     result = {}
     for (document, digest, number), hit in pages.items():
         following = pages.get((document, digest, number + 1))
-        if following is not None and _starts_continuation(following.text.partition("\n")[2]):
-            result[(hit.entry_id, hit.entry_version_id)] = following
+        if following is not None and _starts_continuation(following.body):
+            result[hit.identity] = following
     return result
+
+
+def _with_continuations(hits: tuple[_PDFCandidate, ...], limit: int) -> tuple[_PDFCandidate, ...]:
+    neighbors = _continuation_neighbors(hits)
+    ordered = []
+    continuations = 0
+    for hit in hits:
+        ordered.append(hit)
+        neighbor = neighbors.get(hit.identity)
+        if neighbor is not None and continuations < max(1, limit // 5):
+            ordered.append(neighbor)
+            continuations += 1
+    return tuple(ordered)
 
 
 def _question_text(question: str) -> str:
@@ -313,7 +330,9 @@ def _word_terms(text: str) -> tuple[str, ...]:
     for word in words:
         if word in _STOPWORDS:
             continue
-        if word in {"operate", "operates"}:
+        if word in {"taxes", "losses", "businesses"}:
+            word = word[:-2]
+        elif word in {"operate", "operates"}:
             word = "operate"
         elif word.startswith("geograph"):
             word = "geograph"
@@ -343,29 +362,37 @@ def _document_match(document_id: str, question: str) -> bool:
 
 def _statement_role(body: str) -> str | None:
     """Recognize actual statement headings, rather than an audit/index reference."""
-    lines = body.splitlines()
-    if sum(len(re.findall(r"\d[\d,]*(?:\.\d+)?", line)) >= 2 for line in lines) < 3:
+    # PDF text order may emit every numeric cell on a separate line. Counting
+    # multi-number lines would reject an otherwise complete financial table.
+    if len(re.findall(r"\d[\d,]*(?:\.\d+)?", body)) < 6:
         return None
     headings = _heading_lines(body)
-    for line in headings[:3]:
-        title = " ".join(line.casefold().split())
-        if len(title) > 120:
+    titles = (
+        " ".join(" ".join(headings[start:end]).casefold().split())
+        for start in range(min(3, len(headings)))
+        for end in range(start + 1, min(len(headings), start + 3) + 1)
+    )
+    for title in titles:
+        if len(title) > 160:
             continue
-        if re.match(
-            r"^(?:(?:consolidated|combined|condensed|unaudited)\s+)*"
-            r"statements?\s+of\s+(?:consolidated\s+)?",
+        match = re.fullmatch(
+            r"(?:(?:consolidated|combined|condensed|unaudited)\s+)*"
+            r"(?:statements?\s+of\s+(?:consolidated\s+)?"
+            r"(?P<kind>cash flows?|comprehensive (?:income|loss)|income|operations|earnings|financial position)"
+            r"(?:\s+and\s+(?:comprehensive (?:income|loss)|retained earnings))?|balance sheets?)"
+            r"(?:\s*\([^)]*\))*",
             title,
-        ):
-            if "cash flow" in title:
-                return "cash"
-            if re.search(r"of\s+(?:consolidated\s+)?comprehensive", title):
-                return "comprehensive"
-            if any(term in title for term in ("income", "operations", "earnings")):
-                return "income"
-            if "financial position" in title:
-                return "balance"
-        if re.match(r"^(?:consolidated\s+)?balance sheets?\b", title):
+        )
+        if match is None:
+            continue
+        kind = match.group("kind")
+        if kind is None or kind == "financial position":
             return "balance"
+        if kind.startswith("cash"):
+            return "cash"
+        if kind.startswith("comprehensive"):
+            return "comprehensive"
+        return "income"
     return None
 
 
@@ -373,12 +400,18 @@ def _question_roles(text: str) -> tuple[str, ...]:
     roles = []
     if "comprehensive" in text:
         roles.append("comprehensive")
-    if re.search(r"\b(?:ebitda|income|profit|margin|earnings|revenues?|sales|expenses?)\b", text):
+    if re.search(
+        r"\b(?:ebitda|income|profit|margin|earnings|revenues?|sales|expenses?|r&d|sg&a|roa|roe|"
+        r"return on (?:assets?|equity)|inventory turnover|days sales outstanding)\b",
+        text,
+    ):
         roles.append("income")
     if re.search(r"\b(?:ebitda|capex|cash|depreciation|amortization|capital expenditures?)\b", text):
         roles.append("cash")
     if re.search(
-        r"\b(?:balance|assets?|liabilit\w*|equity|inventory|receivables?|working capital|current ratio)\b", text
+        r"\b(?:balance|assets?|liabilit\w*|equity|inventor(?:y|ies)|receivables?|working capital|"
+        r"(?:quick|current|acid test) ratio|roa|roe|dso|days sales outstanding)\b",
+        text,
     ):
         roles.append("balance")
     return tuple(roles)
@@ -395,58 +428,72 @@ def _query_weights(question: str, issuer_terms: set[str]) -> dict[str, float]:
     return weights
 
 
-def _cover_statement_roles(scored, page_roles: tuple[str | None, ...], roles: tuple[str, ...]) -> tuple[MemoryHit, ...]:
+def _cover_statement_roles(
+    scored, page_roles: tuple[str | None, ...], roles: tuple[str, ...]
+) -> tuple[_PDFCandidate, ...]:
     selected = []
     for depth in range(2):
         for role in roles:
-            statements = [row for row in scored if page_roles[row[1]] == role]
+            statements = [row for row in scored if page_roles[row[2]] == role]
             if len(statements) > depth:
                 selected.append(statements[depth])
-    selected_indices = {row[1] for row in selected}
-    return tuple(row[2] for row in selected + [row for row in scored if row[1] not in selected_indices])
+    selected_indices = {row[2] for row in selected}
+    return tuple(row[3] for row in selected + [row for row in scored if row[2] not in selected_indices])
 
 
-def _rank_page_hits(hits: tuple[MemoryHit, ...], question: str) -> tuple[MemoryHit, ...]:
-    """BM25 over the pooled page bodies, with issuer, date and statement context."""
+def _rank_pages(
+    hits: tuple[_PDFCandidate, ...], question: str, native_ranks: Mapping[tuple[str, str], float]
+) -> tuple[_PDFCandidate, ...]:
+    """Rank real page records using document context, page and passage relevance."""
     if not hits:
         return ()
     question_text = _question_text(question)
-    bodies = tuple(hit.text.partition("\n")[2] for hit in hits)
-    counts = tuple(Counter(_word_terms(body)) for body in bodies)
+    matches = tuple(_document_match(hit.document_id, question_text) for hit in hits)
+    if any(matches):
+        hits = tuple(hit for hit, match in zip(hits, matches, strict=True) if match)
+    terms = tuple(_word_terms(hit.body) for hit in hits)
+    counts = tuple(Counter(words) for words in terms)
     document_frequency = Counter(term for count in counts for term in count)
     average_length = max(1.0, sum(sum(count.values()) for count in counts) / len(counts))
-    matches = tuple(_document_match(hit.text.partition("\n")[0], question_text) for hit in hits)
-    restrict_issuer = any(matches)
     issuer_terms = {
-        term
-        for match, hit in zip(matches, hits, strict=True)
-        if match
-        for term in _word_terms(hit.text.partition("\n")[0])
+        term for hit in hits if _document_match(hit.document_id, question_text) for term in _word_terms(hit.document_id)
     }
     weights = _query_weights(question_text, issuer_terms)
     years = set(re.findall(r"\b(?:19|20)\d{2}\b", question_text))
     roles = _question_roles(question_text)
-    page_roles = tuple(_statement_role(body) for body in bodies)
+    page_roles = tuple(_statement_role(hit.body) for hit in hits)
+    # A historical outlook mentioning the requested year is not that year's
+    # report. Prefer a matching report when one is present; retain other years
+    # as fallbacks rather than treating body occurrences as document identity.
+    report_matches = tuple(bool(years.intersection(re.findall(r"(?:19|20)\d{2}", hit.document_id))) for hit in hits)
+    prefer_report_year = len(years) == 1 and any(report_matches)
     geographic = bool(re.search(r"\b(?:geograph\w*|regions?|countries|operates)\b", question_text))
     scored = []
-    for index, (hit, body, count) in enumerate(zip(hits, bodies, counts, strict=True)):
-        if not body.strip() or (restrict_issuer and not matches[index]):
-            continue
+    for index, (hit, words, count) in enumerate(zip(hits, terms, counts, strict=True)):
         score = _bm25_score(count, weights, document_frequency, len(hits), average_length)
-        if score <= 0:
-            continue
+        score += 0.35 * max(
+            (
+                _bm25_score(Counter(words[start : start + 80]), weights, document_frequency, len(hits), 80)
+                for start in range(0, len(words), 40)
+            ),
+            default=0.0,
+        )
         role = page_roles[index]
         if role in roles:
             score = score * 1.3 + 2.0
+        if score <= 0:
+            continue
         if geographic and re.search(
-            r"\b(?:divisions?|segments?|geograph\w*)\b", " ".join(body.casefold().split())[:600]
+            r"\b(?:divisions?|segments?|geograph\w*)\b", " ".join(hit.body.casefold().split())[:600]
         ):
             score = score * 1.3 + 1.0
-        report_id = hit.text.partition("\n")[0]
-        if years.intersection(re.findall(r"(?:19|20)\d{2}", report_id)):
+        if report_matches[index]:
             score *= 1.15
-        scored.append((score, index, hit))
-    scored.sort(key=lambda item: (-item[0], item[1]))
+        key = (hit.citation.entry_id, hit.citation.entry_version_id)
+        score += 0.5 * native_ranks.get(key, 0.0)
+        priority = int(prefer_report_year and not report_matches[index])
+        scored.append((priority, score, index, hit))
+    scored.sort(key=lambda item: (item[0], -item[1], item[3].identity))
     # A multi-part financial question may require different statements. Preserve
     # the best evidence for each requested role before filling with global ranks.
     return _cover_statement_roles(scored, page_roles, roles)

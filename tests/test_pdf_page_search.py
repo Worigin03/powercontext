@@ -320,3 +320,114 @@ async def test_fragmented_navigation_header_does_not_hide_financial_statements()
         memory = await seed(runtime, definitions, pages)
         citations = await search_pdf_pages(memory, "What is Acme's FY2022 EBITDA?", limit=2)
         assert await source_ids(memory, citations) == {(await definitions.resolve(page)).name for page in pages[-2:]}
+
+
+@pytest.mark.asyncio
+async def test_quick_ratio_question_recalls_its_balance_sheet_components():
+    definitions = registry()
+    page = PDFPageInput(
+        document_id="ACME_2022_10K",
+        document_sha256="a" * 64,
+        page_number=30,
+        text="Consolidated Balance Sheets\n2022 2021\nCash and cash equivalents 50 40\n"
+        "Marketable securities 20 10\nAccounts receivable 30 20\nTotal current liabilities 60 50",
+    )
+    async with open_builtin_runtime(BuiltinConfig(), candidate_pipeline=EvidencePipeline()) as runtime:
+        memory = await seed(runtime, definitions, [page])
+        citations = await search_pdf_pages(memory, "What is Acme's quick ratio?", limit=20)
+        assert await source_ids(memory, citations) == {(await definitions.resolve(page)).name}
+
+
+@pytest.mark.asyncio
+async def test_financial_acronym_recalls_expanded_statement_label():
+    definitions = registry()
+    page = PDFPageInput(
+        document_id="ACME_2022_10K",
+        document_sha256="a" * 64,
+        page_number=30,
+        text="Consolidated Statements of Income\n2022 2021\nResearch and development 50 40\n"
+        "Revenue 200 180\nOperating income 30 20",
+    )
+    async with open_builtin_runtime(BuiltinConfig(), candidate_pipeline=EvidencePipeline()) as runtime:
+        memory = await seed(runtime, definitions, [page])
+        citations = await search_pdf_pages(memory, "How much did Acme spend on R&D?", limit=20)
+        assert await source_ids(memory, citations) == {(await definitions.resolve(page)).name}
+
+
+@pytest.mark.asyncio
+async def test_explicit_report_year_is_not_overwhelmed_by_older_report_notes():
+    definitions = registry()
+    pages = [
+        PDFPageInput(
+            document_id="ACME_2021_10K",
+            document_sha256="b" * 64,
+            page_number=i,
+            text=f"Income tax rate. Effective income tax rates and taxes. Tax rate reconciliation note {i}.\n"
+            "Fiscal 2021 tax information and outlook for 2022. Income tax rate effective taxes.",
+        )
+        for i in range(1, 30)
+    ]
+    current = PDFPageInput(
+        document_id="ACME_2022_10K",
+        document_sha256="a" * 64,
+        page_number=30,
+        text="Income taxes\nThe effective rate was 18 percent for the fiscal period.",
+    )
+    pages.append(current)
+    async with open_builtin_runtime(BuiltinConfig(), candidate_pipeline=EvidencePipeline()) as runtime:
+        memory = await seed(runtime, definitions, pages)
+        citations = await search_pdf_pages(memory, "What was Acme's effective income tax rate in FY2022?", limit=20)
+        assert (await definitions.resolve(current)).name in await source_ids(memory, citations)
+
+
+@pytest.mark.asyncio
+async def test_primary_statement_survives_a_report_full_of_matching_appendices():
+    definitions = registry()
+    pages = [
+        PDFPageInput(
+            document_id="ACME_2022_10K",
+            document_sha256="a" * 64,
+            page_number=i,
+            text=f"Debt to equity ratio. Debt borrowings and equity ratios. Appendix {i}. "
+            "Debt equity borrowing ratio covenant discussion.",
+        )
+        for i in range(1, 401)
+    ]
+    statement = PDFPageInput(
+        document_id="ACME_2022_10K",
+        document_sha256="a" * 64,
+        page_number=401,
+        text="Consolidated Balance Sheets\n2022 2021\nTotal liabilities 100 90\nStockholders equity 200 180\n"
+        + "\n".join(f"Asset category {i} 100 90" for i in range(200)),
+    )
+    pages.append(statement)
+    async with open_builtin_runtime(BuiltinConfig(), candidate_pipeline=EvidencePipeline()) as runtime:
+        memory = await seed(runtime, definitions, pages)
+        citations = await search_pdf_pages(memory, "What is Acme's debt to equity ratio?", limit=20)
+        assert (await definitions.resolve(statement)).name in await source_ids(memory, citations)
+
+
+@pytest.mark.asyncio
+async def test_statement_with_individual_numeric_cell_lines_is_retrieved():
+    definitions = registry()
+    pages = [
+        PDFPageInput(
+            document_id="ACME_2022_10K",
+            document_sha256="a" * 64,
+            page_number=i,
+            text=f"EBITDA performance target. Operating income, depreciation and amortization. Discussion {i}.",
+        )
+        for i in range(1, 26)
+    ]
+    statement = PDFPageInput(
+        document_id="ACME_2022_10K",
+        document_sha256="a" * 64,
+        page_number=30,
+        text="T\nable of\nContents\nAcme and Subsidiaries\nConsolidated\nStatement of Income\n"
+        "2022\n2021\nRevenue\n100\n90\nOperating income\n30\n25\nNet income\n20\n15",
+    )
+    pages.append(statement)
+    async with open_builtin_runtime(BuiltinConfig(), candidate_pipeline=EvidencePipeline()) as runtime:
+        memory = await seed(runtime, definitions, pages)
+        citations = await search_pdf_pages(memory, "What was Acme's FY2022 EBITDA?", limit=1)
+        assert await source_ids(memory, citations) == {(await definitions.resolve(statement)).name}

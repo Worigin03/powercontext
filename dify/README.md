@@ -1,14 +1,25 @@
 # 记忆当铺 · Memory Pawnshop
 
-一个用 **Dify** 搭起来的聊天应用：你可以在当铺里把一段记忆当掉，换几枚「记忆币」；也可以只给一条线索，让掌柜凭 **seekdb 向量检索** 从柜底把那张旧当票找回来。
+一个用 **Dify** 搭起来的聊天应用：把一段记忆当掉，换几枚「记忆币」；只给一条线索，掌柜会凭 **seekdb 向量检索** 从柜底把那张旧当票找回来。
 
-> 赛题：OceanBase 2026 数据库大赛 · Just for Fun「用 Dify 做一个好玩的智能应用」
+> OceanBase 2026 数据库大赛 · Just for Fun「用 Dify 做一个好玩的智能应用」
 >
-> 核心依赖：**Dify 1.19（Chatflow）+ seekdb（原生向量检索）+ MiniMax（掌柜人格）**
+> Dify 1.19 Chatflow + seekdb（原生向量 / 全文索引）+ MiniMax 掌柜（可选）
 
----
+## 目录
 
-## 玩法
+- [1. 玩法](#1-玩法)
+- [2. DSL 文件与导入顺序](#2-dsl-文件与导入顺序)
+- [3. 架构与分工](#3-架构与分工)
+- [4. 启动](#4-启动)
+- [5. 在 Dify 中配置模型](#5-在-dify-中配置模型)
+- [6. 验证](#6-验证)
+- [7. 数据模型](#7-数据模型)
+- [8. 接口](#8-接口)
+- [9. 目录](#9-目录)
+- [10. 已知限制](#10-已知限制)
+
+## 1. 玩法
 
 | 动作 | 你可以说 | 发生什么 |
 | --- | --- | --- |
@@ -18,54 +29,169 @@
 | 托梦 | 「帮我把当掉的记忆缝成一个梦」 | 随机抽三段自己存当的记忆，扣 10 枚，交给掌柜缝成第二人称短梦 |
 | 查账 | 「我还有多少记忆币？」 | 余额、存当数、赎回数、最近五笔账 |
 
-初始 120 枚记忆币。掌柜的语气由 MiniMax 负责，所有数字、检索结果都由 seekdb 柜台返回，**不编造**。
+初始 120 枚记忆币。所有数字、检索结果都由 seekdb 柜台返回，掌柜只负责把它们讲成当铺里的话。
 
-## 架构
+## 2. DSL 文件与导入顺序
+
+| 文件 | 说明 | 依赖 |
+| --- | --- | --- |
+| [`dsl/memory-pawnshop-lite.yml`](dsl/memory-pawnshop-lite.yml) | **离线版，建议先导入这个**：五个动作全部可用，柜台 JSON 由 Code 节点整理成文字 | 无模型、无插件 |
+| [`dsl/memory-pawnshop.yml`](dsl/memory-pawnshop.yml) | 完整版：掌柜由 LLM 扮演，语气更自然 | MiniMax 插件（或任意聊天模型） |
+
+导入方式：Dify 控制台 → 创建空白应用 → 「导入 DSL 文件」。两个 DSL 的应用名不同（`记忆当铺 · 离线版` / `记忆当铺`），可以同时存在。
+
+- Dify 版本：1.19.0（Chatflow / advanced-chat）
+- DSL 版本：0.7.0
+- MiniMax 插件：`langgenius/minimax:0.0.23`（仅在完整版中使用）
+- seekdb：`oceanbase/seekdb:latest`，实测 `5.7.25-OceanBase seekdb-v1.4.0.0`
+
+两个 DSL 的 HTTP 节点默认都指向 `http://host.docker.internal:8700/api/tool`。如果你的 Dify 不在 Docker Desktop 里，见 [4.3 地址怎么填](#43-dify-访问宿主机服务地址怎么填)。
+
+## 3. 架构与分工
 
 ```
 玩家
  │
  ▼
-Dify Chatflow（advanced-chat）
+Dify Chatflow
  ├─ 开始
- ├─ 柜台分诊（Code 节点）       把中文意图翻译成 action + JSON
- ├─ seekdb 柜台（HTTP 节点）    POST http://host.docker.internal:8700/api/tool
+ ├─ 柜台分诊（Code）        中文意图 → action + 安全 JSON
+ ├─ seekdb 柜台（HTTP）     POST /api/tool
  │      │
  │      ▼
- │   FastAPI 记忆当铺服务
- │      ├─ fastembed 多语言向量模型（384 维）
- │      └─ seekdb（OceanBase MySQL 兼容）
- │            ├─ memories: VECTOR(384) + HNSW(cosine) + FULLTEXT(ik)
+ │   记忆当铺服务（FastAPI）
+ │      ├─ 估价与情绪判定（确定性规则）
+ │      ├─ 向量化（hash 默认 / fastembed 可选）
+ │      └─ seekdb
+ │            ├─ memories：VECTOR(384) + HNSW(cosine) + FULLTEXT(ik)
  │            ├─ wallets / ledger
- │            └─ cosine_distance(...) 排序
- ├─ 掌柜（LLM 节点，MiniMax-M2.5）把柜台 JSON 讲成当铺的话
- ├─ 去掉思考块（Code 节点）    推理模型会输出 <think>，这里只留正文
+ │            └─ ORDER BY cosine_distance(...) LIMIT n
+ │
+ ├─ 掌柜（LLM，可选）        把柜台 JSON 讲成当铺的话
+ ├─ 去掉思考块（Code）       剥掉推理模型的 <think>
  └─ 直接回复
 ```
 
-Dify 本身也配置为 `VECTOR_STORE=seekdb`：如果继续在 Dify 里建知识库，向量同样落在 seekdb 上。
+- **路由为什么用 Code 节点？** 典当/赎回会真实改动账本，路由必须稳定、可解释；掌柜的「人味」交给后面的 LLM。
+- **为什么先序列化 JSON？** Dify 的 JSON 请求体是模板拼接，记忆里出现引号或换行会破坏请求体；Code 节点用 `json.dumps` 生成安全载荷。
+- **为什么检索放在 seekdb？** 赎回和黑市都是带 `WHERE` 的「取最相似的几条」，交给数据库一次完成，不把全量向量拉回应用层。
+- **没有模型能用吗？** 能。离线版把「掌柜」换成一个 Code 节点，工作流 `dependencies` 为空。
+- **服务没启动会怎样？** HTTP 节点配置了 `error_strategy: default-value`，会返回「柜台打烊」的提示，工作流仍然给出回答。
 
-## 目录
+## 4. 启动
 
-```
-dify/
-├─ app/                 # 记忆当铺服务（FastAPI + PyMySQL + fastembed）
-│  ├─ appraise.py       # 估价与情绪判定
-│  ├─ config.py         # 环境变量
-│  ├─ db.py             # seekdb 连接、建表、向量字面量
-│  ├─ embeddings.py     # fastembed 封装
-│  ├─ main.py           # HTTP API
-│  ├─ seed.py           # 12 段公开记忆（幂等）
-│  └─ service.py        # 典当 / 赎回 / 黑市 / 托梦 / 账本
-├─ dsl/
-│  └─ memory-pawnshop.yml   # 可直接导入 Dify 的 Chatflow DSL（0.7.0）
-├─ scripts/
-│  └─ smoke.py          # 不经过 Dify 的服务冒烟测试
-├─ requirements.txt
-└─ .env.example
+### 4.1 一条命令起后端（seekdb + 记忆当铺服务）
+
+```bash
+cd dify
+cp .env.example .env
+# 编辑 .env，至少把 SEEKDB_PASSWORD 改成你自己的密码
+docker compose up -d --build
+curl http://127.0.0.1:8700/api/health
 ```
 
-## 数据模型
+期望：
+
+```json
+{"ok": true, "embedding": "hash:char-ngram-384"}
+```
+
+`docker compose` 会启动两个容器：
+
+- `seekdb`：`oceanbase/seekdb:latest`，数据卷 `seekdb_data`，默认映射到宿主机 `2881`；
+- `pawnshop`：镜像由本目录 `Dockerfile` 构建，监听 `8700`，等待 seekdb 健康后启动。
+
+首次启动自动建库 `memory_pawnshop`、建表、写入 12 段公开记忆。之后重启不会重复写入（`meta` 表记录初始化状态）。
+
+> 内存较小的机器可在 `.env` 里调低 `SEEKDB_MEMORY_LIMIT`（默认 `2G`）；端口被占用时改 `SEEKDB_PORT` / `PAWNSHOP_PORT`。
+
+### 4.2 本机直接跑服务（可选）
+
+```bash
+cd dify
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env             # 指向已有 seekdb，填密码
+python -m app.main               # 监听 127.0.0.1:8700
+```
+
+需要语义向量时：
+
+```bash
+pip install -r requirements-fastembed.txt
+# .env: PAWNSHOP_EMBED_BACKEND=fastembed
+```
+
+首次会下载约 470MB 模型；服务发现后端变化后会自动重算已有记忆的向量。
+
+### 4.3 Dify 访问宿主机服务：地址怎么填
+
+Dify 的 HTTP 节点从容器里发起请求，`127.0.0.1` 指向容器自己，不能用。按部署方式选：
+
+| Dify 部署方式 | HTTP 节点 URL | 额外配置 |
+| --- | --- | --- |
+| Docker Desktop（Windows / macOS） | `http://host.docker.internal:8700/api/tool` | 通常开箱可用；若开启 SSRF 代理，在 Dify 的 `docker/.env` 中设置 `SSRF_PROXY_ALLOW_PRIVATE_DOMAINS=host.docker.internal` |
+| Linux + Docker Compose | `http://host.docker.internal:8700/api/tool` | 给 Dify 的 `api`（和 `worker`）加 `extra_hosts: ["host.docker.internal:host-gateway"]` |
+| 任意 | `http://<宿主机局域网IP>:8700/api/tool` | 服务已监听 `0.0.0.0`（compose 中设置）；放行防火墙 8700 |
+
+修改位置：打开 DSL 中的「seekdb 柜台」节点 → URL。保存后记得点「发布」。
+
+如果 Dify 与 seekdb 部署在同一台机器，也可以把 Dify 自身的向量库设为 seekdb（`VECTOR_STORE=seekdb` 及 `OCEANBASE_VECTOR_*`）；本应用的检索不依赖这个设置。
+
+### 4.4 导入并发布 Chatflow
+
+1. 导入 `dsl/memory-pawnshop-lite.yml`（先跑通，零模型依赖）。
+2. 在「运行」面板试一句「我还有多少记忆币？」。有回答即链路通。
+3. 点「发布」→「访问 API / 发布」→「WebApp」。
+4. WebApp 地址形如 `http://127.0.0.1:8080/chat/<site_code>`，**用的是站点码（site code），不是应用 ID**；用应用 ID 拼链接会提示「此应用不存在」。
+
+需要掌柜人格时再导入 `dsl/memory-pawnshop.yml` 并配置模型（下一节）。
+
+## 5. 在 Dify 中配置模型
+
+完整版默认使用 MiniMax：
+
+1. Marketplace 安装 `langgenius/minimax`（DSL 固定为 `0.0.23`）。
+2. 「模型供应商」→ MiniMax → 填 API Key 与 Base URL：
+   - 国内站：`https://api.minimaxi.com`
+   - 海外站：`https://api.minimax.io`
+3. 模型：`MiniMax-M2.5`（可在应用里换成同供应商的其他聊天模型）。
+
+也可以换成任意聊天模型：打开 LLM 节点，选择你的供应商与模型即可。柜台 JSON 的字段不变，提示词不需要改。
+
+> 仓库不包含任何真实 API Key 或密码；`.env.example` 只有占位值。MiniMax-M2.5 的 `<think>` 块由 `去掉思考块` 节点在输出前剥掉。
+
+## 6. 验证
+
+完整的初始状态、输入、步骤、期望/实际结果与证据文件见 **[`docs/VALIDATION.md`](docs/VALIDATION.md)**。最短路径：
+
+```bash
+# 服务端五动作（典当×2 → 赎回 → 黑市 → 托梦 → 查账）
+python -m scripts.reset_player verify-2026
+python scripts/smoke.py http://127.0.0.1:8700 verify-2026
+
+# seekdb 版本、建表语句、向量/全文检索、钱包账本
+python -m scripts.verify_seekdb --player verify-2026 --query "关东煮"
+```
+
+实测记录（原始输出）：
+
+- [`records/service-smoke.log`](records/service-smoke.log)
+- [`records/seekdb-evidence.log`](records/seekdb-evidence.log)
+- [`records/dify-e2e-lite.json`](records/dify-e2e-lite.json)：离线版六轮对话
+- [`records/dify-e2e-minimax.json`](records/dify-e2e-minimax.json)：完整版两轮对话
+- [`records/dify-e2e-fallback-lite.json`](records/dify-e2e-fallback-lite.json)、[`records/dify-e2e-fallback.json`](records/dify-e2e-fallback.json)：服务停机时的兜底回答
+
+重置某个玩家（钱包、账本、当票一起删除）：
+
+```bash
+python -m scripts.reset_player <player_id>
+```
+
+Dify 对话里的玩家是 Dify 账号 ID；想复现文档中的「120 → 158 → 205 → 173 → 163」，先按账号 ID 重置一次。
+
+## 7. 数据模型
 
 ```sql
 CREATE TABLE memories (
@@ -86,83 +212,11 @@ CREATE TABLE memories (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
-赎回与黑市都走同一条 SQL：`ORDER BY cosine_distance(embedding, %s) LIMIT n`，相似度 = `1 - distance`。赎回只检索 `owner_id = 自己 AND status = 'pawned'`，黑市只检索 `owner_id <> 自己 AND is_public = 1`。
+赎回与黑市走同一条 SQL：`ORDER BY cosine_distance(embedding, %s) LIMIT n`，相似度 = `1 - distance`。赎回只检索 `owner_id = 自己 AND status = 'pawned'`；黑市只检索 `owner_id <> 自己 AND is_public = 1`。
 
-## 本地启动
+`wallets` 保存余额，`ledger` 保存每一笔收支，`meta` 保存初始化与向量后端标记。
 
-### 1. seekdb
-
-任选一种方式起一个 seekdb（MySQL 协议，默认 2881）：
-
-```bash
-docker run -d --name seekdb \
-  -p 2881:2881 \
-  -v seekdb_data:/root/seekdb \
-  oceanbase/seekdb:latest
-```
-
-### 2. 记忆当铺服务
-
-```bash
-cd dify
-python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env               # 填 seekdb 密码
-python -m app.main                 # 监听 127.0.0.1:8700
-```
-
-首次启动会自动建库建表、下载向量模型并写入 12 段公开记忆。
-
-```bash
-python scripts/smoke.py            # 典当 → 赎回 → 黑市 → 托梦 → 余额
-```
-
-### 3. Dify
-
-```bash
-git clone https://github.com/langgenius/dify.git
-cd dify/docker
-cp .env.example .env
-```
-
-在 `docker/.env` 中至少设置：
-
-```dotenv
-VECTOR_STORE=seekdb
-OCEANBASE_VECTOR_HOST=<seekdb host>
-OCEANBASE_VECTOR_PORT=2881
-OCEANBASE_VECTOR_USER=root
-OCEANBASE_VECTOR_PASSWORD=<password>
-OCEANBASE_VECTOR_DATABASE=test
-
-# 让 HTTP 节点可以访问宿主机上的记忆当铺服务（二选一）
-SSRF_PROXY_ALLOW_PRIVATE_DOMAINS=host.docker.internal
-SSRF_PROXY_ALLOW_PRIVATE_IPS=192.168.65.254/32
-```
-
-```bash
-docker compose up -d
-```
-
-完成 Dify 初始化后，安装 **MiniMax** 插件（Marketplace → `langgenius/minimax`），在「模型供应商」里填入 API Key 与 Base URL：
-
-- Base URL：`https://api.minimaxi.com`（国内站；海外站为 `https://api.minimax.io`）
-- 模型：`MiniMax-M2.5`（DSL 中的默认值，可在 Dify 里直接换）
-
-### 4. 导入 Chatflow
-
-Dify 控制台 → 创建空白应用 → 「导入 DSL 文件」→ 选择 `dify/dsl/memory-pawnshop.yml`。
-
-导入后可先在「运行」面板里试一句：
-
-> 当掉：凌晨三点的便利店，我买了两份关东煮，等一个不会来的人。
-
-然后点「发布」→「访问 API / 发布」→「WebApp」，即可打开对话页。
-注意 WebApp 地址形如 `http://127.0.0.1:8080/chat/<site_code>`，用的是站点码（site code）而不是应用 ID；
-App ID 拼出来的链接会报「此应用不存在，或无法从您的网络访问」。
-
-## 接口
+## 8. 接口
 
 `POST /api/tool`
 
@@ -176,19 +230,44 @@ App ID 拼出来的链接会报「此应用不存在，或无法从您的网络�
 }
 ```
 
-`action` 可选：`pawn` / `redeem` / `browse` / `dream` / `balance` / `chat`。
-失败时返回 `{"ok": false, "error": "not_enough_coins", "message": "..."}`，HTTP 状态码 400。
+`action` 可选：`pawn` / `redeem` / `browse` / `dream` / `balance` / `chat`。失败时返回 `{"ok": false, "error": "...", "message": "..."}`；为让 Dify 工作流继续，`/api/tool` 的业务错误也以 HTTP 200 返回，`ok` 字段区分成败。
 
 其他接口：`GET /api/health`、`GET /api/stats`、`GET /api/wallet/{player_id}`。
 
-## 设计说明
+## 9. 目录
 
-- **为什么路由用 Code 节点而不是 LLM？** 典当/赎回会真的改动账本，路由必须稳定、可解释；掌柜的「人味」交给后面的 LLM。
-- **为什么要一个「去掉思考块」的节点？** MiniMax-M2.5 会把推理过程写进正文的 `<think>` 块里；Code 节点在流式输出前把它剥掉，客人只看到掌柜的话。
-- **为什么在 HTTP 节点前先序列化 JSON？** Dify 的 JSON 请求体是模板拼接，记忆里出现引号或换行会破坏请求体；Code 节点用 `json.dumps` 生成安全载荷。
-- **为什么相似度过滤放在 seekdb？** 赎回是「在我自己的记忆里找最像的一条」，黑市是「在别人的公开记忆里找」；都是带 `WHERE` 的向量检索，交给数据库一次完成，不把全量向量拉回应用层。
-- **估价是确定性的**：细节、感官、情绪、数字、人称各自加分，30–180 封顶；赎回手续费随相似度在 0.55–1.35 倍之间浮动，最低 8 枚。
+```
+dify/
+├─ app/                     # 记忆当铺服务（FastAPI + PyMySQL）
+│  ├─ appraise.py           # 估价与情绪判定
+│  ├─ config.py             # 环境变量
+│  ├─ db.py                 # seekdb 连接、建表、向量字面量
+│  ├─ embeddings.py         # hash / fastembed 向量
+│  ├─ main.py               # HTTP API
+│  ├─ seed.py               # 12 段公开记忆（幂等）
+│  └─ service.py            # 典当 / 赎回 / 黑市 / 托梦 / 账本
+├─ dsl/
+│  ├─ memory-pawnshop.yml       # 完整版（LLM 掌柜）
+│  └─ memory-pawnshop-lite.yml  # 离线版（无模型依赖）
+├─ docs/VALIDATION.md       # 验证样例与实测证据
+├─ records/                 # 冒烟、seekdb、Dify E2E 的原始日志
+├─ scripts/
+│  ├─ smoke.py              # 服务端五动作冒烟
+│  ├─ verify_seekdb.py      # seekdb 读写与索引证据
+│  ├─ reset_player.py       # 重置玩家
+│  └─ build_lite_dsl.py     # 从完整版生成离线 DSL
+├─ docker-compose.yml       # seekdb + 服务
+├─ Dockerfile
+├─ requirements.txt
+├─ requirements-fastembed.txt
+└─ .env.example             # 只有占位值
+```
 
-## 许可
+## 10. 已知限制
 
-与仓库其他部分一致。
+- 默认 `hash` 后端衡量字面重合度，不是语义相似度；语义检索请切到 `fastembed`。
+- 黑市固定返回最相似的 3 条，没有阈值；分数很低也会展示。
+- 赎回在「自己未赎回的记忆」中取最相似的一条；一条都没有时会提示先去典当。
+- seekdb 的向量距离由 HNSW 索引计算，属于近似值。
+- 服务没有鉴权与 TLS，面向本地演示；公网部署需自行加网关。
+- 完整版需要模型与插件；没有 Key 时使用离线版，功能不受影响。

@@ -1,0 +1,258 @@
+app:
+  description: 记忆当铺的无模型版本：典当、赎回、黑市、托梦全部可用，柜台结果由 Dify Code 节点整理，不依赖任何 LLM。
+  icon: 🏮
+  icon_background: '#FFEAD5'
+  icon_type: emoji
+  mode: advanced-chat
+  name: 记忆当铺 · 离线版
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+site:
+  chat_color_theme: null
+  chat_color_theme_inverted: false
+  copyright: null
+  custom_disclaimer: ''
+  default_language: zh-Hans
+  description: 一家开在城市缝隙里的记忆当铺。无模型也能玩：seekdb 负责找回当掉的旧时光。
+  icon: 🏮
+  icon_background: '#FFEAD5'
+  icon_type: emoji
+  input_placeholder: 说说你今天带了什么记忆来…
+  privacy_policy: null
+  show_workflow_steps: true
+  title: 记忆当铺 · 离线版
+  use_icon_as_answer_icon: false
+version: 0.7.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload: {}
+    opening_statement: '欢迎光临记忆当铺。
+
+
+      你可以：把一段记忆当掉换记忆币、凭线索赎回旧当票、逛黑市看看别人的记忆、托梦把碎片缝成梦，或者查一查余额。
+
+      先说说，你今天带什么来？'
+    retriever_resource:
+      enabled: false
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions:
+    - 我想当掉一段记忆：去年冬天奶奶在厨房煮姜汤，窗外下着雪。
+    - 赎回一段关于雨夜的记忆
+    - 逛逛黑市，看看别人的秘密
+    - 帮我把当掉的记忆缝成一个梦
+    - 我还有多少记忆币？
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: code
+      id: start-route
+      source: start
+      sourceHandle: source
+      target: route
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: http-request
+      id: route-counter
+      source: route
+      sourceHandle: source
+      target: counter
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: counter-format
+      source: counter
+      sourceHandle: source
+      target: format
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: answer
+      id: format-answer
+      source: format
+      sourceHandle: source
+      target: answer
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 开始
+        type: start
+        variables: []
+      height: 90
+      id: start
+      position:
+        x: 80
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "import json\nimport re\n\n\ndef main(query: str, player_id: str) -> dict:\n    q = (query or \"\").strip()\n    action = \"chat\"\n    text = \"\"\n    search = \"\"\n    limit = 3\n\n    def after_cmd(s: str, words) -> str:\n        for w in words:\n            if s.startswith(w):\n                s = s[len(w):]\n                break\n        return s.lstrip(\"：:，,。. 　\")\n\n    if re.search(r\"余额|记忆币|账本|还剩|存了|赎回了几\", q) and not re.search(r\"当掉|典当|赎回\", q):\n        action = \"balance\"\n    elif re.search(r\"托梦|做梦|缝成梦|梦到|把.*梦\", q):\n        action = \"dream\"\n    elif re.search(r\"黑市|别人.*记忆|逛逛|看看.*柜|有什么.*记忆\", q):\n        action = \"browse\"\n        search = after_cmd(q, [\"帮我逛逛黑市\", \"逛逛黑市\", \"黑市\", \"看看别人的记忆\", \"别人的记忆\", \"逛逛\"])\n        search = re.sub(r\"^(看看|帮我|我想)\", \"\", search).strip(\" 。！？!?\")\n        if search in (\"\", \"别人的秘密\", \"别人的记忆\", \"秘密\", \"记忆\", \"别人的\"):\n            search = \"\"\n    elif re.search(r\"赎回|赎当|赎|找回|取回\", q):\n        action\
+          \ = \"redeem\"\n        search = after_cmd(q, [\"帮我赎回\", \"我想赎回\", \"赎回\", \"赎当\", \"找回\", \"取回\", \"赎\"])\n        search = re.sub(r\"^(?:一段|那段|这段|我的|关于|的)+\", \"\", search).strip(\" 。！？!?\")\n        if len(search) < 2:\n            search = q\n    elif re.search(r\"当掉|典当|当了|卖掉|押给你|换.*记忆币\", q):\n        action = \"pawn\"\n        text = after_cmd(q, [\"我想当掉\", \"我要当掉\", \"帮我当掉\", \"当掉\", \"典当\", \"卖掉\", \"押给你\"])\n        text = re.sub(r\"^(?:一段|一个|这段|这个)?(?:记忆|故事)[：:，,。]?\", \"\", text).strip()\n        if len(text) < 12:\n            action = \"chat\"\n\n    payload_query = search if action in (\"redeem\", \"browse\") else q\n    payload = {\n        \"player_id\": player_id or \"guest\",\n        \"action\": action,\n        \"text\": text or q,\n        \"query\": payload_query or \"\",\n        \"limit\": limit,\n    }\n    return {\n        \"action\": action,\n        \"payload_json\": json.dumps(payload, ensure_ascii=False),\n    }"
+        code_language: python3
+        desc: 把玩家的话翻译成当铺柜台能执行的动作，并序列化成 JSON，避免引号换行破坏请求体。
+        outputs:
+          action:
+            children: null
+            type: string
+          payload_json:
+            children: null
+            type: string
+        selected: false
+        title: 柜台分诊
+        type: code
+        variables:
+        - value_selector:
+          - sys
+          - query
+          value_type: string
+          variable: query
+        - value_selector:
+          - sys
+          - user_id
+          value_type: string
+          variable: player_id
+      height: 90
+      id: route
+      position:
+        x: 380
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        authorization:
+          type: no-auth
+        body:
+          data:
+          - key: ''
+            type: text
+            value: '{{#route.payload_json#}}'
+          type: json
+        desc: 调用本地记忆当铺服务，由 seekdb 完成向量检索与账本结算。
+        error_strategy: default-value
+        default_value:
+        - key: body
+          type: string
+          value: '{"ok": false, "error": "counter_unreachable", "message": "柜台暂时打烊了：记忆当铺服务没有响应。请按运行说明启动服务，并确认本节点的地址可达。"}'
+        - key: status_code
+          type: number
+          value: 0
+        - key: headers
+          type: object
+          value: {}
+        headers: 'Content-Type: application/json'
+        method: post
+        params: ''
+        retry_config:
+          enabled: false
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+          max_retries: 1
+          retry_interval: 1000
+        selected: false
+        timeout:
+          connect: 10
+          read: 30
+          write: 30
+        title: seekdb 柜台
+        type: http-request
+        url: http://host.docker.internal:8700/api/tool
+      height: 90
+      id: counter
+      position:
+        x: 680
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "import json\n\n\ndef main(raw: str) -> dict:\n    try:\n        data = json.loads(raw or \"{}\")\n    except ValueError:\n        return {\"text\": \"柜台暂时打烊了。请确认记忆当铺服务已经启动，再敲敲柜台。\"}\n\n    if not data.get(\"ok\", True):\n        message = data.get(\"message\") or \"掌柜摇了摇头，没办成。\"\n        if data.get(\"hint\") == \"action=pawn\":\n            message += \"（先当掉一段记忆，再来赎。）\"\n        return {\"text\": message}\n\n    action = data.get(\"action\")\n    say = data.get(\"say\") or \"\"\n    lines = [] if action == \"dream\" else [say]\n\n    if action == \"pawn\":\n        reasons = data.get(\"reasons\") or []\n        if reasons:\n            lines.append(\"估价明细：\" + \"、\".join(str(item) for item in reasons))\n    elif action == \"redeem\":\n        content = data.get(\"content\")\n        if content:\n            lines.append(f\"当票背面还留着字：「{content}」\")\n    elif action == \"browse\":\n        items = data.get(\"items\") or []\n        if items:\n            lines.append(\"\")\n\
+          \            for item in items:\n                lines.append(\n                    f\"· {item.get('owner')} 的《{item.get('title')}》\"\n                    f\"（{item.get('emotion')}，相似度 {item.get('similarity')}）：\"\n                    f\"{item.get('fragment')}\"\n                )\n    elif action == \"dream\":\n        fragments = data.get(\"fragments\") or []\n        if fragments:\n            lines.append(\"\")\n            lines.append(f\"掌柜把灯拧暗，你听见 {len(fragments)} 段旧事在锅里翻身：\")\n            for item in fragments:\n                lines.append(f\"你回到《{item.get('title')}》——{item.get('text')}\")\n            lines.append(f\"梦的成本 {data.get('cost')} 枚，余额 {data.get('balance')} 枚。\")\n    elif action == \"balance\":\n        lines.append(\"\")\n        for item in data.get(\"recent\") or []:\n            lines.append(f\"· {item.get('delta'):+d} 枚：{item.get('reason')}\")\n    return {\"text\": \"\\n\".join(line for line in lines if line).strip()}"
+        code_language: python3
+        desc: 把柜台返回的 JSON 整理成当铺口吻的文字，不依赖任何模型。
+        outputs:
+          text:
+            children: null
+            type: string
+        selected: false
+        title: 整理柜台回话
+        type: code
+        variables:
+        - value_selector:
+          - counter
+          - body
+          value_type: string
+          variable: raw
+      height: 90
+      id: format
+      position:
+        x: 980
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        answer: '{{#format.text#}}'
+        desc: ''
+        selected: false
+        title: 直接回复
+        type: answer
+        variables: []
+      height: 90
+      id: answer
+      position:
+        x: 1280
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    viewport:
+      x: 0
+      y: 0
+      zoom: 0.7
+  rag_pipeline_variables: []

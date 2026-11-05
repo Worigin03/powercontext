@@ -1,0 +1,52 @@
+name: memory-pawnshop
+
+services:
+  seekdb:
+    image: oceanbase/seekdb:latest
+    environment:
+      ROOT_PASSWORD: ${SEEKDB_PASSWORD:-change-me}
+      SEEKDB_MEMORY_LIMIT: ${SEEKDB_MEMORY_LIMIT:-2G}
+    ports:
+      - "${SEEKDB_PORT:-2881}:2881"
+    volumes:
+      - seekdb_data:/var/lib/oceanbase
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'mysql -h127.0.0.1 -P2881 -uroot -p"$$ROOT_PASSWORD" -e "SELECT 1;"',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+
+  pawnshop:
+    build: .
+    depends_on:
+      seekdb:
+        condition: service_healthy
+    environment:
+      SEEKDB_HOST: seekdb
+      SEEKDB_PORT: 2881
+      SEEKDB_USER: root
+      SEEKDB_PASSWORD: ${SEEKDB_PASSWORD:-change-me}
+      SEEKDB_DATABASE: ${SEEKDB_DATABASE:-memory_pawnshop}
+      PAWNSHOP_HOST: 0.0.0.0
+      PAWNSHOP_PORT: 8700
+      PAWNSHOP_EMBED_BACKEND: ${PAWNSHOP_EMBED_BACKEND:-hash}
+    ports:
+      - "${PAWNSHOP_PORT:-8700}:8700"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8700/api/health', timeout=3)",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  seekdb_data:

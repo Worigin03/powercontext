@@ -162,6 +162,8 @@ workflow:
                   action = "browse"
                   search = after_cmd(q, ["帮我逛逛黑市", "逛逛黑市", "黑市", "看看别人的记忆", "别人的记忆", "逛逛"])
                   search = re.sub(r"^(看看|帮我|我想)", "", search).strip(" 。！？!?")
+                  if search in ("", "别人的秘密", "别人的记忆", "秘密", "记忆", "别人的"):
+                      search = ""
               elif re.search(r"赎回|赎当|赎|找回|取回", q):
                   action = "redeem"
                   search = after_cmd(q, ["帮我赎回", "我想赎回", "赎回", "赎当", "找回", "取回", "赎"])
@@ -230,6 +232,17 @@ workflow:
             value: '{{#route.payload_json#}}'
           type: json
         desc: 调用本地记忆当铺服务，由 seekdb 完成向量检索与账本结算。
+        error_strategy: default-value
+        default_value:
+        - key: body
+          type: string
+          value: '{"ok": false, "error": "counter_unreachable", "message": "柜台暂时打烊了：记忆当铺服务没有响应。请按运行说明启动服务，并确认本节点的地址可达。"}'
+        - key: status_code
+          type: number
+          value: 0
+        - key: headers
+          type: object
+          value: {}
         headers: 'Content-Type: application/json'
         method: post
         params: ''

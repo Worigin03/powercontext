@@ -1,0 +1,45 @@
+== seekdb ==
+version: 5.7.25-OceanBase seekdb-v1.4.0.0
+database: memory_pawnshop
+tables: ledger, memories, meta, wallets
+embedding backend: hash:char-ngram-384
+
+== schema ==
+CREATE TABLE `memories` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `owner_id` varchar(64) NOT NULL,
+  `title` varchar(120) NOT NULL,
+  `content` text NOT NULL,
+  `emotion` varchar(24) NOT NULL,
+  `appraisal` int(11) NOT NULL,
+  `status` varchar(16) NOT NULL DEFAULT 'pawned',
+  `is_public` tinyint(4) NOT NULL DEFAULT '1',
+  `embedding` VECTOR(384) NOT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `redeemed_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  FULLTEXT KEY `ft_mem` (`content`) WITH PARSER ik PARSER_PROPERTIES=(ik_mode="smart") BLOCK_SIZE 16384,
+  VECTOR KEY `vidx_mem` (`embedding`) WITH (DISTANCE=COSINE, TYPE=HNSW, LIB=VSAG, M=16, EF_CONSTRUCTION=200, EF_SEARCH=64) BLOCK_SIZE 16384,
+  KEY `idx_owner_status` (`owner_id`, `status`) BLOCK_SIZE 16384 LOCAL
+) ORGANIZATION INDEX AUTO_INCREMENT = 29 DEFAULT CHARSET = utf8mb4 ROW_FORMAT = DYNAMIC COMPRESSION = 'zstd_1.3.8' BLOCK_SIZE = 16384 TABLET_SIZE = 134217728 PCTFREE = 0
+
+== memories ==
+total: 14
+  status=pawned: 13
+  status=redeemed: 1
+
+== vector search ==
+  id=24 title=凌晨三点的便利店 我买了两份关东 owner=verify-2026 status=redeemed distance=0.7091 similarity=0.2909
+  id=3 title=海边埋脚 owner=路人·03 status=pawned distance=0.9118 similarity=0.0882
+  id=2 title=高三的第一场雪 owner=路人·02 status=pawned distance=0.9231 similarity=0.0769
+
+== fulltext search (ik) ==
+  id=24 title=凌晨三点的便利店 我买了两份关东 score=2.0206897938868025
+
+== wallet / ledger ==
+player: verify-2026 coins: 157
+  #31 -10 托梦：把旧记忆缝在一起 memory=None
+  #30 -38 赎回《凌晨三点的便利店 我买了两份关东》 memory=24
+  #29 +38 典当《凌晨三点的便利店 我买了两份关东》 memory=24
+  #28 +47 典当《去年冬天奶奶在厨房煮姜汤 窗外下》 memory=23
+  #27 +120 开户：掌柜塞给你的启动记忆币 memory=None

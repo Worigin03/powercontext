@@ -1,0 +1,9 @@
+[
+  {
+    "query": "我还有多少记忆币？",
+    "status": "partial-succeeded",
+    "error": null,
+    "answer": "柜台暂时打烊了：记忆当铺服务没有响应。请按运行说明启动服务，并确认本节点的地址可达。",
+    "conversation_id": "9106c268-8d9e-4509-b8f1-474f196ad552"
+  }
+]

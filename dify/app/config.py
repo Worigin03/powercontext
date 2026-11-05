@@ -13,6 +13,7 @@ DB_CONFIG = {
     "autocommit": True,
 }
 
+EMBED_BACKEND = os.getenv("PAWNSHOP_EMBED_BACKEND", "hash").strip().lower()
 EMBED_MODEL = os.getenv(
     "PAWNSHOP_EMBED_MODEL",
     "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",

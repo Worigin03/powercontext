@@ -1,6 +1,6 @@
 from . import appraise as appraiser
 from . import db
-from .embeddings import embed_texts
+from .embeddings import backend_name, embed_texts
 from .db import vector_literal
 
 SEED = [
@@ -17,6 +17,18 @@ SEED = [
     ("路人·11", "陌生人的糖", "公交车上低血糖快晕倒，陌生女孩递来一颗糖，没留下名字就下车了。", "温柔"),
     ("路人·12", "删掉又恢复的短信", "深夜把那条短信删了又恢复，恢复又删，最后手机没电，天也亮了。", "遗憾"),
 ]
+
+
+def ensure_embedding_backend():
+    name = backend_name()
+    if db.get_meta("embed_backend") == name:
+        return 0
+    existing = db.rows("SELECT id, content FROM memories")
+    vectors = embed_texts([row["content"] for row in existing])
+    for row, vec in zip(existing, vectors):
+        db.run("UPDATE memories SET embedding=%s WHERE id=%s", [vector_literal(vec), row["id"]])
+    db.set_meta("embed_backend", name)
+    return len(existing)
 
 
 def seed_if_empty():

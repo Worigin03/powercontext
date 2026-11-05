@@ -156,7 +156,7 @@ def redeem(player_id, query):
 
 
 def browse(player_id, query, limit=3):
-    query = (query or "").strip() or "雨夜 车站 旧照片"
+    query = (query or "").strip() or "下雨天 跑回家"
     _wallet(player_id)
     hits = _search(query, player_id=player_id, only_owner=False, limit=max(1, min(5, limit)))
     items = [

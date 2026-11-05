@@ -1,0 +1,9 @@
+[
+  {
+    "query": "我还有多少记忆币？",
+    "status": "partial-succeeded",
+    "error": null,
+    "answer": "柜台暂时熄了灯，账本眼下查不出余额。请先让柜台服务重新开张，并确认此处的门牌尚能叩通，再来问一次。",
+    "conversation_id": "07b26b55-74af-4157-9f01-b7fb2f7ef65b"
+  }
+]

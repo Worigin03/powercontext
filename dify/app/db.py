@@ -1,4 +1,5 @@
 import json
+import time
 
 import pymysql
 
@@ -41,6 +42,12 @@ SCHEMA = [
         KEY idx_owner (owner_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     """,
+    """
+    CREATE TABLE IF NOT EXISTS meta (
+        k VARCHAR(64) PRIMARY KEY,
+        v VARCHAR(255) NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    """,
 ]
 
 
@@ -54,7 +61,21 @@ def connect(with_db=True):
     return conn
 
 
+def wait_ready(attempts=60, delay=2.0):
+    last_error = None
+    for _ in range(attempts):
+        try:
+            conn = connect(with_db=False)
+            conn.close()
+            return
+        except pymysql.MySQLError as error:
+            last_error = error
+            time.sleep(delay)
+    raise RuntimeError(f"seekdb is not ready: {last_error}")
+
+
 def init_schema():
+    wait_ready()
     conn = connect(with_db=False)
     try:
         with conn.cursor() as cur:
@@ -67,6 +88,19 @@ def init_schema():
                 cur.execute(sql)
     finally:
         conn.close()
+
+
+def get_meta(key):
+    row = one("SELECT v FROM meta WHERE k=%s", [key])
+    return row["v"] if row else None
+
+
+def set_meta(key, value):
+    run(
+        "INSERT INTO meta (k, v) VALUES (%s, %s) "
+        "ON DUPLICATE KEY UPDATE v=VALUES(v)",
+        [key, value],
+    )
 
 
 def rows(sql, params=None):
@@ -90,6 +124,16 @@ def run(sql, params=None):
         with conn.cursor() as cur:
             cur.execute(sql, params)
             return cur.lastrowid
+    finally:
+        conn.close()
+
+
+def execute(sql, params=None):
+    conn = connect()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(sql, params)
+            return cur.rowcount
     finally:
         conn.close()
 

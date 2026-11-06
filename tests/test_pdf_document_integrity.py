@@ -79,6 +79,23 @@ def test_wrong_page_tree_count_is_not_reported_as_complete():
         parse(raw)
 
 
+def test_wrong_nested_page_tree_count_fails_even_when_root_count_is_correct():
+    writer = report()
+    root = writer.root_object["/Pages"]
+    child = DictionaryObject({
+        NameObject("/Type"): NameObject("/Pages"),
+        NameObject("/Parent"): writer.root_object.raw_get("/Pages"),
+        NameObject("/Count"): NumberObject(3),
+        NameObject("/Kids"): root["/Kids"],
+    })
+    child_reference = writer._add_object(child)
+    for page in writer.pages:
+        page[NameObject("/Parent")] = child_reference
+    root[NameObject("/Kids")] = ArrayObject([child_reference])
+    with pytest.raises(ValueError):
+        parse(serialize(writer))
+
+
 def test_non_stream_in_content_array_is_not_silently_ignored():
     writer = report()
     page = writer.pages[1]

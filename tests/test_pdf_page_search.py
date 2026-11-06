@@ -110,6 +110,32 @@ async def test_document_id_survives_memory_text_normalization():
 
 
 @pytest.mark.asyncio
+async def test_dense_page_can_be_persisted_and_recalled_in_full(tmp_path):
+    definitions = registry()
+    page = PDFPageInput(
+        document_id="ACME_2022_10K",
+        document_sha256="a" * 64,
+        page_number=12,
+        text="Operating results and consolidated financial disclosures.\n" * 160
+        + "Asset retirement obligations increased to 170 million.",
+    )
+    source = await definitions.resolve(page)
+    projected = project_source_for_transport(definitions, source).projection(TEXT_EVIDENCE_PROJECTION_KEY)["content"]
+    assert len(projected.encode("utf-8")) > 8192
+    config = BuiltinConfig(database=SQLiteConfig(url=f"sqlite+aiosqlite:///{tmp_path / 'dense-pages.db'}"))
+    async with open_builtin_runtime(config, candidate_pipeline=EvidencePipeline()) as runtime:
+        memory = await seed(runtime, definitions, [page])
+        scope_id = memory.scope_id
+    async with open_builtin_runtime(config) as runtime:
+        memory = runtime.memory.for_scope(scope_id)
+        citations = await search_pdf_pages(memory, "What were Acme's asset retirement obligations?", limit=1)
+        assert len(citations) == 1
+        record = await memory.get(GetMemoryEntryRequest(citation=citations[0]))
+        assert record.entry.sources[0].source_id == source.name
+        assert record.entry.text == projected
+
+
+@pytest.mark.asyncio
 async def test_same_physical_page_in_distinct_pdf_revisions_is_not_collapsed():
     definitions = registry()
     pages = [

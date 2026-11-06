@@ -27,17 +27,19 @@ import rfc8785
 from pydantic import BaseModel, ConfigDict, JsonValue, ValidationError
 
 from powercontext.builtin.artifacts.memory.models import MemoryContent
+from powercontext.limits import MAX_SOURCE_OBSERVATION_BYTES
 
 _ENTRY_HASH_DOMAIN = b"powercontext:entry-content:v1\0"
 _EMBEDDING_HASH_DOMAIN = b"powercontext:embedding-content:v1\0"
 _LOWER_HEX_64 = re.compile(r"[0-9a-f]{64}\Z")
+_MEMORY_TEXT_BYTES = 8192
 
 
 class _CanonicalValueError(ValueError):
     def __init__(self, code: str, detail: object | None = None) -> None:
         self.code = code
         messages = {
-            "text-too-long": "memory entry text must not exceed 8192 UTF-8 bytes",
+            "text-too-long": f"memory entry text must not exceed {detail} UTF-8 bytes",
             "reason-too-long": "memory change reason must not exceed 512 Unicode code points",
             "identifier-empty": "memory identifiers must be non-empty strings",
             "identifier-ascii": "memory identifiers must contain only ASCII characters",
@@ -78,12 +80,20 @@ def canonical_json(value: object) -> bytes:
     return rfc8785.dumps(_validated_json(value))
 
 
-def normalize_text(value: str) -> str:
+def normalize_text(value: str, *, source_refs: Sequence[object] = ()) -> str:
     """Normalize and validate one durable entry body."""
 
     normalized = _normalize_non_empty_string(value, "memory entry text")
-    if len(normalized.encode("utf-8")) > 8192:
-        raise _CanonicalValueError("text-too-long")
+    # One PDF page is the evidence unit. Its text must remain intact for the
+    # exact citation and already fits inside the captured source payload limit.
+    source = source_refs[0] if len(source_refs) == 1 else None
+    limit = (
+        MAX_SOURCE_OBSERVATION_BYTES
+        if isinstance(source, Mapping) and source.get("source_type") == "pdf-page"
+        else _MEMORY_TEXT_BYTES
+    )
+    if len(normalized.encode("utf-8")) > limit:
+        raise _CanonicalValueError("text-too-long", limit)
     return normalized
 
 
@@ -158,10 +168,11 @@ def entry_content_bytes(
 ) -> bytes:
     """Return canonical content bytes for an immutable entry version."""
 
+    sources = normalize_refs(source_refs)
     return canonical_json({
         "kind": normalize_kind(kind),
-        "text": normalize_text(text),
-        "source_refs": normalize_refs(source_refs),
+        "text": normalize_text(text, source_refs=sources),
+        "source_refs": sources,
         "artifact_refs": normalize_refs(artifact_refs),
     })
 

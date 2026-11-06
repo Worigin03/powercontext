@@ -22,7 +22,17 @@ import unicodedata
 from collections import Counter
 
 from pypdf import PageObject, PdfReader
-from pypdf.generic import ArrayObject, DictionaryObject, NameObject, NullObject, NumberObject, PdfObject, StreamObject
+from pypdf._text_extraction import _layout_mode
+from pypdf.generic import (
+    ArrayObject,
+    ContentStream,
+    DictionaryObject,
+    NameObject,
+    NullObject,
+    NumberObject,
+    PdfObject,
+    StreamObject,
+)
 
 _TOKEN_PATTERN = re.compile(r"[a-z]+|\d+")
 
@@ -95,9 +105,26 @@ def _text_characters(text: str) -> Counter[str]:
 
 def _extract_page_text(page: PageObject, active_forms: frozenset[int] = frozenset()) -> str:
     """Reconstruct word boundaries without dropping text in forms or rotations."""
-    plain = page.extract_text() or ""
+    original = page.get("/Contents")
+    if original is None or isinstance(original.get_object(), NullObject):
+        return ""
+    # Both extraction modes use the same byte operands. Reuse one decoded
+    # stream so large reports do not parse each page's operators twice.
+    contents = ContentStream(original, page.pdf, "bytes")
+    page[NameObject("/Contents")] = contents
     try:
-        layout = page.extract_text(extraction_mode="layout", layout_mode_strip_rotated=False) or ""
+        plain = page.extract_text() or ""
+    finally:
+        page[NameObject("/Contents")] = original
+    try:
+        groups = _layout_mode.text_show_operations(
+            iter(contents.operations), page._layout_mode_fonts(), strip_rotated=False
+        )
+        layout = ""
+        if groups:
+            rows = _layout_mode.y_coordinate_groups(groups)
+            width = _layout_mode.fixed_char_width(groups)
+            layout = _layout_mode.fixed_width_page(rows, width, space_vertically=True, font_height_weight=1)
     except Exception:  # Layout support can be narrower than plain extraction.
         return plain
     if plain.strip():
@@ -105,7 +132,7 @@ def _extract_page_text(page: PageObject, active_forms: frozenset[int] = frozense
         if not plain_chars:
             return plain
         try:
-            layout = _restore_form_text(page, layout, plain_chars - _text_characters(layout), active_forms)
+            layout = _restore_form_text(page, contents, layout, plain_chars - _text_characters(layout), active_forms)
         except Exception:  # A layout-only limitation must not discard plain text.
             return plain
         # Preserve the original letter/number multiset before accepting layout.
@@ -144,15 +171,14 @@ def _separate_column_labels(plain: str, layout: str) -> str:
     return re.sub(r"[a-zA-Z]{12,}", separate, layout)
 
 
-def _restore_form_text(page: PageObject, layout: str, missing: Counter[str], active: frozenset[int]) -> str:
+def _restore_form_text(
+    page: PageObject, contents: ContentStream, layout: str, missing: Counter[str], active: frozenset[int]
+) -> str:
     """Recover text from actually drawn forms omitted by pypdf layout mode."""
     if not missing:
         return layout
     resources = page.get("/Resources", DictionaryObject()).get_object()
     objects = resources.get("/XObject", DictionaryObject()).get_object()
-    contents = page.get_contents()
-    if contents is None:
-        return layout
     for operands, operator in contents.operations:
         if operator != b"Do":
             continue

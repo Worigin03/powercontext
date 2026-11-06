@@ -1,5 +1,6 @@
 import json
 import time
+from contextlib import contextmanager
 
 import pymysql
 
@@ -35,11 +36,13 @@ SCHEMA = [
     CREATE TABLE IF NOT EXISTS ledger (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         owner_id VARCHAR(64) NOT NULL,
+        turn_id VARCHAR(64) NULL,
         delta INT NOT NULL,
         reason VARCHAR(160) NOT NULL,
         memory_id BIGINT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        KEY idx_owner (owner_id)
+        KEY idx_owner (owner_id),
+        UNIQUE KEY uk_owner_turn (owner_id, turn_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     """,
     """
@@ -49,6 +52,14 @@ SCHEMA = [
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     """,
 ]
+
+LEDGER_MIGRATIONS = (
+    ("turn_id", "ALTER TABLE ledger ADD COLUMN turn_id VARCHAR(64) NULL AFTER owner_id"),
+    (
+        "uk_owner_turn",
+        "ALTER TABLE ledger ADD UNIQUE KEY uk_owner_turn (owner_id, turn_id)",
+    ),
+)
 
 
 def connect(with_db=True):
@@ -74,6 +85,17 @@ def wait_ready(attempts=60, delay=2.0):
     raise RuntimeError(f"seekdb is not ready: {last_error}")
 
 
+def _migrate_ledger(cur):
+    for name, sql in LEDGER_MIGRATIONS:
+        try:
+            cur.execute(sql)
+        except pymysql.err.OperationalError as error:
+            # 1060 duplicate column, 1061 duplicate key: already applied.
+            if error.args and error.args[0] in (1060, 1061):
+                continue
+            raise
+
+
 def init_schema():
     wait_ready()
     conn = connect(with_db=False)
@@ -86,6 +108,21 @@ def init_schema():
         with conn.cursor() as cur:
             for sql in SCHEMA:
                 cur.execute(sql)
+            _migrate_ledger(cur)
+    finally:
+        conn.close()
+
+
+@contextmanager
+def tx():
+    conn = connect()
+    try:
+        conn.begin()
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
     finally:
         conn.close()
 

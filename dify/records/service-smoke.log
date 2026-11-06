@@ -1,141 +1,137 @@
-health: {"ok": true, "embedding": "hash:char-ngram-384"}
 
-[OK ] pawn 1 http=200
+== health (open) ==
 {
   "ok": true,
-  "action": "pawn",
-  "memory_id": 23,
-  "title": "去年冬天奶奶在厨房煮姜汤 窗外下",
-  "emotion": "温柔",
-  "appraisal": 47,
-  "reasons": [
-    "细节浓度 +2",
-    "感官颗粒 +6",
-    "温柔余温 +10",
-    "第一人称 +4"
+  "embedding": "fastembed:sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+  "auth": "required"
+}
+
+== missing token -> 401 ==
+{
+  "ok": false,
+  "error": "unauthorized",
+  "message": "缺少或错误的 X-Pawnshop-Token。"
+}
+
+== guest rejected ==
+guest player id was rejected as expected
+
+== reset ==
+{
+  "ok": true,
+  "removed_memories": 0,
+  "removed_ledger": 0,
+  "removed_wallet": 0
+}
+
+== wallet opened ==
+{
+  "ok": true,
+  "balance": 120,
+  "pawned": 0,
+  "redeemed": 0,
+  "recent": [
+    {
+      "delta": 120,
+      "reason": "开户：掌柜塞给你的启动记忆币",
+      "at": "2026-11-06 12:23:51"
+    }
   ],
+  "start_coins": 120,
+  "dream_cost": 10
+}
+
+== memory_store ==
+{
+  "ok": true,
+  "memory_id": 30,
+  "title": "奶奶的姜汤"
+}
+
+== wallet_apply (+47) ==
+{
+  "ok": true,
   "balance": 167,
-  "say": "掌柜收下了《去年冬天奶奶在厨房煮姜汤 窗外下》，估价 47 枚记忆币，判它是「温柔」味。你现在还有 167 枚。"
+  "applied": true
 }
 
-[OK ] pawn 2 http=200
+== same turn twice -> idempotent ==
 {
   "ok": true,
-  "action": "pawn",
-  "memory_id": 24,
-  "title": "凌晨三点的便利店 我买了两份关东",
-  "emotion": "未命名",
-  "appraisal": 38,
-  "reasons": [
-    "细节浓度 +1",
-    "可核对的刻度 +8",
-    "第一人称 +4"
-  ],
-  "balance": 205,
-  "say": "掌柜收下了《凌晨三点的便利店 我买了两份关东》，估价 38 枚记忆币，判它是「未命名」味。你现在还有 205 枚。"
-}
-
-[OK ] redeem http=200
-{
-  "ok": true,
-  "action": "redeem",
-  "memory_id": 24,
-  "title": "凌晨三点的便利店 我买了两份关东",
-  "content": "凌晨三点的便利店，我买了两份关东煮，等一个不会来的人。",
-  "emotion": "未命名",
-  "similarity": 0.5527,
-  "cost": 38,
   "balance": 167,
-  "exactness": "轮廓还在，边角被雨水泡软了",
-  "say": "掌柜从柜底抽出《凌晨三点的便利店 我买了两份关东》，相似度 0.55，收手续费 38 枚，余额 167 枚。记忆的清晰度：轮廓还在。"
+  "applied": false
 }
 
-[OK ] browse http=200
+== semantic search (owner) ==
 {
   "ok": true,
-  "action": "browse",
-  "query": "下雨天 跑回家",
+  "query": "亲人在灶台边熬汤",
+  "scope": "owner",
   "items": [
     {
-      "title": "大雨跑回家",
-      "fragment": "下大雨没带伞，索性跑回家，进门时全身滴水，妈妈一边骂一边递毛巾。",
+      "id": 30,
+      "title": "奶奶的姜汤",
+      "snippet": "去年冬天奶奶在厨房煮姜汤，窗外下着小雪，锅盖被蒸汽顶得咯咯响，她把碗塞进我手里说快喝。",
       "emotion": "温柔",
-      "similarity": 0.3198,
-      "owner": "匿名的旅人·92",
-      "appraisal": 47
-    },
-    {
-      "title": "毕业礼帽",
-      "fragment": "毕业典礼把帽子抛向天空，落下来时找不到自己的那顶，大家笑着说算了。",
-      "emotion": "狂喜",
-      "similarity": 0.0845,
-      "owner": "匿名的旅人·B4",
-      "appraisal": 36
-    },
-    {
-      "title": "高三的第一场雪",
-      "fragment": "高三晚自习，窗外的第一场雪落下来，全班同时抬头，班主任破天荒没有骂人。",
-      "emotion": "平静",
-      "similarity": 0.05,
-      "owner": "匿名的旅人·CC",
-      "appraisal": 47
+      "appraisal": 47,
+      "similarity": 0.6823,
+      "owner_key": "f680cdb23506f783ab12c0fa9094259ceddc7039"
     }
-  ],
-  "count": 3,
-  "say": "掌柜拉开通往黑市的暗门，翻出几段不属于你的记忆。"
+  ]
 }
 
-[OK ] dream http=200
+== memory_redeem (-40) ==
 {
   "ok": true,
-  "action": "dream",
-  "fragments": [
-    {
-      "title": "去年冬天奶奶在厨房煮姜汤 窗外下",
-      "emotion": "温柔",
-      "text": "去年冬天奶奶在厨房煮姜汤，窗外下着小雪，锅盖被蒸汽顶得咯咯响，她把碗塞进我手里说快喝。"
-    }
-  ],
-  "cost": 10,
-  "balance": 157,
-  "say": "掌柜把 1 段记忆塞进 dream 机，扣了 10 枚。请把碎片缝成一段第二人称的短梦，保留原句里最锋利的那半句。"
+  "memory_id": 30,
+  "title": "奶奶的姜汤",
+  "content": "去年冬天奶奶在厨房煮姜汤，窗外下着小雪，锅盖被蒸汽顶得咯咯响，她把碗塞进我手里说快喝。",
+  "emotion": "温柔",
+  "balance": 127,
+  "applied": true
 }
 
-[OK ] balance http=200
+== fragments after redeem ==
 {
   "ok": true,
-  "action": "balance",
-  "balance": 157,
-  "pawned": 1,
+  "fragments": [],
+  "count": 0,
+  "dream_cost": 10
+}
+
+== final wallet ==
+{
+  "ok": true,
+  "balance": 127,
+  "pawned": 0,
   "redeemed": 1,
   "recent": [
     {
-      "delta": -10,
-      "reason": "托梦：把旧记忆缝在一起",
-      "at": "2026-11-05 19:50:17"
-    },
-    {
-      "delta": -38,
-      "reason": "赎回《凌晨三点的便利店 我买了两份关东》",
-      "at": "2026-11-05 19:50:16"
-    },
-    {
-      "delta": 38,
-      "reason": "典当《凌晨三点的便利店 我买了两份关东》",
-      "at": "2026-11-05 19:50:16"
+      "delta": -40,
+      "reason": "赎回《奶奶的姜汤》",
+      "at": "2026-11-06 12:23:51"
     },
     {
       "delta": 47,
-      "reason": "典当《去年冬天奶奶在厨房煮姜汤 窗外下》",
-      "at": "2026-11-05 19:50:16"
+      "reason": "典当《奶奶的姜汤》",
+      "at": "2026-11-06 12:23:51"
     },
     {
       "delta": 120,
       "reason": "开户：掌柜塞给你的启动记忆币",
-      "at": "2026-11-05 19:50:13"
+      "at": "2026-11-06 12:23:51"
     }
   ],
-  "say": "你现在有 157 枚记忆币，柜台上还存着 1 段记忆，已经赎走 1 段。"
+  "start_coins": 120,
+  "dream_cost": 10
 }
 
-smoke: all actions ok
+== cleanup ==
+{
+  "ok": true,
+  "removed_memories": 1,
+  "removed_ledger": 3,
+  "removed_wallet": 1
+}
+
+smoke: ok

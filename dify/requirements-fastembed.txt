@@ -1,2 +1,0 @@
--r requirements.txt
-fastembed>=0.4

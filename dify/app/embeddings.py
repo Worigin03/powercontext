@@ -1,10 +1,10 @@
 """Embedding backends.
 
-The default backend hashes character n-grams into a fixed 384-dim vector.
-It needs no model download and runs offline, which keeps the submission
-reproducible on machines that cannot reach Hugging Face. A stronger
-multilingual sentence-transformer backend is available by installing
-``requirements-fastembed.txt`` and setting ``PAWNSHOP_EMBED_BACKEND=fastembed``.
+Default: fastembed running sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+locally (384 dims, no network at runtime because the image bakes the model in).
+``PAWNSHOP_EMBED_BACKEND=hash`` is an explicit offline fallback that hashes
+character n-grams; it measures literal overlap, not meaning, and exists only for
+machines that cannot carry the model.
 """
 
 import hashlib

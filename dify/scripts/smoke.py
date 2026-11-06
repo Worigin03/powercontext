@@ -1,58 +1,135 @@
-"""End-to-end smoke test for the memory pawnshop service (UTF-8 safe)."""
+#!/usr/bin/env python3
+"""Backend smoke test: auth, identity, memory writes, vector search, ledger.
+
+This exercises the storage service directly, without Dify. Gameplay decisions
+(appraisal, fee, wallet delta) belong to the Dify nodes; here we submit fixed
+values to prove the service persists them and keeps the ledger idempotent.
+
+Usage:
+    python scripts/smoke.py [base_url] [player_id]
+Environment:
+    PAWNSHOP_API_TOKEN (default: change-me-pawnshop-token)
+"""
 
 import json
+import os
 import sys
+import urllib.error
 import urllib.request
 
-BASE = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8700"
+BASE = sys.argv[1] if len(sys.argv) > 1 else os.getenv("PAWNSHOP_BASE_URL", "http://127.0.0.1:8700")
 PLAYER = sys.argv[2] if len(sys.argv) > 2 else "verify-2026"
+TOKEN = os.getenv("PAWNSHOP_API_TOKEN", "change-me-pawnshop-token")
+HEADERS = {"Content-Type": "application/json; charset=utf-8", "X-Pawnshop-Token": TOKEN}
 
 
-def call(action, **extra):
-    payload = {"player_id": PLAYER, "action": action, **extra}
+def call(path, payload=None, headers=None, expect=200):
+    data = None
+    if payload is not None:
+        data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     req = urllib.request.Request(
-        f"{BASE}/api/tool",
-        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-        headers={"Content-Type": "application/json; charset=utf-8"},
-        method="POST",
+        f"{BASE}{path}",
+        data=data,
+        headers=HEADERS if headers is None else headers,
+        method="POST" if data else "GET",
     )
-    with urllib.request.urlopen(req, timeout=90) as resp:
-        return resp.status, json.loads(resp.read().decode("utf-8"))
+    try:
+        with urllib.request.urlopen(req, timeout=180) as resp:
+            status, raw = resp.status, resp.read().decode("utf-8")
+    except urllib.error.HTTPError as exc:
+        status, raw = exc.code, exc.read().decode("utf-8")
+    body = json.loads(raw)
+    if status != expect:
+        raise SystemExit(f"{path} expected {expect}, got {status}: {body}")
+    return body
 
 
-def show(name, status, body):
-    flag = "OK " if body.get("ok") else "ERR"
-    print(f"\n[{flag}] {name} http={status}")
+def show(name, body):
+    print(f"\n== {name} ==")
     print(json.dumps(body, ensure_ascii=False, indent=2))
-    if not body.get("ok"):
-        raise SystemExit(f"{name} failed: {body}")
 
 
-health = json.loads(urllib.request.urlopen(f"{BASE}/api/health", timeout=30).read())
-print("health:", json.dumps(health, ensure_ascii=False))
+def main():
+    health = call("/api/health", headers={})
+    show("health (open)", health)
+    if health.get("embedding", "").startswith("hash:"):
+        print("WARNING: running the lexical hash fallback, not semantic embeddings")
 
-status, body = call(
-    "pawn",
-    text="去年冬天奶奶在厨房煮姜汤，窗外下着小雪，锅盖被蒸汽顶得咯咯响，她把碗塞进我手里说快喝。",
-)
-show("pawn 1", status, body)
+    unauthorized = call("/api/wallet/get", {"player_id": f"acct:{PLAYER}"}, headers={}, expect=401)
+    show("missing token -> 401", unauthorized)
 
-status, body = call(
-    "pawn",
-    text="凌晨三点的便利店，我买了两份关东煮，等一个不会来的人。",
-)
-show("pawn 2", status, body)
+    guest = call("/api/wallet/get", {"player_id": "guest"})
+    if guest.get("ok") is not False or guest.get("error") != "bad_player":
+        raise SystemExit(f"guest should be rejected: {guest}")
+    print("\n== guest rejected ==")
+    print("guest player id was rejected as expected")
 
-status, body = call("redeem", query="便利店 关东煮 不会来的人")
-show("redeem", status, body)
+    show("reset", call("/api/admin/reset", {"player_id": f"acct:{PLAYER}"}))
+    wallet = call("/api/wallet/get", {"player_id": f"acct:{PLAYER}"})
+    show("wallet opened", wallet)
 
-status, body = call("browse", query="下雨天 跑回家", limit=3)
-show("browse", status, body)
+    text = "去年冬天奶奶在厨房煮姜汤，窗外下着小雪，锅盖被蒸汽顶得咯咯响，她把碗塞进我手里说快喝。"
+    stored = call(
+        "/api/memory/store",
+        {
+            "player_id": f"acct:{PLAYER}",
+            "text": text,
+            "title": "奶奶的姜汤",
+            "emotion": "温柔",
+            "appraisal": 47,
+        },
+    )
+    show("memory_store", stored)
+    memory_id = stored["memory_id"]
 
-status, body = call("dream")
-show("dream", status, body)
+    ledger = call(
+        "/api/wallet/apply",
+        {
+            "player_id": f"acct:{PLAYER}",
+            "turn_id": "smoke-pawn-1",
+            "delta": 47,
+            "reason": "典当《奶奶的姜汤》",
+            "memory_id": memory_id,
+        },
+    )
+    show("wallet_apply (+47)", ledger)
+    repeated = call(
+        "/api/wallet/apply",
+        {
+            "player_id": f"acct:{PLAYER}",
+            "turn_id": "smoke-pawn-1",
+            "delta": 47,
+            "reason": "典当《奶奶的姜汤》",
+            "memory_id": memory_id,
+        },
+    )
+    show("same turn twice -> idempotent", repeated)
 
-status, body = call("balance")
-show("balance", status, body)
+    hits = call(
+        "/api/memory/search",
+        {"player_id": f"acct:{PLAYER}", "query": "亲人在灶台边熬汤", "scope": "owner", "limit": 3},
+    )
+    show("semantic search (owner)", hits)
 
-print("\nsmoke: all actions ok")
+    redeemed = call(
+        "/api/memory/redeem",
+        {
+            "player_id": f"acct:{PLAYER}",
+            "memory_id": memory_id,
+            "fee": 40,
+            "turn_id": "smoke-redeem-1",
+        },
+    )
+    show("memory_redeem (-40)", redeemed)
+
+    show(
+        "fragments after redeem",
+        call("/api/memory/fragments", {"player_id": f"acct:{PLAYER}", "limit": 3}),
+    )
+    show("final wallet", call("/api/wallet/get", {"player_id": f"acct:{PLAYER}"}))
+    show("cleanup", call("/api/admin/reset", {"player_id": f"acct:{PLAYER}"}))
+    print("\nsmoke: ok")
+
+
+if __name__ == "__main__":
+    main()

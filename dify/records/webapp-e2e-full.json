@@ -1,0 +1,1883 @@
+{
+  "generated_at": "2026-11-06T12:21:38+08:00",
+  "dify_base": "http://127.0.0.1:8080",
+  "mode": "published-webapp-api",
+  "account": "acct:e2e-2026",
+  "turns": [
+    {
+      "query": "我还有多少记忆币？",
+      "workflow_run_id": "7f305944-174b-4890-9128-2a514be875dd",
+      "conversation_id": "03469971-cd17-4c8f-afc6-164dcf78bda6",
+      "status": "succeeded",
+      "answer": "你现在有 120 枚记忆币。柜台上还存着 0 段记忆，已经赎走 0 段。\n最近账目：\n· +120 枚：开户：掌柜塞给你的启动记忆币",
+      "nodes": [
+        {
+          "node_id": "start",
+          "node_type": "start",
+          "title": "开始",
+          "status": "succeeded",
+          "elapsed_time": 0.000141,
+          "total_tokens": 0,
+          "outputs": {
+            "account": "e2e-2026"
+          }
+        },
+        {
+          "node_id": "route",
+          "node_type": "code",
+          "title": "柜台分诊",
+          "status": "succeeded",
+          "elapsed_time": 0.062337,
+          "total_tokens": 0,
+          "outputs": {
+            "action": "balance",
+            "text": "",
+            "query": "",
+            "player_id": "acct:e2e-2026",
+            "turn_id": "7f305944-174b-4890-9128-2a514be875dd",
+            "wallet_body": "{\"player_id\": \"acct:e2e-2026\"}",
+            "redeem_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"我还有多少记忆币？\", \"scope\": \"owner\", \"limit\": 5}",
+            "browse_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"\", \"scope\": \"public\", \"limit\": 4}",
+            "dream_body": "{\"player_id\": \"acct:e2e-2026\", \"limit\": 3}",
+            "hint": "",
+            "start_coins": 120,
+            "dream_cost": 10
+          }
+        },
+        {
+          "node_id": "branch",
+          "node_type": "if-else",
+          "title": "按动作分支",
+          "status": "succeeded",
+          "elapsed_time": 0.000352,
+          "total_tokens": 0,
+          "outputs": {
+            "result": true,
+            "selected_case_id": "balance"
+          }
+        },
+        {
+          "node_id": "balance_wallet",
+          "node_type": "http-request",
+          "title": "查余额",
+          "status": "succeeded",
+          "elapsed_time": 0.046346,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"balance\":120,\"pawned\":0,\"redeemed\":0,\"recent\":[{\"delta\":120,\"reason\":\"开户：掌柜塞给你的启动记忆币\",\"at\":\"2026-11-06 12:21:26\"}],\"start_coins\":120,\"dream_cost\":10}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:26 GMT",
+              "server": "uvicorn",
+              "content-length": "189",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "balance_fmt",
+          "node_type": "code",
+          "title": "整理账本",
+          "status": "succeeded",
+          "elapsed_time": 0.061139,
+          "total_tokens": 0,
+          "outputs": {
+            "text": "你现在有 120 枚记忆币。柜台上还存着 0 段记忆，已经赎走 0 段。\n最近账目：\n· +120 枚：开户：掌柜塞给你的启动记忆币"
+          }
+        },
+        {
+          "node_id": "merge",
+          "node_type": "variable-aggregator",
+          "title": "汇总六路回话",
+          "status": "succeeded",
+          "elapsed_time": 9.9e-05,
+          "total_tokens": 0,
+          "outputs": {
+            "output": "你现在有 120 枚记忆币。柜台上还存着 0 段记忆，已经赎走 0 段。\n最近账目：\n· +120 枚：开户：掌柜塞给你的启动记忆币"
+          }
+        },
+        {
+          "node_id": "answer",
+          "node_type": "answer",
+          "title": "回复",
+          "status": "succeeded",
+          "elapsed_time": 0.000114,
+          "total_tokens": 0,
+          "outputs": {
+            "answer": "你现在有 120 枚记忆币。柜台上还存着 0 段记忆，已经赎走 0 段。\n最近账目：\n· +120 枚：开户：掌柜塞给你的启动记忆币",
+            "files": []
+          }
+        }
+      ],
+      "node_counts": {
+        "start": 1,
+        "route": 1,
+        "branch": 1,
+        "balance_wallet": 1,
+        "balance_fmt": 1,
+        "merge": 1,
+        "answer": 1
+      },
+      "total_tokens": 0,
+      "elapsed_time": 0.28678490300012527
+    },
+    {
+      "query": "赎回一段关于雨夜的记忆",
+      "workflow_run_id": "31752536-e58d-49bb-b61e-00ffe213fa50",
+      "conversation_id": "03469971-cd17-4c8f-afc6-164dcf78bda6",
+      "status": "succeeded",
+      "answer": "柜台上没有你当掉的记忆。先去典当一段吧。\n你现在有 120 枚记忆币。",
+      "nodes": [
+        {
+          "node_id": "start",
+          "node_type": "start",
+          "title": "开始",
+          "status": "succeeded",
+          "elapsed_time": 0.000174,
+          "total_tokens": 0,
+          "outputs": {
+            "account": "e2e-2026"
+          }
+        },
+        {
+          "node_id": "route",
+          "node_type": "code",
+          "title": "柜台分诊",
+          "status": "succeeded",
+          "elapsed_time": 0.067974,
+          "total_tokens": 0,
+          "outputs": {
+            "action": "redeem",
+            "text": "",
+            "query": "雨夜的记忆",
+            "player_id": "acct:e2e-2026",
+            "turn_id": "31752536-e58d-49bb-b61e-00ffe213fa50",
+            "wallet_body": "{\"player_id\": \"acct:e2e-2026\"}",
+            "redeem_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"雨夜的记忆\", \"scope\": \"owner\", \"limit\": 5}",
+            "browse_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"雨夜的记忆\", \"scope\": \"public\", \"limit\": 4}",
+            "dream_body": "{\"player_id\": \"acct:e2e-2026\", \"limit\": 3}",
+            "hint": "",
+            "start_coins": 120,
+            "dream_cost": 10
+          }
+        },
+        {
+          "node_id": "branch",
+          "node_type": "if-else",
+          "title": "按动作分支",
+          "status": "succeeded",
+          "elapsed_time": 0.000185,
+          "total_tokens": 0,
+          "outputs": {
+            "result": true,
+            "selected_case_id": "redeem"
+          }
+        },
+        {
+          "node_id": "redeem_wallet",
+          "node_type": "http-request",
+          "title": "赎回前查余额",
+          "status": "succeeded",
+          "elapsed_time": 0.041182,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"balance\":120,\"pawned\":0,\"redeemed\":0,\"recent\":[{\"delta\":120,\"reason\":\"开户：掌柜塞给你的启动记忆币\",\"at\":\"2026-11-06 12:21:26\"}],\"start_coins\":120,\"dream_cost\":10}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:27 GMT",
+              "server": "uvicorn",
+              "content-length": "189",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "redeem_search",
+          "node_type": "http-request",
+          "title": "赎回向量检索",
+          "status": "succeeded",
+          "elapsed_time": 0.053318,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"query\":\"雨夜的记忆\",\"scope\":\"owner\",\"items\":[]}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:27 GMT",
+              "server": "uvicorn",
+              "content-length": "64",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "redeem_choose",
+          "node_type": "code",
+          "title": "选票 · 算手续费",
+          "status": "succeeded",
+          "elapsed_time": 0.06248,
+          "total_tokens": 0,
+          "outputs": {
+            "decision": "fail",
+            "fail_reason": "柜台上没有你当掉的记忆。先去典当一段吧。",
+            "memory_id": 0,
+            "title": "",
+            "similarity": 0,
+            "cost": 0,
+            "exactness": "",
+            "balance": 120,
+            "commit_body": ""
+          }
+        },
+        {
+          "node_id": "redeem_if",
+          "node_type": "if-else",
+          "title": "能否赎回",
+          "status": "succeeded",
+          "elapsed_time": 0.000113,
+          "total_tokens": 0,
+          "outputs": {
+            "result": false,
+            "selected_case_id": "false"
+          }
+        },
+        {
+          "node_id": "redeem_fail",
+          "node_type": "code",
+          "title": "赎回失败说明",
+          "status": "succeeded",
+          "elapsed_time": 0.056419,
+          "total_tokens": 0,
+          "outputs": {
+            "text": "柜台上没有你当掉的记忆。先去典当一段吧。\n你现在有 120 枚记忆币。"
+          }
+        },
+        {
+          "node_id": "merge",
+          "node_type": "variable-aggregator",
+          "title": "汇总六路回话",
+          "status": "succeeded",
+          "elapsed_time": 8.5e-05,
+          "total_tokens": 0,
+          "outputs": {
+            "output": "柜台上没有你当掉的记忆。先去典当一段吧。\n你现在有 120 枚记忆币。"
+          }
+        },
+        {
+          "node_id": "answer",
+          "node_type": "answer",
+          "title": "回复",
+          "status": "succeeded",
+          "elapsed_time": 0.000117,
+          "total_tokens": 0,
+          "outputs": {
+            "answer": "柜台上没有你当掉的记忆。先去典当一段吧。\n你现在有 120 枚记忆币。",
+            "files": []
+          }
+        }
+      ],
+      "node_counts": {
+        "start": 1,
+        "route": 1,
+        "branch": 1,
+        "redeem_wallet": 1,
+        "redeem_search": 1,
+        "redeem_choose": 1,
+        "redeem_if": 1,
+        "redeem_fail": 1,
+        "merge": 1,
+        "answer": 1
+      },
+      "total_tokens": 0,
+      "elapsed_time": 0.41546560300002966
+    },
+    {
+      "query": "帮我把当掉的记忆缝成一个梦",
+      "workflow_run_id": "b1415f08-040f-4912-9f56-10ca88580045",
+      "conversation_id": "03469971-cd17-4c8f-afc6-164dcf78bda6",
+      "status": "succeeded",
+      "answer": "你还没在当铺留下任何东西，梦是拼不出来的。先去典当一段吧。\n你现在有 120 枚记忆币。",
+      "nodes": [
+        {
+          "node_id": "start",
+          "node_type": "start",
+          "title": "开始",
+          "status": "succeeded",
+          "elapsed_time": 0.000104,
+          "total_tokens": 0,
+          "outputs": {
+            "account": "e2e-2026"
+          }
+        },
+        {
+          "node_id": "route",
+          "node_type": "code",
+          "title": "柜台分诊",
+          "status": "succeeded",
+          "elapsed_time": 0.059365,
+          "total_tokens": 0,
+          "outputs": {
+            "action": "dream",
+            "text": "",
+            "query": "",
+            "player_id": "acct:e2e-2026",
+            "turn_id": "b1415f08-040f-4912-9f56-10ca88580045",
+            "wallet_body": "{\"player_id\": \"acct:e2e-2026\"}",
+            "redeem_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"帮我把当掉的记忆缝成一个梦\", \"scope\": \"owner\", \"limit\": 5}",
+            "browse_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"\", \"scope\": \"public\", \"limit\": 4}",
+            "dream_body": "{\"player_id\": \"acct:e2e-2026\", \"limit\": 3}",
+            "hint": "",
+            "start_coins": 120,
+            "dream_cost": 10
+          }
+        },
+        {
+          "node_id": "branch",
+          "node_type": "if-else",
+          "title": "按动作分支",
+          "status": "succeeded",
+          "elapsed_time": 0.000128,
+          "total_tokens": 0,
+          "outputs": {
+            "result": true,
+            "selected_case_id": "dream"
+          }
+        },
+        {
+          "node_id": "dream_wallet",
+          "node_type": "http-request",
+          "title": "托梦前查余额",
+          "status": "succeeded",
+          "elapsed_time": 0.03142,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"balance\":120,\"pawned\":0,\"redeemed\":0,\"recent\":[{\"delta\":120,\"reason\":\"开户：掌柜塞给你的启动记忆币\",\"at\":\"2026-11-06 12:21:26\"}],\"start_coins\":120,\"dream_cost\":10}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:27 GMT",
+              "server": "uvicorn",
+              "content-length": "189",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "dream_fragments",
+          "node_type": "http-request",
+          "title": "抽取旧记忆碎片",
+          "status": "succeeded",
+          "elapsed_time": 0.043018,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"fragments\":[],\"count\":0,\"dream_cost\":10}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:27 GMT",
+              "server": "uvicorn",
+              "content-length": "52",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "dream_check",
+          "node_type": "code",
+          "title": "托梦检查与扣费单",
+          "status": "succeeded",
+          "elapsed_time": 0.05365,
+          "total_tokens": 0,
+          "outputs": {
+            "decision": "fail",
+            "fail_reason": "你还没在当铺留下任何东西，梦是拼不出来的。先去典当一段吧。",
+            "fragment_text": "",
+            "fragment_count": 0,
+            "ledger_body": "",
+            "balance": 120
+          }
+        },
+        {
+          "node_id": "dream_ledger_prep",
+          "node_type": "code",
+          "title": "补全扣费单",
+          "status": "succeeded",
+          "elapsed_time": 0.059205,
+          "total_tokens": 0,
+          "outputs": {
+            "body": "{\"player_id\": \"acct:e2e-2026\", \"turn_id\": \"b1415f08-040f-4912-9f56-10ca88580045\"}"
+          }
+        },
+        {
+          "node_id": "dream_if",
+          "node_type": "if-else",
+          "title": "能否托梦",
+          "status": "succeeded",
+          "elapsed_time": 0.000108,
+          "total_tokens": 0,
+          "outputs": {
+            "result": false,
+            "selected_case_id": "false"
+          }
+        },
+        {
+          "node_id": "dream_fail",
+          "node_type": "code",
+          "title": "托梦失败说明",
+          "status": "succeeded",
+          "elapsed_time": 0.064574,
+          "total_tokens": 0,
+          "outputs": {
+            "text": "你还没在当铺留下任何东西，梦是拼不出来的。先去典当一段吧。\n你现在有 120 枚记忆币。"
+          }
+        },
+        {
+          "node_id": "merge",
+          "node_type": "variable-aggregator",
+          "title": "汇总六路回话",
+          "status": "succeeded",
+          "elapsed_time": 7.1e-05,
+          "total_tokens": 0,
+          "outputs": {
+            "output": "你还没在当铺留下任何东西，梦是拼不出来的。先去典当一段吧。\n你现在有 120 枚记忆币。"
+          }
+        },
+        {
+          "node_id": "answer",
+          "node_type": "answer",
+          "title": "回复",
+          "status": "succeeded",
+          "elapsed_time": 0.000108,
+          "total_tokens": 0,
+          "outputs": {
+            "answer": "你还没在当铺留下任何东西，梦是拼不出来的。先去典当一段吧。\n你现在有 120 枚记忆币。",
+            "files": []
+          }
+        }
+      ],
+      "node_counts": {
+        "start": 1,
+        "route": 1,
+        "branch": 1,
+        "dream_wallet": 1,
+        "dream_fragments": 1,
+        "dream_check": 1,
+        "dream_ledger_prep": 1,
+        "dream_if": 1,
+        "dream_fail": 1,
+        "merge": 1,
+        "answer": 1
+      },
+      "total_tokens": 0,
+      "elapsed_time": 0.4260711980000451
+    },
+    {
+      "query": "当掉：去年冬天奶奶在厨房煮姜汤，窗外下着雪，她一直看着窗外。",
+      "workflow_run_id": "4947b10d-d9b1-44c0-91b4-fb130fc87b28",
+      "conversation_id": "03469971-cd17-4c8f-afc6-164dcf78bda6",
+      "status": "succeeded",
+      "answer": "掌柜收下了《去年冬天奶奶在厨房煮姜汤 窗外下》，估价 47 枚记忆币，判它是「平静」味。\n估价明细：细节浓度 +1、感官颗粒 +3、平静余温 +10、可核对的刻度 +8\n当票编号 #23。你现在还有 167 枚记忆币。",
+      "nodes": [
+        {
+          "node_id": "start",
+          "node_type": "start",
+          "title": "开始",
+          "status": "succeeded",
+          "elapsed_time": 0.00016,
+          "total_tokens": 0,
+          "outputs": {
+            "account": "e2e-2026"
+          }
+        },
+        {
+          "node_id": "route",
+          "node_type": "code",
+          "title": "柜台分诊",
+          "status": "succeeded",
+          "elapsed_time": 0.055724,
+          "total_tokens": 0,
+          "outputs": {
+            "action": "pawn",
+            "text": "去年冬天奶奶在厨房煮姜汤，窗外下着雪，她一直看着窗外。",
+            "query": "",
+            "player_id": "acct:e2e-2026",
+            "turn_id": "4947b10d-d9b1-44c0-91b4-fb130fc87b28",
+            "wallet_body": "{\"player_id\": \"acct:e2e-2026\"}",
+            "redeem_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"当掉：去年冬天奶奶在厨房煮姜汤，窗外下着雪，她一直看着窗外。\", \"scope\": \"owner\", \"limit\": 5}",
+            "browse_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"\", \"scope\": \"public\", \"limit\": 4}",
+            "dream_body": "{\"player_id\": \"acct:e2e-2026\", \"limit\": 3}",
+            "hint": "",
+            "start_coins": 120,
+            "dream_cost": 10
+          }
+        },
+        {
+          "node_id": "branch",
+          "node_type": "if-else",
+          "title": "按动作分支",
+          "status": "succeeded",
+          "elapsed_time": 0.000141,
+          "total_tokens": 0,
+          "outputs": {
+            "result": true,
+            "selected_case_id": "pawn"
+          }
+        },
+        {
+          "node_id": "pawn_appraise",
+          "node_type": "code",
+          "title": "估价 · 判味",
+          "status": "succeeded",
+          "elapsed_time": 0.058091,
+          "total_tokens": 0,
+          "outputs": {
+            "can_pawn": true,
+            "title": "去年冬天奶奶在厨房煮姜汤 窗外下",
+            "emotion": "平静",
+            "appraisal": 47,
+            "reasons_line": "细节浓度 +1、感官颗粒 +3、平静余温 +10、可核对的刻度 +8",
+            "store_body": "{\"player_id\": \"acct:e2e-2026\", \"text\": \"去年冬天奶奶在厨房煮姜汤，窗外下着雪，她一直看着窗外。\", \"title\": \"去年冬天奶奶在厨房煮姜汤 窗外下\", \"emotion\": \"平静\", \"appraisal\": 47}",
+            "ledger_body": "{\"player_id\": \"acct:e2e-2026\", \"turn_id\": \"4947b10d-d9b1-44c0-91b4-fb130fc87b28\", \"delta\": 47, \"reason\": \"典当《去年冬天奶奶在厨房煮姜汤 窗外下》\"}"
+          }
+        },
+        {
+          "node_id": "pawn_store",
+          "node_type": "http-request",
+          "title": "写入当票",
+          "status": "succeeded",
+          "elapsed_time": 0.16571,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"memory_id\":23,\"title\":\"去年冬天奶奶在厨房煮姜汤 窗外下\"}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:28 GMT",
+              "server": "uvicorn",
+              "content-length": "83",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "pawn_ledger",
+          "node_type": "http-request",
+          "title": "记忆币入账",
+          "status": "succeeded",
+          "elapsed_time": 0.046631,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"balance\":167,\"applied\":true}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:28 GMT",
+              "server": "uvicorn",
+              "content-length": "40",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "pawn_reply",
+          "node_type": "code",
+          "title": "整理当票",
+          "status": "succeeded",
+          "elapsed_time": 0.057497,
+          "total_tokens": 0,
+          "outputs": {
+            "text": "掌柜收下了《去年冬天奶奶在厨房煮姜汤 窗外下》，估价 47 枚记忆币，判它是「平静」味。\n估价明细：细节浓度 +1、感官颗粒 +3、平静余温 +10、可核对的刻度 +8\n当票编号 #23。你现在还有 167 枚记忆币。"
+          }
+        },
+        {
+          "node_id": "merge",
+          "node_type": "variable-aggregator",
+          "title": "汇总六路回话",
+          "status": "succeeded",
+          "elapsed_time": 6.6e-05,
+          "total_tokens": 0,
+          "outputs": {
+            "output": "掌柜收下了《去年冬天奶奶在厨房煮姜汤 窗外下》，估价 47 枚记忆币，判它是「平静」味。\n估价明细：细节浓度 +1、感官颗粒 +3、平静余温 +10、可核对的刻度 +8\n当票编号 #23。你现在还有 167 枚记忆币。"
+          }
+        },
+        {
+          "node_id": "answer",
+          "node_type": "answer",
+          "title": "回复",
+          "status": "succeeded",
+          "elapsed_time": 0.00011,
+          "total_tokens": 0,
+          "outputs": {
+            "answer": "掌柜收下了《去年冬天奶奶在厨房煮姜汤 窗外下》，估价 47 枚记忆币，判它是「平静」味。\n估价明细：细节浓度 +1、感官颗粒 +3、平静余温 +10、可核对的刻度 +8\n当票编号 #23。你现在还有 167 枚记忆币。",
+            "files": []
+          }
+        }
+      ],
+      "node_counts": {
+        "start": 1,
+        "route": 1,
+        "branch": 1,
+        "pawn_appraise": 1,
+        "pawn_store": 1,
+        "pawn_ledger": 1,
+        "pawn_reply": 1,
+        "merge": 1,
+        "answer": 1
+      },
+      "total_tokens": 0,
+      "elapsed_time": 0.46966445700013537
+    },
+    {
+      "query": "当掉：凌晨三点我们在宿舍分一锅泡面，谁都不肯承认自己饿了，汤都喝完了。",
+      "workflow_run_id": "8a0e9321-42fd-4954-b773-fa4d0f226515",
+      "conversation_id": "03469971-cd17-4c8f-afc6-164dcf78bda6",
+      "status": "succeeded",
+      "answer": "掌柜收下了《凌晨三点我们在宿舍分一锅泡面 谁》，估价 38 枚记忆币，判它是「未命名」味。\n估价明细：细节浓度 +1、可核对的刻度 +8、第一人称 +4\n当票编号 #24。你现在还有 205 枚记忆币。",
+      "nodes": [
+        {
+          "node_id": "start",
+          "node_type": "start",
+          "title": "开始",
+          "status": "succeeded",
+          "elapsed_time": 9.9e-05,
+          "total_tokens": 0,
+          "outputs": {
+            "account": "e2e-2026"
+          }
+        },
+        {
+          "node_id": "route",
+          "node_type": "code",
+          "title": "柜台分诊",
+          "status": "succeeded",
+          "elapsed_time": 0.08083,
+          "total_tokens": 0,
+          "outputs": {
+            "action": "pawn",
+            "text": "凌晨三点我们在宿舍分一锅泡面，谁都不肯承认自己饿了，汤都喝完了。",
+            "query": "",
+            "player_id": "acct:e2e-2026",
+            "turn_id": "8a0e9321-42fd-4954-b773-fa4d0f226515",
+            "wallet_body": "{\"player_id\": \"acct:e2e-2026\"}",
+            "redeem_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"当掉：凌晨三点我们在宿舍分一锅泡面，谁都不肯承认自己饿了，汤都喝完了。\", \"scope\": \"owner\", \"limit\": 5}",
+            "browse_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"\", \"scope\": \"public\", \"limit\": 4}",
+            "dream_body": "{\"player_id\": \"acct:e2e-2026\", \"limit\": 3}",
+            "hint": "",
+            "start_coins": 120,
+            "dream_cost": 10
+          }
+        },
+        {
+          "node_id": "branch",
+          "node_type": "if-else",
+          "title": "按动作分支",
+          "status": "succeeded",
+          "elapsed_time": 0.000145,
+          "total_tokens": 0,
+          "outputs": {
+            "result": true,
+            "selected_case_id": "pawn"
+          }
+        },
+        {
+          "node_id": "pawn_appraise",
+          "node_type": "code",
+          "title": "估价 · 判味",
+          "status": "succeeded",
+          "elapsed_time": 0.073858,
+          "total_tokens": 0,
+          "outputs": {
+            "can_pawn": true,
+            "title": "凌晨三点我们在宿舍分一锅泡面 谁",
+            "emotion": "未命名",
+            "appraisal": 38,
+            "reasons_line": "细节浓度 +1、可核对的刻度 +8、第一人称 +4",
+            "store_body": "{\"player_id\": \"acct:e2e-2026\", \"text\": \"凌晨三点我们在宿舍分一锅泡面，谁都不肯承认自己饿了，汤都喝完了。\", \"title\": \"凌晨三点我们在宿舍分一锅泡面 谁\", \"emotion\": \"未命名\", \"appraisal\": 38}",
+            "ledger_body": "{\"player_id\": \"acct:e2e-2026\", \"turn_id\": \"8a0e9321-42fd-4954-b773-fa4d0f226515\", \"delta\": 38, \"reason\": \"典当《凌晨三点我们在宿舍分一锅泡面 谁》\"}"
+          }
+        },
+        {
+          "node_id": "pawn_store",
+          "node_type": "http-request",
+          "title": "写入当票",
+          "status": "succeeded",
+          "elapsed_time": 0.05154,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"memory_id\":24,\"title\":\"凌晨三点我们在宿舍分一锅泡面 谁\"}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:28 GMT",
+              "server": "uvicorn",
+              "content-length": "83",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "pawn_ledger",
+          "node_type": "http-request",
+          "title": "记忆币入账",
+          "status": "succeeded",
+          "elapsed_time": 0.057312,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"balance\":205,\"applied\":true}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:28 GMT",
+              "server": "uvicorn",
+              "content-length": "40",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "pawn_reply",
+          "node_type": "code",
+          "title": "整理当票",
+          "status": "succeeded",
+          "elapsed_time": 0.062893,
+          "total_tokens": 0,
+          "outputs": {
+            "text": "掌柜收下了《凌晨三点我们在宿舍分一锅泡面 谁》，估价 38 枚记忆币，判它是「未命名」味。\n估价明细：细节浓度 +1、可核对的刻度 +8、第一人称 +4\n当票编号 #24。你现在还有 205 枚记忆币。"
+          }
+        },
+        {
+          "node_id": "merge",
+          "node_type": "variable-aggregator",
+          "title": "汇总六路回话",
+          "status": "succeeded",
+          "elapsed_time": 7.2e-05,
+          "total_tokens": 0,
+          "outputs": {
+            "output": "掌柜收下了《凌晨三点我们在宿舍分一锅泡面 谁》，估价 38 枚记忆币，判它是「未命名」味。\n估价明细：细节浓度 +1、可核对的刻度 +8、第一人称 +4\n当票编号 #24。你现在还有 205 枚记忆币。"
+          }
+        },
+        {
+          "node_id": "answer",
+          "node_type": "answer",
+          "title": "回复",
+          "status": "succeeded",
+          "elapsed_time": 0.000119,
+          "total_tokens": 0,
+          "outputs": {
+            "answer": "掌柜收下了《凌晨三点我们在宿舍分一锅泡面 谁》，估价 38 枚记忆币，判它是「未命名」味。\n估价明细：细节浓度 +1、可核对的刻度 +8、第一人称 +4\n当票编号 #24。你现在还有 205 枚记忆币。",
+            "files": []
+          }
+        }
+      ],
+      "node_counts": {
+        "start": 1,
+        "route": 1,
+        "branch": 1,
+        "pawn_appraise": 1,
+        "pawn_store": 1,
+        "pawn_ledger": 1,
+        "pawn_reply": 1,
+        "merge": 1,
+        "answer": 1
+      },
+      "total_tokens": 0,
+      "elapsed_time": 0.5184843800000181
+    },
+    {
+      "query": "当掉：毕业典礼把帽子抛向天空，落下来时找不到自己的那顶，大家笑着说算了。",
+      "workflow_run_id": "cc01e076-dce9-40f0-87b4-33f0f87131bb",
+      "conversation_id": "03469971-cd17-4c8f-afc6-164dcf78bda6",
+      "status": "succeeded",
+      "answer": "掌柜收下了《毕业典礼把帽子抛向天空 落下来时》，估价 36 枚记忆币，判它是「狂喜」味。\n估价明细：细节浓度 +1、狂喜余温 +10\n当票编号 #25。你现在还有 241 枚记忆币。",
+      "nodes": [
+        {
+          "node_id": "start",
+          "node_type": "start",
+          "title": "开始",
+          "status": "succeeded",
+          "elapsed_time": 0.000102,
+          "total_tokens": 0,
+          "outputs": {
+            "account": "e2e-2026"
+          }
+        },
+        {
+          "node_id": "route",
+          "node_type": "code",
+          "title": "柜台分诊",
+          "status": "succeeded",
+          "elapsed_time": 0.058026,
+          "total_tokens": 0,
+          "outputs": {
+            "action": "pawn",
+            "text": "毕业典礼把帽子抛向天空，落下来时找不到自己的那顶，大家笑着说算了。",
+            "query": "",
+            "player_id": "acct:e2e-2026",
+            "turn_id": "cc01e076-dce9-40f0-87b4-33f0f87131bb",
+            "wallet_body": "{\"player_id\": \"acct:e2e-2026\"}",
+            "redeem_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"当掉：毕业典礼把帽子抛向天空，落下来时找不到自己的那顶，大家笑着说算了。\", \"scope\": \"owner\", \"limit\": 5}",
+            "browse_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"\", \"scope\": \"public\", \"limit\": 4}",
+            "dream_body": "{\"player_id\": \"acct:e2e-2026\", \"limit\": 3}",
+            "hint": "",
+            "start_coins": 120,
+            "dream_cost": 10
+          }
+        },
+        {
+          "node_id": "branch",
+          "node_type": "if-else",
+          "title": "按动作分支",
+          "status": "succeeded",
+          "elapsed_time": 0.000118,
+          "total_tokens": 0,
+          "outputs": {
+            "result": true,
+            "selected_case_id": "pawn"
+          }
+        },
+        {
+          "node_id": "pawn_appraise",
+          "node_type": "code",
+          "title": "估价 · 判味",
+          "status": "succeeded",
+          "elapsed_time": 0.059204,
+          "total_tokens": 0,
+          "outputs": {
+            "can_pawn": true,
+            "title": "毕业典礼把帽子抛向天空 落下来时",
+            "emotion": "狂喜",
+            "appraisal": 36,
+            "reasons_line": "细节浓度 +1、狂喜余温 +10",
+            "store_body": "{\"player_id\": \"acct:e2e-2026\", \"text\": \"毕业典礼把帽子抛向天空，落下来时找不到自己的那顶，大家笑着说算了。\", \"title\": \"毕业典礼把帽子抛向天空 落下来时\", \"emotion\": \"狂喜\", \"appraisal\": 36}",
+            "ledger_body": "{\"player_id\": \"acct:e2e-2026\", \"turn_id\": \"cc01e076-dce9-40f0-87b4-33f0f87131bb\", \"delta\": 36, \"reason\": \"典当《毕业典礼把帽子抛向天空 落下来时》\"}"
+          }
+        },
+        {
+          "node_id": "pawn_store",
+          "node_type": "http-request",
+          "title": "写入当票",
+          "status": "succeeded",
+          "elapsed_time": 0.052964,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"memory_id\":25,\"title\":\"毕业典礼把帽子抛向天空 落下来时\"}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:29 GMT",
+              "server": "uvicorn",
+              "content-length": "83",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "pawn_ledger",
+          "node_type": "http-request",
+          "title": "记忆币入账",
+          "status": "succeeded",
+          "elapsed_time": 0.028975,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"balance\":241,\"applied\":true}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:29 GMT",
+              "server": "uvicorn",
+              "content-length": "40",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "pawn_reply",
+          "node_type": "code",
+          "title": "整理当票",
+          "status": "succeeded",
+          "elapsed_time": 0.058444,
+          "total_tokens": 0,
+          "outputs": {
+            "text": "掌柜收下了《毕业典礼把帽子抛向天空 落下来时》，估价 36 枚记忆币，判它是「狂喜」味。\n估价明细：细节浓度 +1、狂喜余温 +10\n当票编号 #25。你现在还有 241 枚记忆币。"
+          }
+        },
+        {
+          "node_id": "merge",
+          "node_type": "variable-aggregator",
+          "title": "汇总六路回话",
+          "status": "succeeded",
+          "elapsed_time": 5.4e-05,
+          "total_tokens": 0,
+          "outputs": {
+            "output": "掌柜收下了《毕业典礼把帽子抛向天空 落下来时》，估价 36 枚记忆币，判它是「狂喜」味。\n估价明细：细节浓度 +1、狂喜余温 +10\n当票编号 #25。你现在还有 241 枚记忆币。"
+          }
+        },
+        {
+          "node_id": "answer",
+          "node_type": "answer",
+          "title": "回复",
+          "status": "succeeded",
+          "elapsed_time": 0.000134,
+          "total_tokens": 0,
+          "outputs": {
+            "answer": "掌柜收下了《毕业典礼把帽子抛向天空 落下来时》，估价 36 枚记忆币，判它是「狂喜」味。\n估价明细：细节浓度 +1、狂喜余温 +10\n当票编号 #25。你现在还有 241 枚记忆币。",
+            "files": []
+          }
+        }
+      ],
+      "node_counts": {
+        "start": 1,
+        "route": 1,
+        "branch": 1,
+        "pawn_appraise": 1,
+        "pawn_store": 1,
+        "pawn_ledger": 1,
+        "pawn_reply": 1,
+        "merge": 1,
+        "answer": 1
+      },
+      "total_tokens": 0,
+      "elapsed_time": 0.3485194329998649
+    },
+    {
+      "query": "赎回一段关于奶奶在厨房煮姜汤的记忆",
+      "workflow_run_id": "9172c4d8-bbe3-4fef-9952-74858d0fc9dd",
+      "conversation_id": "03469971-cd17-4c8f-afc6-164dcf78bda6",
+      "status": "succeeded",
+      "answer": "掌柜从柜底抽出《去年冬天奶奶在厨房煮姜汤 窗外下》，相似度 0.70，收手续费 40 枚，余额 201 枚。\n当票背面还留着字：「去年冬天奶奶在厨房煮姜汤，窗外下着雪，她一直看着窗外。」\n清晰度：轮廓还在，边角被雨水泡软了。",
+      "nodes": [
+        {
+          "node_id": "start",
+          "node_type": "start",
+          "title": "开始",
+          "status": "succeeded",
+          "elapsed_time": 0.000115,
+          "total_tokens": 0,
+          "outputs": {
+            "account": "e2e-2026"
+          }
+        },
+        {
+          "node_id": "route",
+          "node_type": "code",
+          "title": "柜台分诊",
+          "status": "succeeded",
+          "elapsed_time": 0.066169,
+          "total_tokens": 0,
+          "outputs": {
+            "action": "redeem",
+            "text": "",
+            "query": "奶奶在厨房煮姜汤的记忆",
+            "player_id": "acct:e2e-2026",
+            "turn_id": "9172c4d8-bbe3-4fef-9952-74858d0fc9dd",
+            "wallet_body": "{\"player_id\": \"acct:e2e-2026\"}",
+            "redeem_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"奶奶在厨房煮姜汤的记忆\", \"scope\": \"owner\", \"limit\": 5}",
+            "browse_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"奶奶在厨房煮姜汤的记忆\", \"scope\": \"public\", \"limit\": 4}",
+            "dream_body": "{\"player_id\": \"acct:e2e-2026\", \"limit\": 3}",
+            "hint": "",
+            "start_coins": 120,
+            "dream_cost": 10
+          }
+        },
+        {
+          "node_id": "branch",
+          "node_type": "if-else",
+          "title": "按动作分支",
+          "status": "succeeded",
+          "elapsed_time": 0.00013,
+          "total_tokens": 0,
+          "outputs": {
+            "result": true,
+            "selected_case_id": "redeem"
+          }
+        },
+        {
+          "node_id": "redeem_wallet",
+          "node_type": "http-request",
+          "title": "赎回前查余额",
+          "status": "succeeded",
+          "elapsed_time": 0.03704,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"balance\":241,\"pawned\":3,\"redeemed\":0,\"recent\":[{\"delta\":36,\"reason\":\"典当《毕业典礼把帽子抛向天空 落下来时》\",\"at\":\"2026-11-06 12:21:29\"},{\"delta\":38,\"reason\":\"典当《凌晨三点我们在宿舍分一锅泡面 谁》\",\"at\":\"2026-11-06 12:21:29\"},{\"delta\":47,\"reason\":\"典当《去年冬天奶奶在厨房煮姜汤 窗外下》\",\"at\":\"2026-11-06 12:21:28\"},{\"delta\":120,\"reason\":\"开户：掌柜塞给你的启动记忆币\",\"at\":\"2026-11-06 12:21:26\"}],\"start_coins\":120,\"dream_cost\":10}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:29 GMT",
+              "server": "uvicorn",
+              "content-length": "519",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "redeem_search",
+          "node_type": "http-request",
+          "title": "赎回向量检索",
+          "status": "succeeded",
+          "elapsed_time": 0.034501,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"query\":\"奶奶在厨房煮姜汤的记忆\",\"scope\":\"owner\",\"items\":[{\"id\":23,\"title\":\"去年冬天奶奶在厨房煮姜汤 窗外下\",\"snippet\":\"去年冬天奶奶在厨房煮姜汤，窗外下着雪，她一直看着窗外。\",\"emotion\":\"平静\",\"appraisal\":47,\"similarity\":0.7019,\"owner_key\":\"3a2d99c4fa66d289e5a336a673eed2ac36661a39\"},{\"id\":24,\"title\":\"凌晨三点我们在宿舍分一锅泡面 谁\",\"snippet\":\"凌晨三点我们在宿舍分一锅泡面，谁都不肯承认自己饿了，汤都喝完了。\",\"emotion\":\"未命名\",\"appraisal\":38,\"similarity\":0.2901,\"owner_key\":\"3a2d99c4fa66d289e5a336a673eed2ac36661a39\"},{\"id\":25,\"title\":\"毕业典礼把帽子抛向天空 落下来时\",\"snippet\":\"毕业典礼把帽子抛向天空，落下来时找不到自己的那顶，大家笑着说算了。\",\"emotion\":\"狂喜\",\"appraisal\":36,\"similarity\":0.0369,\"owner_key\":\"3a2d99c4fa66d289e5a336a673eed2ac36661a39\"}]}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:29 GMT",
+              "server": "uvicorn",
+              "content-length": "927",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "redeem_choose",
+          "node_type": "code",
+          "title": "选票 · 算手续费",
+          "status": "succeeded",
+          "elapsed_time": 0.062109,
+          "total_tokens": 0,
+          "outputs": {
+            "decision": "commit",
+            "fail_reason": "",
+            "memory_id": 23,
+            "title": "去年冬天奶奶在厨房煮姜汤 窗外下",
+            "similarity": 0.7019,
+            "cost": 40,
+            "exactness": "轮廓还在，边角被雨水泡软了",
+            "balance": 241,
+            "commit_body": "{\"player_id\": \"acct:e2e-2026\", \"memory_id\": 23, \"fee\": 40, \"turn_id\": \"9172c4d8-bbe3-4fef-9952-74858d0fc9dd\"}"
+          }
+        },
+        {
+          "node_id": "redeem_if",
+          "node_type": "if-else",
+          "title": "能否赎回",
+          "status": "succeeded",
+          "elapsed_time": 0.000105,
+          "total_tokens": 0,
+          "outputs": {
+            "result": true,
+            "selected_case_id": "commit"
+          }
+        },
+        {
+          "node_id": "redeem_commit",
+          "node_type": "http-request",
+          "title": "赎回当票",
+          "status": "succeeded",
+          "elapsed_time": 0.056094,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"memory_id\":23,\"title\":\"去年冬天奶奶在厨房煮姜汤 窗外下\",\"content\":\"去年冬天奶奶在厨房煮姜汤，窗外下着雪，她一直看着窗外。\",\"emotion\":\"平静\",\"balance\":201,\"applied\":true}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:29 GMT",
+              "server": "uvicorn",
+              "content-length": "225",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "redeem_reply",
+          "node_type": "code",
+          "title": "交还当票",
+          "status": "succeeded",
+          "elapsed_time": 0.061443,
+          "total_tokens": 0,
+          "outputs": {
+            "text": "掌柜从柜底抽出《去年冬天奶奶在厨房煮姜汤 窗外下》，相似度 0.70，收手续费 40 枚，余额 201 枚。\n当票背面还留着字：「去年冬天奶奶在厨房煮姜汤，窗外下着雪，她一直看着窗外。」\n清晰度：轮廓还在，边角被雨水泡软了。"
+          }
+        },
+        {
+          "node_id": "merge",
+          "node_type": "variable-aggregator",
+          "title": "汇总六路回话",
+          "status": "succeeded",
+          "elapsed_time": 9.2e-05,
+          "total_tokens": 0,
+          "outputs": {
+            "output": "掌柜从柜底抽出《去年冬天奶奶在厨房煮姜汤 窗外下》，相似度 0.70，收手续费 40 枚，余额 201 枚。\n当票背面还留着字：「去年冬天奶奶在厨房煮姜汤，窗外下着雪，她一直看着窗外。」\n清晰度：轮廓还在，边角被雨水泡软了。"
+          }
+        },
+        {
+          "node_id": "answer",
+          "node_type": "answer",
+          "title": "回复",
+          "status": "succeeded",
+          "elapsed_time": 0.000112,
+          "total_tokens": 0,
+          "outputs": {
+            "answer": "掌柜从柜底抽出《去年冬天奶奶在厨房煮姜汤 窗外下》，相似度 0.70，收手续费 40 枚，余额 201 枚。\n当票背面还留着字：「去年冬天奶奶在厨房煮姜汤，窗外下着雪，她一直看着窗外。」\n清晰度：轮廓还在，边角被雨水泡软了。",
+            "files": []
+          }
+        }
+      ],
+      "node_counts": {
+        "start": 1,
+        "route": 1,
+        "branch": 1,
+        "redeem_wallet": 1,
+        "redeem_search": 1,
+        "redeem_choose": 1,
+        "redeem_if": 1,
+        "redeem_commit": 1,
+        "redeem_reply": 1,
+        "merge": 1,
+        "answer": 1
+      },
+      "total_tokens": 0,
+      "elapsed_time": 0.4452784899999642
+    },
+    {
+      "query": "逛逛黑市，看看别人的秘密",
+      "workflow_run_id": "3432a8da-26c0-44b9-ae26-8da73e5dd52c",
+      "conversation_id": "03469971-cd17-4c8f-afc6-164dcf78bda6",
+      "status": "succeeded",
+      "answer": "掌柜拉开黑市的暗门，翻出几段不属于你的记忆：（线索：下雨天 跑回家）\n· 匿名的旅人·92 的《大雨跑回家》（温柔，相似度 0.8117）：下大雨没带伞，索性跑回家，进门时全身滴水，妈妈一边骂一边递毛巾。\n· 匿名的旅人·08 的《下大雨没带伞 索性跑回家 进门时》（温柔，相似度 0.6926）：下大雨没带伞，索性跑回家，进门时全身滴水，妈妈一边骂一边递毛巾。\n· 匿名的旅人·CC 的《高三的第一场雪》（平静，相似度 0.3224）：高三晚自习，窗外的第一场雪落下来，全班同时抬头，班主任破天荒没有骂人。\n· 匿名的旅人·28 的《地铁站的分手》（酸涩，相似度 0.3165）：分手那天在换乘通道，她转身走进人潮，我盯着她的背影直到广播报出下一站。",
+      "nodes": [
+        {
+          "node_id": "start",
+          "node_type": "start",
+          "title": "开始",
+          "status": "succeeded",
+          "elapsed_time": 9.7e-05,
+          "total_tokens": 0,
+          "outputs": {
+            "account": "e2e-2026"
+          }
+        },
+        {
+          "node_id": "route",
+          "node_type": "code",
+          "title": "柜台分诊",
+          "status": "succeeded",
+          "elapsed_time": 0.059617,
+          "total_tokens": 0,
+          "outputs": {
+            "action": "browse",
+            "text": "",
+            "query": "",
+            "player_id": "acct:e2e-2026",
+            "turn_id": "3432a8da-26c0-44b9-ae26-8da73e5dd52c",
+            "wallet_body": "{\"player_id\": \"acct:e2e-2026\"}",
+            "redeem_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"逛逛黑市，看看别人的秘密\", \"scope\": \"owner\", \"limit\": 5}",
+            "browse_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"\", \"scope\": \"public\", \"limit\": 4}",
+            "dream_body": "{\"player_id\": \"acct:e2e-2026\", \"limit\": 3}",
+            "hint": "",
+            "start_coins": 120,
+            "dream_cost": 10
+          }
+        },
+        {
+          "node_id": "branch",
+          "node_type": "if-else",
+          "title": "按动作分支",
+          "status": "succeeded",
+          "elapsed_time": 0.000145,
+          "total_tokens": 0,
+          "outputs": {
+            "result": true,
+            "selected_case_id": "browse"
+          }
+        },
+        {
+          "node_id": "browse_search",
+          "node_type": "http-request",
+          "title": "黑市向量检索",
+          "status": "succeeded",
+          "elapsed_time": 0.029943,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"query\":\"下雨天 跑回家\",\"scope\":\"public\",\"items\":[{\"id\":10,\"title\":\"大雨跑回家\",\"snippet\":\"下大雨没带伞，索性跑回家，进门时全身滴水，妈妈一边骂一边递毛巾。\",\"emotion\":\"温柔\",\"appraisal\":47,\"similarity\":0.8117,\"owner_key\":\"9286406160209a6eaa876b1ba5fa2a2211380238\"},{\"id\":18,\"title\":\"下大雨没带伞 索性跑回家 进门时\",\"snippet\":\"下大雨没带伞，索性跑回家，进门时全身滴水，妈妈一边骂一边递毛巾。\",\"emotion\":\"温柔\",\"appraisal\":47,\"similarity\":0.6926,\"owner_key\":\"08f642095660ba5ae64119bb33064dfefc0760d8\"},{\"id\":2,\"title\":\"高三的第一场雪\",\"snippet\":\"高三晚自习，窗外的第一场雪落下来，全班同时抬头，班主任破天荒没有骂人。\",\"emotion\":\"平静\",\"appraisal\":47,\"similarity\":0.3224,\"owner_key\":\"cce68f9a41ffe37174e07e62d7be7c1738ec24f7\"},{\"id\":5,\"title\":\"地铁站的分手\",\"snippet\":\"分手那天在换乘通道，她转身走进人潮，我盯着她的背影直到广播报出下一站。\",\"emotion\":\"酸涩\",\"appraisal\":48,\"similarity\":0.3165,\"owner_key\":\"28d03cd9aa77c0fa5f832f43510dec0a74196bc2\"}]}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:29 GMT",
+              "server": "uvicorn",
+              "content-length": "1138",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "browse_parse",
+          "node_type": "code",
+          "title": "解析候选",
+          "status": "succeeded",
+          "elapsed_time": 0.058562,
+          "total_tokens": 0,
+          "outputs": {
+            "items": [
+              {
+                "id": 10,
+                "title": "大雨跑回家",
+                "snippet": "下大雨没带伞，索性跑回家，进门时全身滴水，妈妈一边骂一边递毛巾。",
+                "emotion": "温柔",
+                "appraisal": 47,
+                "similarity": 0.8117,
+                "owner_key": "9286406160209a6eaa876b1ba5fa2a2211380238"
+              },
+              {
+                "id": 18,
+                "title": "下大雨没带伞 索性跑回家 进门时",
+                "snippet": "下大雨没带伞，索性跑回家，进门时全身滴水，妈妈一边骂一边递毛巾。",
+                "emotion": "温柔",
+                "appraisal": 47,
+                "similarity": 0.6926,
+                "owner_key": "08f642095660ba5ae64119bb33064dfefc0760d8"
+              },
+              {
+                "id": 2,
+                "title": "高三的第一场雪",
+                "snippet": "高三晚自习，窗外的第一场雪落下来，全班同时抬头，班主任破天荒没有骂人。",
+                "emotion": "平静",
+                "appraisal": 47,
+                "similarity": 0.3224,
+                "owner_key": "cce68f9a41ffe37174e07e62d7be7c1738ec24f7"
+              },
+              {
+                "id": 5,
+                "title": "地铁站的分手",
+                "snippet": "分手那天在换乘通道，她转身走进人潮，我盯着她的背影直到广播报出下一站。",
+                "emotion": "酸涩",
+                "appraisal": 48,
+                "similarity": 0.3165,
+                "owner_key": "28d03cd9aa77c0fa5f832f43510dec0a74196bc2"
+              }
+            ],
+            "error": "",
+            "query": "下雨天 跑回家"
+          }
+        },
+        {
+          "node_id": "browse_line",
+          "node_type": "code",
+          "title": "格式化一条黑市记忆",
+          "status": "succeeded",
+          "elapsed_time": 0.056327,
+          "total_tokens": 0,
+          "outputs": {
+            "line": "· 匿名的旅人·92 的《大雨跑回家》（温柔，相似度 0.8117）：下大雨没带伞，索性跑回家，进门时全身滴水，妈妈一边骂一边递毛巾。"
+          }
+        },
+        {
+          "node_id": "browse_line",
+          "node_type": "code",
+          "title": "格式化一条黑市记忆",
+          "status": "succeeded",
+          "elapsed_time": 0.05423,
+          "total_tokens": 0,
+          "outputs": {
+            "line": "· 匿名的旅人·08 的《下大雨没带伞 索性跑回家 进门时》（温柔，相似度 0.6926）：下大雨没带伞，索性跑回家，进门时全身滴水，妈妈一边骂一边递毛巾。"
+          }
+        },
+        {
+          "node_id": "browse_line",
+          "node_type": "code",
+          "title": "格式化一条黑市记忆",
+          "status": "succeeded",
+          "elapsed_time": 0.06302,
+          "total_tokens": 0,
+          "outputs": {
+            "line": "· 匿名的旅人·CC 的《高三的第一场雪》（平静，相似度 0.3224）：高三晚自习，窗外的第一场雪落下来，全班同时抬头，班主任破天荒没有骂人。"
+          }
+        },
+        {
+          "node_id": "browse_line",
+          "node_type": "code",
+          "title": "格式化一条黑市记忆",
+          "status": "succeeded",
+          "elapsed_time": 0.082093,
+          "total_tokens": 0,
+          "outputs": {
+            "line": "· 匿名的旅人·28 的《地铁站的分手》（酸涩，相似度 0.3165）：分手那天在换乘通道，她转身走进人潮，我盯着她的背影直到广播报出下一站。"
+          }
+        },
+        {
+          "node_id": "browse_join",
+          "node_type": "code",
+          "title": "拼黑市回话",
+          "status": "succeeded",
+          "elapsed_time": 0.093442,
+          "total_tokens": 0,
+          "outputs": {
+            "text": "掌柜拉开黑市的暗门，翻出几段不属于你的记忆：（线索：下雨天 跑回家）\n· 匿名的旅人·92 的《大雨跑回家》（温柔，相似度 0.8117）：下大雨没带伞，索性跑回家，进门时全身滴水，妈妈一边骂一边递毛巾。\n· 匿名的旅人·08 的《下大雨没带伞 索性跑回家 进门时》（温柔，相似度 0.6926）：下大雨没带伞，索性跑回家，进门时全身滴水，妈妈一边骂一边递毛巾。\n· 匿名的旅人·CC 的《高三的第一场雪》（平静，相似度 0.3224）：高三晚自习，窗外的第一场雪落下来，全班同时抬头，班主任破天荒没有骂人。\n· 匿名的旅人·28 的《地铁站的分手》（酸涩，相似度 0.3165）：分手那天在换乘通道，她转身走进人潮，我盯着她的背影直到广播报出下一站。"
+          }
+        },
+        {
+          "node_id": "merge",
+          "node_type": "variable-aggregator",
+          "title": "汇总六路回话",
+          "status": "succeeded",
+          "elapsed_time": 7.8e-05,
+          "total_tokens": 0,
+          "outputs": {
+            "output": "掌柜拉开黑市的暗门，翻出几段不属于你的记忆：（线索：下雨天 跑回家）\n· 匿名的旅人·92 的《大雨跑回家》（温柔，相似度 0.8117）：下大雨没带伞，索性跑回家，进门时全身滴水，妈妈一边骂一边递毛巾。\n· 匿名的旅人·08 的《下大雨没带伞 索性跑回家 进门时》（温柔，相似度 0.6926）：下大雨没带伞，索性跑回家，进门时全身滴水，妈妈一边骂一边递毛巾。\n· 匿名的旅人·CC 的《高三的第一场雪》（平静，相似度 0.3224）：高三晚自习，窗外的第一场雪落下来，全班同时抬头，班主任破天荒没有骂人。\n· 匿名的旅人·28 的《地铁站的分手》（酸涩，相似度 0.3165）：分手那天在换乘通道，她转身走进人潮，我盯着她的背影直到广播报出下一站。"
+          }
+        },
+        {
+          "node_id": "answer",
+          "node_type": "answer",
+          "title": "回复",
+          "status": "succeeded",
+          "elapsed_time": 0.000117,
+          "total_tokens": 0,
+          "outputs": {
+            "answer": "掌柜拉开黑市的暗门，翻出几段不属于你的记忆：（线索：下雨天 跑回家）\n· 匿名的旅人·92 的《大雨跑回家》（温柔，相似度 0.8117）：下大雨没带伞，索性跑回家，进门时全身滴水，妈妈一边骂一边递毛巾。\n· 匿名的旅人·08 的《下大雨没带伞 索性跑回家 进门时》（温柔，相似度 0.6926）：下大雨没带伞，索性跑回家，进门时全身滴水，妈妈一边骂一边递毛巾。\n· 匿名的旅人·CC 的《高三的第一场雪》（平静，相似度 0.3224）：高三晚自习，窗外的第一场雪落下来，全班同时抬头，班主任破天荒没有骂人。\n· 匿名的旅人·28 的《地铁站的分手》（酸涩，相似度 0.3165）：分手那天在换乘通道，她转身走进人潮，我盯着她的背影直到广播报出下一站。",
+            "files": []
+          }
+        }
+      ],
+      "node_counts": {
+        "start": 1,
+        "route": 1,
+        "branch": 1,
+        "browse_search": 1,
+        "browse_parse": 1,
+        "browse_line": 4,
+        "browse_join": 1,
+        "merge": 1,
+        "answer": 1
+      },
+      "total_tokens": 0,
+      "elapsed_time": 0.69706429200005
+    },
+    {
+      "query": "帮我把当掉的记忆缝成一个梦",
+      "workflow_run_id": "96cae058-2381-4b9e-8dd7-ea07a8d7ebe4",
+      "conversation_id": "03469971-cd17-4c8f-afc6-164dcf78bda6",
+      "status": "succeeded",
+      "answer": "梦里，雪落进凌晨三点的宿舍。你和几个人围着一锅泡面，谁也不肯承认饿了，汤底却喝得一点不剩。转身时，奶奶站在厨房煮姜汤，隔着窗望着雪。毕业典礼的帽子飞上天空，落下时偏偏不见了你的那顶。大家都笑着算了，你却走进奶奶的厨房，窗外仍下着雪，她还在等一碗姜汤。\n\n（托梦扣 10 枚，余额 191 枚；用了 2 段旧记忆。）",
+      "nodes": [
+        {
+          "node_id": "start",
+          "node_type": "start",
+          "title": "开始",
+          "status": "succeeded",
+          "elapsed_time": 0.000119,
+          "total_tokens": 0,
+          "outputs": {
+            "account": "e2e-2026"
+          }
+        },
+        {
+          "node_id": "route",
+          "node_type": "code",
+          "title": "柜台分诊",
+          "status": "succeeded",
+          "elapsed_time": 0.068007,
+          "total_tokens": 0,
+          "outputs": {
+            "action": "dream",
+            "text": "",
+            "query": "",
+            "player_id": "acct:e2e-2026",
+            "turn_id": "96cae058-2381-4b9e-8dd7-ea07a8d7ebe4",
+            "wallet_body": "{\"player_id\": \"acct:e2e-2026\"}",
+            "redeem_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"帮我把当掉的记忆缝成一个梦\", \"scope\": \"owner\", \"limit\": 5}",
+            "browse_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"\", \"scope\": \"public\", \"limit\": 4}",
+            "dream_body": "{\"player_id\": \"acct:e2e-2026\", \"limit\": 3}",
+            "hint": "",
+            "start_coins": 120,
+            "dream_cost": 10
+          }
+        },
+        {
+          "node_id": "branch",
+          "node_type": "if-else",
+          "title": "按动作分支",
+          "status": "succeeded",
+          "elapsed_time": 0.000189,
+          "total_tokens": 0,
+          "outputs": {
+            "result": true,
+            "selected_case_id": "dream"
+          }
+        },
+        {
+          "node_id": "dream_wallet",
+          "node_type": "http-request",
+          "title": "托梦前查余额",
+          "status": "succeeded",
+          "elapsed_time": 0.035302,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"balance\":201,\"pawned\":2,\"redeemed\":1,\"recent\":[{\"delta\":-40,\"reason\":\"赎回《去年冬天奶奶在厨房煮姜汤 窗外下》\",\"at\":\"2026-11-06 12:21:30\"},{\"delta\":36,\"reason\":\"典当《毕业典礼把帽子抛向天空 落下来时》\",\"at\":\"2026-11-06 12:21:29\"},{\"delta\":38,\"reason\":\"典当《凌晨三点我们在宿舍分一锅泡面 谁》\",\"at\":\"2026-11-06 12:21:29\"},{\"delta\":47,\"reason\":\"典当《去年冬天奶奶在厨房煮姜汤 窗外下》\",\"at\":\"2026-11-06 12:21:28\"},{\"delta\":120,\"reason\":\"开户：掌柜塞给你的启动记忆币\",\"at\":\"2026-11-06 12:21:26\"}],\"start_coins\":120,\"dream_cost\":10}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:30 GMT",
+              "server": "uvicorn",
+              "content-length": "630",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "dream_fragments",
+          "node_type": "http-request",
+          "title": "抽取旧记忆碎片",
+          "status": "succeeded",
+          "elapsed_time": 0.031218,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"fragments\":[{\"id\":24,\"title\":\"凌晨三点我们在宿舍分一锅泡面 谁\",\"text\":\"凌晨三点我们在宿舍分一锅泡面，谁都不肯承认自己饿了，汤都喝完了。\",\"emotion\":\"未命名\"},{\"id\":25,\"title\":\"毕业典礼把帽子抛向天空 落下来时\",\"text\":\"毕业典礼把帽子抛向天空，落下来时找不到自己的那顶，大家笑着说算了。\",\"emotion\":\"狂喜\"}],\"count\":2,\"dream_cost\":10}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:30 GMT",
+              "server": "uvicorn",
+              "content-length": "441",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "dream_check",
+          "node_type": "code",
+          "title": "托梦检查与扣费单",
+          "status": "succeeded",
+          "elapsed_time": 0.06089,
+          "total_tokens": 0,
+          "outputs": {
+            "decision": "dream",
+            "fail_reason": "",
+            "fragment_text": "- 《凌晨三点我们在宿舍分一锅泡面 谁》（未命名）：凌晨三点我们在宿舍分一锅泡面，谁都不肯承认自己饿了，汤都喝完了。\n- 《毕业典礼把帽子抛向天空 落下来时》（狂喜）：毕业典礼把帽子抛向天空，落下来时找不到自己的那顶，大家笑着说算了。",
+            "fragment_count": 2,
+            "ledger_body": "{\"player_id\": \"\", \"turn_id\": \"\", \"delta\": -10, \"reason\": \"托梦：把旧记忆缝在一起\"}",
+            "balance": 201
+          }
+        },
+        {
+          "node_id": "dream_ledger_prep",
+          "node_type": "code",
+          "title": "补全扣费单",
+          "status": "succeeded",
+          "elapsed_time": 0.059704,
+          "total_tokens": 0,
+          "outputs": {
+            "body": "{\"player_id\": \"acct:e2e-2026\", \"turn_id\": \"96cae058-2381-4b9e-8dd7-ea07a8d7ebe4\", \"delta\": -10, \"reason\": \"托梦：把旧记忆缝在一起\"}"
+          }
+        },
+        {
+          "node_id": "dream_if",
+          "node_type": "if-else",
+          "title": "能否托梦",
+          "status": "succeeded",
+          "elapsed_time": 0.000132,
+          "total_tokens": 0,
+          "outputs": {
+            "result": true,
+            "selected_case_id": "dream"
+          }
+        },
+        {
+          "node_id": "dream_ledger",
+          "node_type": "http-request",
+          "title": "托梦扣费",
+          "status": "succeeded",
+          "elapsed_time": 0.029706,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"balance\":191,\"applied\":true}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:30 GMT",
+              "server": "uvicorn",
+              "content-length": "40",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "dream_llm",
+          "node_type": "llm",
+          "title": "掌柜缝梦",
+          "status": "succeeded",
+          "elapsed_time": 4.242897,
+          "total_tokens": 2763,
+          "outputs": {
+            "text": "<think>\nWe need produce Chinese second person 80-160 chars. Need use fragments? User says 当掉 includes grandmother, instant noodles, graduation. Wants dream. Each fragment sharpest detail, don't list/explain. We should write second person dream. 80-160 Chinese characters. Need likely no mention meta. Let's compose ~130 chars. Ensure all 3? Sharp detail each. Second person. Maybe grandmother staring snow, 3am noodles denying hunger, graduation hat missing and laughter. Seamless dream. Count 120.\n</think>\n梦里，雪落进凌晨三点的宿舍。你和几个人围着一锅泡面，谁也不肯承认饿了，汤底却喝得一点不剩。转身时，奶奶站在厨房煮姜汤，隔着窗望着雪。毕业典礼的帽子飞上天空，落下时偏偏不见了你的那顶。大家都笑着算了，你却走进奶奶的厨房，窗外仍下着雪，她还在等一碗姜汤。",
+            "reasoning_content": "",
+            "usage": {
+              "prompt_tokens": 2572,
+              "prompt_unit_price": "2.1",
+              "prompt_price_unit": "0.000001",
+              "prompt_price": "0.0054012",
+              "completion_tokens": 191,
+              "completion_unit_price": "8.4",
+              "completion_price_unit": "0.000001",
+              "completion_price": "0.0016044",
+              "total_tokens": 2763,
+              "total_price": "0.0070056",
+              "currency": "RMB",
+              "latency": 4.232,
+              "time_to_first_token": 1.636,
+              "time_to_generate": 2.596
+            },
+            "finish_reason": "stop"
+          }
+        },
+        {
+          "node_id": "dream_reply",
+          "node_type": "code",
+          "title": "缝梦后记账",
+          "status": "succeeded",
+          "elapsed_time": 0.062043,
+          "total_tokens": 0,
+          "outputs": {
+            "text": "梦里，雪落进凌晨三点的宿舍。你和几个人围着一锅泡面，谁也不肯承认饿了，汤底却喝得一点不剩。转身时，奶奶站在厨房煮姜汤，隔着窗望着雪。毕业典礼的帽子飞上天空，落下时偏偏不见了你的那顶。大家都笑着算了，你却走进奶奶的厨房，窗外仍下着雪，她还在等一碗姜汤。\n\n（托梦扣 10 枚，余额 191 枚；用了 2 段旧记忆。）"
+          }
+        },
+        {
+          "node_id": "merge",
+          "node_type": "variable-aggregator",
+          "title": "汇总六路回话",
+          "status": "succeeded",
+          "elapsed_time": 7e-05,
+          "total_tokens": 0,
+          "outputs": {
+            "output": "梦里，雪落进凌晨三点的宿舍。你和几个人围着一锅泡面，谁也不肯承认饿了，汤底却喝得一点不剩。转身时，奶奶站在厨房煮姜汤，隔着窗望着雪。毕业典礼的帽子飞上天空，落下时偏偏不见了你的那顶。大家都笑着算了，你却走进奶奶的厨房，窗外仍下着雪，她还在等一碗姜汤。\n\n（托梦扣 10 枚，余额 191 枚；用了 2 段旧记忆。）"
+          }
+        },
+        {
+          "node_id": "answer",
+          "node_type": "answer",
+          "title": "回复",
+          "status": "succeeded",
+          "elapsed_time": 0.000153,
+          "total_tokens": 0,
+          "outputs": {
+            "answer": "梦里，雪落进凌晨三点的宿舍。你和几个人围着一锅泡面，谁也不肯承认饿了，汤底却喝得一点不剩。转身时，奶奶站在厨房煮姜汤，隔着窗望着雪。毕业典礼的帽子飞上天空，落下时偏偏不见了你的那顶。大家都笑着算了，你却走进奶奶的厨房，窗外仍下着雪，她还在等一碗姜汤。\n\n（托梦扣 10 枚，余额 191 枚；用了 2 段旧记忆。）",
+            "files": []
+          }
+        }
+      ],
+      "node_counts": {
+        "start": 1,
+        "route": 1,
+        "branch": 1,
+        "dream_wallet": 1,
+        "dream_fragments": 1,
+        "dream_check": 1,
+        "dream_ledger_prep": 1,
+        "dream_if": 1,
+        "dream_ledger": 1,
+        "dream_llm": 1,
+        "dream_reply": 1,
+        "merge": 1,
+        "answer": 1
+      },
+      "total_tokens": 2763,
+      "elapsed_time": 4.723487104000014
+    },
+    {
+      "query": "你好，掌柜",
+      "workflow_run_id": "5bc9404b-f853-43d9-a9bc-c326000e8d40",
+      "conversation_id": "03469971-cd17-4c8f-afc6-164dcf78bda6",
+      "status": "succeeded",
+      "answer": "你好，客人。记忆当铺的门还亮着，柜台上的姜汤冒着热气。你可以来典当一段旧事，赎回一段记忆，逛逛黑市，或托我替你缝一个梦。",
+      "nodes": [
+        {
+          "node_id": "start",
+          "node_type": "start",
+          "title": "开始",
+          "status": "succeeded",
+          "elapsed_time": 0.000108,
+          "total_tokens": 0,
+          "outputs": {
+            "account": "e2e-2026"
+          }
+        },
+        {
+          "node_id": "route",
+          "node_type": "code",
+          "title": "柜台分诊",
+          "status": "succeeded",
+          "elapsed_time": 0.05895,
+          "total_tokens": 0,
+          "outputs": {
+            "action": "chat",
+            "text": "",
+            "query": "",
+            "player_id": "acct:e2e-2026",
+            "turn_id": "5bc9404b-f853-43d9-a9bc-c326000e8d40",
+            "wallet_body": "{\"player_id\": \"acct:e2e-2026\"}",
+            "redeem_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"你好，掌柜\", \"scope\": \"owner\", \"limit\": 5}",
+            "browse_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"\", \"scope\": \"public\", \"limit\": 4}",
+            "dream_body": "{\"player_id\": \"acct:e2e-2026\", \"limit\": 3}",
+            "hint": "",
+            "start_coins": 120,
+            "dream_cost": 10
+          }
+        },
+        {
+          "node_id": "branch",
+          "node_type": "if-else",
+          "title": "按动作分支",
+          "status": "succeeded",
+          "elapsed_time": 0.000146,
+          "total_tokens": 0,
+          "outputs": {
+            "result": false,
+            "selected_case_id": "false"
+          }
+        },
+        {
+          "node_id": "chat_llm",
+          "node_type": "llm",
+          "title": "掌柜闲聊",
+          "status": "succeeded",
+          "elapsed_time": 1.769924,
+          "total_tokens": 2570,
+          "outputs": {
+            "text": "<think>\nWe need respond Chinese only, greeting, perhaps welcome and services. Note prior assistant violated no invent? It has fake balance, but current turn just greeting. Need not mention AI. \"你好，客人...\" Maybe invite.\n</think>\n你好，客人。记忆当铺的门还亮着，柜台上的姜汤冒着热气。你可以来典当一段旧事，赎回一段记忆，逛逛黑市，或托我替你缝一个梦。",
+            "reasoning_content": "",
+            "usage": {
+              "prompt_tokens": 2481,
+              "prompt_unit_price": "2.1",
+              "prompt_price_unit": "0.000001",
+              "prompt_price": "0.0052101",
+              "completion_tokens": 89,
+              "completion_unit_price": "8.4",
+              "completion_price_unit": "0.000001",
+              "completion_price": "0.0007476",
+              "total_tokens": 2570,
+              "total_price": "0.0059577",
+              "currency": "RMB",
+              "latency": 1.76,
+              "time_to_first_token": 0.736,
+              "time_to_generate": 1.024
+            },
+            "finish_reason": "stop"
+          }
+        },
+        {
+          "node_id": "chat_clean",
+          "node_type": "code",
+          "title": "去掉思考块",
+          "status": "succeeded",
+          "elapsed_time": 0.069738,
+          "total_tokens": 0,
+          "outputs": {
+            "text": "你好，客人。记忆当铺的门还亮着，柜台上的姜汤冒着热气。你可以来典当一段旧事，赎回一段记忆，逛逛黑市，或托我替你缝一个梦。"
+          }
+        },
+        {
+          "node_id": "merge",
+          "node_type": "variable-aggregator",
+          "title": "汇总六路回话",
+          "status": "succeeded",
+          "elapsed_time": 7.8e-05,
+          "total_tokens": 0,
+          "outputs": {
+            "output": "你好，客人。记忆当铺的门还亮着，柜台上的姜汤冒着热气。你可以来典当一段旧事，赎回一段记忆，逛逛黑市，或托我替你缝一个梦。"
+          }
+        },
+        {
+          "node_id": "answer",
+          "node_type": "answer",
+          "title": "回复",
+          "status": "succeeded",
+          "elapsed_time": 0.000157,
+          "total_tokens": 0,
+          "outputs": {
+            "answer": "你好，客人。记忆当铺的门还亮着，柜台上的姜汤冒着热气。你可以来典当一段旧事，赎回一段记忆，逛逛黑市，或托我替你缝一个梦。",
+            "files": []
+          }
+        }
+      ],
+      "node_counts": {
+        "start": 1,
+        "route": 1,
+        "branch": 1,
+        "chat_llm": 1,
+        "chat_clean": 1,
+        "merge": 1,
+        "answer": 1
+      },
+      "total_tokens": 2570,
+      "elapsed_time": 1.9842304950000198
+    },
+    {
+      "query": "我还有多少记忆币？",
+      "workflow_run_id": "fa4b9d64-148c-4b95-9b2c-50b0e71fe9bb",
+      "conversation_id": "03469971-cd17-4c8f-afc6-164dcf78bda6",
+      "status": "succeeded",
+      "answer": "你现在有 191 枚记忆币。柜台上还存着 2 段记忆，已经赎走 1 段。\n最近账目：\n· -10 枚：托梦：把旧记忆缝在一起\n· -40 枚：赎回《去年冬天奶奶在厨房煮姜汤 窗外下》\n· +36 枚：典当《毕业典礼把帽子抛向天空 落下来时》\n· +38 枚：典当《凌晨三点我们在宿舍分一锅泡面 谁》\n· +47 枚：典当《去年冬天奶奶在厨房煮姜汤 窗外下》",
+      "nodes": [
+        {
+          "node_id": "start",
+          "node_type": "start",
+          "title": "开始",
+          "status": "succeeded",
+          "elapsed_time": 0.000188,
+          "total_tokens": 0,
+          "outputs": {
+            "account": "e2e-2026"
+          }
+        },
+        {
+          "node_id": "route",
+          "node_type": "code",
+          "title": "柜台分诊",
+          "status": "succeeded",
+          "elapsed_time": 0.057964,
+          "total_tokens": 0,
+          "outputs": {
+            "action": "balance",
+            "text": "",
+            "query": "",
+            "player_id": "acct:e2e-2026",
+            "turn_id": "fa4b9d64-148c-4b95-9b2c-50b0e71fe9bb",
+            "wallet_body": "{\"player_id\": \"acct:e2e-2026\"}",
+            "redeem_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"我还有多少记忆币？\", \"scope\": \"owner\", \"limit\": 5}",
+            "browse_search_body": "{\"player_id\": \"acct:e2e-2026\", \"query\": \"\", \"scope\": \"public\", \"limit\": 4}",
+            "dream_body": "{\"player_id\": \"acct:e2e-2026\", \"limit\": 3}",
+            "hint": "",
+            "start_coins": 120,
+            "dream_cost": 10
+          }
+        },
+        {
+          "node_id": "branch",
+          "node_type": "if-else",
+          "title": "按动作分支",
+          "status": "succeeded",
+          "elapsed_time": 0.000137,
+          "total_tokens": 0,
+          "outputs": {
+            "result": true,
+            "selected_case_id": "balance"
+          }
+        },
+        {
+          "node_id": "balance_wallet",
+          "node_type": "http-request",
+          "title": "查余额",
+          "status": "succeeded",
+          "elapsed_time": 0.034643,
+          "total_tokens": 0,
+          "outputs": {
+            "status_code": 200,
+            "body": "{\"ok\":true,\"balance\":191,\"pawned\":2,\"redeemed\":1,\"recent\":[{\"delta\":-10,\"reason\":\"托梦：把旧记忆缝在一起\",\"at\":\"2026-11-06 12:21:31\"},{\"delta\":-40,\"reason\":\"赎回《去年冬天奶奶在厨房煮姜汤 窗外下》\",\"at\":\"2026-11-06 12:21:30\"},{\"delta\":36,\"reason\":\"典当《毕业典礼把帽子抛向天空 落下来时》\",\"at\":\"2026-11-06 12:21:29\"},{\"delta\":38,\"reason\":\"典当《凌晨三点我们在宿舍分一锅泡面 谁》\",\"at\":\"2026-11-06 12:21:29\"},{\"delta\":47,\"reason\":\"典当《去年冬天奶奶在厨房煮姜汤 窗外下》\",\"at\":\"2026-11-06 12:21:28\"}],\"start_coins\":120,\"dream_cost\":10}",
+            "headers": {
+              "date": "Fri, 06 Nov 2026 04:21:37 GMT",
+              "server": "uvicorn",
+              "content-length": "621",
+              "content-type": "application/json",
+              "cache-status": "5da5b8d2aeef;detail=mismatch",
+              "via": "1.1 5da5b8d2aeef (squid/6.13)",
+              "connection": "keep-alive"
+            },
+            "files": []
+          }
+        },
+        {
+          "node_id": "balance_fmt",
+          "node_type": "code",
+          "title": "整理账本",
+          "status": "succeeded",
+          "elapsed_time": 0.055026,
+          "total_tokens": 0,
+          "outputs": {
+            "text": "你现在有 191 枚记忆币。柜台上还存着 2 段记忆，已经赎走 1 段。\n最近账目：\n· -10 枚：托梦：把旧记忆缝在一起\n· -40 枚：赎回《去年冬天奶奶在厨房煮姜汤 窗外下》\n· +36 枚：典当《毕业典礼把帽子抛向天空 落下来时》\n· +38 枚：典当《凌晨三点我们在宿舍分一锅泡面 谁》\n· +47 枚：典当《去年冬天奶奶在厨房煮姜汤 窗外下》"
+          }
+        },
+        {
+          "node_id": "merge",
+          "node_type": "variable-aggregator",
+          "title": "汇总六路回话",
+          "status": "succeeded",
+          "elapsed_time": 5.9e-05,
+          "total_tokens": 0,
+          "outputs": {
+            "output": "你现在有 191 枚记忆币。柜台上还存着 2 段记忆，已经赎走 1 段。\n最近账目：\n· -10 枚：托梦：把旧记忆缝在一起\n· -40 枚：赎回《去年冬天奶奶在厨房煮姜汤 窗外下》\n· +36 枚：典当《毕业典礼把帽子抛向天空 落下来时》\n· +38 枚：典当《凌晨三点我们在宿舍分一锅泡面 谁》\n· +47 枚：典当《去年冬天奶奶在厨房煮姜汤 窗外下》"
+          }
+        },
+        {
+          "node_id": "answer",
+          "node_type": "answer",
+          "title": "回复",
+          "status": "succeeded",
+          "elapsed_time": 0.000231,
+          "total_tokens": 0,
+          "outputs": {
+            "answer": "你现在有 191 枚记忆币。柜台上还存着 2 段记忆，已经赎走 1 段。\n最近账目：\n· -10 枚：托梦：把旧记忆缝在一起\n· -40 枚：赎回《去年冬天奶奶在厨房煮姜汤 窗外下》\n· +36 枚：典当《毕业典礼把帽子抛向天空 落下来时》\n· +38 枚：典当《凌晨三点我们在宿舍分一锅泡面 谁》\n· +47 枚：典当《去年冬天奶奶在厨房煮姜汤 窗外下》",
+            "files": []
+          }
+        }
+      ],
+      "node_counts": {
+        "start": 1,
+        "route": 1,
+        "branch": 1,
+        "balance_wallet": 1,
+        "balance_fmt": 1,
+        "merge": 1,
+        "answer": 1
+      },
+      "total_tokens": 0,
+      "elapsed_time": 0.23642437099988456
+    }
+  ]
+}

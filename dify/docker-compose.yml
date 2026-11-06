@@ -33,7 +33,9 @@ services:
       SEEKDB_DATABASE: ${SEEKDB_DATABASE:-memory_pawnshop}
       PAWNSHOP_HOST: 0.0.0.0
       PAWNSHOP_PORT: 8700
-      PAWNSHOP_EMBED_BACKEND: ${PAWNSHOP_EMBED_BACKEND:-hash}
+      PAWNSHOP_API_TOKEN: ${PAWNSHOP_API_TOKEN:-change-me-pawnshop-token}
+      PAWNSHOP_EMBED_BACKEND: ${PAWNSHOP_EMBED_BACKEND:-fastembed}
+      PAWNSHOP_MODEL_CACHE: /models
     ports:
       - "${PAWNSHOP_PORT:-8700}:8700"
     healthcheck:

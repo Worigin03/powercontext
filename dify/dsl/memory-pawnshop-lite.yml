@@ -1,5 +1,5 @@
 app:
-  description: 记忆当铺的无模型版本：典当、赎回、黑市、托梦全部可用，柜台结果由 Dify Code 节点整理，不依赖任何 LLM。
+  description: 记忆当铺：把记忆当掉换记忆币，凭线索赎回，逛别人的黑市，再托梦把碎片缝成梦。分支、迭代、估价、手续费与钱包增量都在 Dify 节点内。
   icon: 🏮
   icon_background: '#FFEAD5'
   icon_type: emoji
@@ -14,7 +14,7 @@ site:
   copyright: null
   custom_disclaimer: ''
   default_language: zh-Hans
-  description: 一家开在城市缝隙里的记忆当铺。无模型也能玩：seekdb 负责找回当掉的旧时光。
+  description: 一家开在城市缝隙里的记忆当铺。Dify 负责估价、手续费与分支，seekdb 负责语义向量检索与钱包账本。
   icon: 🏮
   icon_background: '#FFEAD5'
   icon_type: emoji
@@ -43,216 +43,1903 @@ workflow:
       enabled: false
     suggested_questions:
     - 我想当掉一段记忆：去年冬天奶奶在厨房煮姜汤，窗外下着雪。
-    - 赎回一段关于雨夜的记忆
+    - 帮我赎回一段关东煮的记忆
     - 逛逛黑市，看看别人的秘密
     - 帮我把当掉的记忆缝成一个梦
     - 我还有多少记忆币？
+    - 你好，这里怎么玩？
     suggested_questions_after_answer:
       enabled: false
     text_to_speech:
       enabled: false
       language: ''
       voice: ''
+    show_workflow_steps: true
   graph:
     edges:
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: start
-        targetType: code
-      id: start-route
+    - id: start-source-route
       source: start
       sourceHandle: source
       target: route
       targetHandle: target
       type: custom
       zIndex: 0
-    - data:
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: code
+    - id: route-source-branch
+      source: route
+      sourceHandle: source
+      target: branch
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+    - id: branch-pawn-pawn_appraise
+      source: branch
+      sourceHandle: pawn
+      target: pawn_appraise
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+    - id: branch-redeem-redeem_wallet
+      source: branch
+      sourceHandle: redeem
+      target: redeem_wallet
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+    - id: branch-browse-browse_search
+      source: branch
+      sourceHandle: browse
+      target: browse_search
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+    - id: branch-dream-dream_wallet
+      source: branch
+      sourceHandle: dream
+      target: dream_wallet
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+    - id: branch-balance-balance_wallet
+      source: branch
+      sourceHandle: balance
+      target: balance_wallet
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+    - id: branch-false-chat_fmt
+      source: branch
+      sourceHandle: 'false'
+      target: chat_fmt
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+    - id: pawn_appraise-source-pawn_store
+      source: pawn_appraise
+      sourceHandle: source
+      target: pawn_store
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
         isInIteration: false
         isInLoop: false
         sourceType: code
         targetType: http-request
-      id: route-counter
-      source: route
+    - id: pawn_store-source-pawn_ledger
+      source: pawn_store
       sourceHandle: source
-      target: counter
+      target: pawn_ledger
       targetHandle: target
       type: custom
       zIndex: 0
-    - data:
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: http-request
+    - id: pawn_ledger-source-pawn_reply
+      source: pawn_ledger
+      sourceHandle: source
+      target: pawn_reply
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
         isInIteration: false
         isInLoop: false
         sourceType: http-request
         targetType: code
-      id: counter-format
-      source: counter
+    - id: pawn_reply-source-merge
+      source: pawn_reply
       sourceHandle: source
-      target: format
+      target: merge
       targetHandle: target
       type: custom
       zIndex: 0
-    - data:
+      data:
         isInIteration: false
         isInLoop: false
         sourceType: code
-        targetType: answer
-      id: format-answer
-      source: format
+        targetType: variable-aggregator
+    - id: redeem_wallet-source-redeem_search
+      source: redeem_wallet
+      sourceHandle: source
+      target: redeem_search
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: http-request
+    - id: redeem_search-source-redeem_choose
+      source: redeem_search
+      sourceHandle: source
+      target: redeem_choose
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+    - id: redeem_choose-source-redeem_if
+      source: redeem_choose
+      sourceHandle: source
+      target: redeem_if
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+    - id: redeem_if-commit-redeem_commit
+      source: redeem_if
+      sourceHandle: commit
+      target: redeem_commit
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: http-request
+    - id: redeem_if-false-redeem_fail
+      source: redeem_if
+      sourceHandle: 'false'
+      target: redeem_fail
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+    - id: redeem_commit-source-redeem_reply
+      source: redeem_commit
+      sourceHandle: source
+      target: redeem_reply
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+    - id: redeem_reply-source-merge
+      source: redeem_reply
+      sourceHandle: source
+      target: merge
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: variable-aggregator
+    - id: redeem_fail-source-merge
+      source: redeem_fail
+      sourceHandle: source
+      target: merge
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: variable-aggregator
+    - id: browse_search-source-browse_parse
+      source: browse_search
+      sourceHandle: source
+      target: browse_parse
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+    - id: browse_parse-source-browse_iter
+      source: browse_parse
+      sourceHandle: source
+      target: browse_iter
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: iteration
+    - id: browse_iter_start-source-browse_line
+      source: browse_iter_start
+      sourceHandle: source
+      target: browse_line
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+      data:
+        isInIteration: true
+        isInLoop: false
+        sourceType: iteration-start
+        targetType: code
+        iteration_id: browse_iter
+    - id: browse_iter-source-browse_join
+      source: browse_iter
+      sourceHandle: source
+      target: browse_join
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: iteration
+        targetType: code
+    - id: browse_join-source-merge
+      source: browse_join
+      sourceHandle: source
+      target: merge
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: variable-aggregator
+    - id: dream_wallet-source-dream_fragments
+      source: dream_wallet
+      sourceHandle: source
+      target: dream_fragments
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: http-request
+    - id: dream_fragments-source-dream_check
+      source: dream_fragments
+      sourceHandle: source
+      target: dream_check
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+    - id: dream_check-source-dream_ledger_prep
+      source: dream_check
+      sourceHandle: source
+      target: dream_ledger_prep
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: code
+    - id: dream_ledger_prep-source-dream_if
+      source: dream_ledger_prep
+      sourceHandle: source
+      target: dream_if
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+    - id: dream_if-dream-dream_ledger
+      source: dream_if
+      sourceHandle: dream
+      target: dream_ledger
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: http-request
+    - id: dream_if-false-dream_fail
+      source: dream_if
+      sourceHandle: 'false'
+      target: dream_fail
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+    - id: dream_fail-source-merge
+      source: dream_fail
+      sourceHandle: source
+      target: merge
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: variable-aggregator
+    - id: balance_wallet-source-balance_fmt
+      source: balance_wallet
+      sourceHandle: source
+      target: balance_fmt
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+    - id: balance_fmt-source-merge
+      source: balance_fmt
+      sourceHandle: source
+      target: merge
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: variable-aggregator
+    - id: dream_ledger-source-dream_weave
+      source: dream_ledger
+      sourceHandle: source
+      target: dream_weave
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+    - id: dream_weave-source-merge
+      source: dream_weave
+      sourceHandle: source
+      target: merge
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: variable-aggregator
+    - id: chat_fmt-source-merge
+      source: chat_fmt
+      sourceHandle: source
+      target: merge
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: variable-aggregator
+    - id: merge-source-answer
+      source: merge
       sourceHandle: source
       target: answer
       targetHandle: target
       type: custom
       zIndex: 0
+      data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: variable-aggregator
+        targetType: answer
     nodes:
-    - data:
-        desc: ''
-        selected: false
-        title: 开始
-        type: start
-        variables: []
-      height: 90
-      id: start
+    - id: start
+      type: custom
       position:
-        x: 80
-        y: 282
-      selected: false
+        x: 60
+        y: 320
       sourcePosition: right
       targetPosition: left
-      type: custom
+      selected: false
       width: 244
-    - data:
-        code: "import json\nimport re\n\n\ndef main(query: str, player_id: str) -> dict:\n    q = (query or \"\").strip()\n    action = \"chat\"\n    text = \"\"\n    search = \"\"\n    limit = 3\n\n    def after_cmd(s: str, words) -> str:\n        for w in words:\n            if s.startswith(w):\n                s = s[len(w):]\n                break\n        return s.lstrip(\"：:，,。. 　\")\n\n    if re.search(r\"余额|记忆币|账本|还剩|存了|赎回了几\", q) and not re.search(r\"当掉|典当|赎回\", q):\n        action = \"balance\"\n    elif re.search(r\"托梦|做梦|缝成梦|梦到|把.*梦\", q):\n        action = \"dream\"\n    elif re.search(r\"黑市|别人.*记忆|逛逛|看看.*柜|有什么.*记忆\", q):\n        action = \"browse\"\n        search = after_cmd(q, [\"帮我逛逛黑市\", \"逛逛黑市\", \"黑市\", \"看看别人的记忆\", \"别人的记忆\", \"逛逛\"])\n        search = re.sub(r\"^(看看|帮我|我想)\", \"\", search).strip(\" 。！？!?\")\n        if search in (\"\", \"别人的秘密\", \"别人的记忆\", \"秘密\", \"记忆\", \"别人的\"):\n            search = \"\"\n    elif re.search(r\"赎回|赎当|赎|找回|取回\", q):\n        action\
-          \ = \"redeem\"\n        search = after_cmd(q, [\"帮我赎回\", \"我想赎回\", \"赎回\", \"赎当\", \"找回\", \"取回\", \"赎\"])\n        search = re.sub(r\"^(?:一段|那段|这段|我的|关于|的)+\", \"\", search).strip(\" 。！？!?\")\n        if len(search) < 2:\n            search = q\n    elif re.search(r\"当掉|典当|当了|卖掉|押给你|换.*记忆币\", q):\n        action = \"pawn\"\n        text = after_cmd(q, [\"我想当掉\", \"我要当掉\", \"帮我当掉\", \"当掉\", \"典当\", \"卖掉\", \"押给你\"])\n        text = re.sub(r\"^(?:一段|一个|这段|这个)?(?:记忆|故事)[：:，,。]?\", \"\", text).strip()\n        if len(text) < 12:\n            action = \"chat\"\n\n    payload_query = search if action in (\"redeem\", \"browse\") else q\n    payload = {\n        \"player_id\": player_id or \"guest\",\n        \"action\": action,\n        \"text\": text or q,\n        \"query\": payload_query or \"\",\n        \"limit\": limit,\n    }\n    return {\n        \"action\": action,\n        \"payload_json\": json.dumps(payload, ensure_ascii=False),\n    }"
+      height: 120
+      data:
+        type: start
+        title: 开始
+        desc: account 可选；填写后钱包按 acct:<account> 记账，不填则使用 Dify 会话用户，绝不落到共享 guest。
+        selected: false
+        variables:
+        - label: 当铺账号（可选，3-32 位字母数字）
+          variable: account
+          type: text-input
+          required: false
+          max_length: 32
+          options: []
+    - id: route
+      type: custom
+      position:
+        x: 330
+        y: 320
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: code
+        title: 柜台分诊
+        desc: 把中文意图拆成 action；生成各分支所需的安全 JSON 载荷，并绑定非 guest 的玩家 ID 与 workflow_run_id。
+        selected: false
         code_language: python3
-        desc: 把玩家的话翻译成当铺柜台能执行的动作，并序列化成 JSON，避免引号换行破坏请求体。
+        code: "import json\nimport re\n\nSTART_COINS = 120\nDREAM_COST = 10\n\n\ndef main(query: str, user_id: str, workflow_run_id: str, account: str) -> dict:\n    q = (query or \"\").strip()\n    uid = (user_id or \"\").strip()\n    handle = re.sub(r\"[^0-9A-Za-z_-]\", \"\", (account or \"\").strip())[:32]\n    if len(handle) < 3:\n        handle = \"\"\n    player_id = (\"acct:\" + handle) if handle else ((\"dify:\" + uid) if uid else \"\")\n\n    action = \"chat\"\n    text = \"\"\n    search = \"\"\n    hint = \"\"\n\n    def after_cmd(s: str, words) -> str:\n        for word in words:\n            if s.startswith(word):\n                s = s[len(word):]\n                break\n        return s.lstrip(\"：:，,。. 　\")\n\n    if re.search(r\"余额|记忆币|账本|还剩|存了|赎回了几\", q) and not re.search(r\"当掉|典当|赎回\", q):\n        action = \"balance\"\n    elif re.search(r\"托.{0,2}梦|做梦|缝成梦|梦到|把.*梦\", q):\n        action = \"dream\"\n    elif re.search(r\"黑市|别人.*记忆|逛逛|看看.*柜|有什么.*记忆\", q):\n        action\
+          \ = \"browse\"\n        search = after_cmd(q, [\"帮我逛逛黑市\", \"逛逛黑市\", \"黑市\", \"看看别人的记忆\", \"别人的记忆\", \"逛逛\"])\n        search = re.sub(r\"^(看看|帮我|我想)\", \"\", search).strip(\" 。！？!?\")\n        if search in (\"\", \"别人的秘密\", \"别人的记忆\", \"秘密\", \"记忆\", \"别人的\"):\n            search = \"\"\n    elif re.search(r\"赎回|赎当|赎|找回|取回\", q):\n        action = \"redeem\"\n        search = after_cmd(q, [\"帮我赎回\", \"我想赎回\", \"赎回\", \"赎当\", \"找回\", \"取回\", \"赎\"])\n        search = re.sub(r\"^(?:一段|那段|这段|我的|关于|的)+\", \"\", search).strip(\" 。！？!?\")\n        if len(search) < 2:\n            search = q\n    elif re.search(r\"当掉|典当|当了|卖掉|押给你|换.*记忆币\", q):\n        candidate = after_cmd(q, [\"我想当掉\", \"我要当掉\", \"帮我当掉\", \"当掉\", \"典当\", \"卖掉\", \"押给你\"])\n        candidate = re.sub(r\"^(?:一段|一个|这段|这个)?(?:记忆|故事)[：:，,。]?\", \"\", candidate).strip()\n        if len(candidate) >= 10:\n            action = \"pawn\"\n            text = candidate\n        else:\n            hint = \"客人想当记忆，但描述不足十个字；请邀请他多讲一点细节。\"\
+          \n\n    wallet_body = json.dumps({\"player_id\": player_id}, ensure_ascii=False)\n    redeem_body = json.dumps(\n        {\"player_id\": player_id, \"query\": search or q, \"scope\": \"owner\", \"limit\": 5},\n        ensure_ascii=False,\n    )\n    browse_body = json.dumps(\n        {\"player_id\": player_id, \"query\": search, \"scope\": \"public\", \"limit\": 4},\n        ensure_ascii=False,\n    )\n    dream_body = json.dumps({\"player_id\": player_id, \"limit\": 3}, ensure_ascii=False)\n\n    return {\n        \"action\": action,\n        \"text\": text,\n        \"query\": search,\n        \"player_id\": player_id,\n        \"turn_id\": workflow_run_id,\n        \"wallet_body\": wallet_body,\n        \"redeem_search_body\": redeem_body,\n        \"browse_search_body\": browse_body,\n        \"dream_body\": dream_body,\n        \"hint\": hint,\n        \"start_coins\": START_COINS,\n        \"dream_cost\": DREAM_COST,\n    }"
         outputs:
           action:
             children: null
             type: string
-          payload_json:
+          text:
             children: null
             type: string
-        selected: false
-        title: 柜台分诊
-        type: code
+          query:
+            children: null
+            type: string
+          player_id:
+            children: null
+            type: string
+          turn_id:
+            children: null
+            type: string
+          wallet_body:
+            children: null
+            type: string
+          redeem_search_body:
+            children: null
+            type: string
+          browse_search_body:
+            children: null
+            type: string
+          dream_body:
+            children: null
+            type: string
+          hint:
+            children: null
+            type: string
+          start_coins:
+            children: null
+            type: number
+          dream_cost:
+            children: null
+            type: number
         variables:
-        - value_selector:
+        - variable: query
+          value_selector:
           - sys
           - query
           value_type: string
-          variable: query
-        - value_selector:
+        - variable: user_id
+          value_selector:
           - sys
           - user_id
           value_type: string
-          variable: player_id
-      height: 90
-      id: route
+        - variable: workflow_run_id
+          value_selector:
+          - sys
+          - workflow_run_id
+          value_type: string
+        - variable: account
+          value_selector:
+          - start
+          - account
+          value_type: string
+    - id: branch
+      type: custom
       position:
-        x: 380
-        y: 282
-      selected: false
+        x: 620
+        y: 320
       sourcePosition: right
       targetPosition: left
-      type: custom
+      selected: false
       width: 244
-    - data:
+      height: 170
+      data:
+        type: if-else
+        title: 按动作分支
+        desc: 六个动作走六条不同的节点链；chat 走 ELSE。
+        selected: false
+        cases:
+        - case_id: pawn
+          id: pawn
+          logical_operator: and
+          conditions:
+          - id: pawn-cond
+            comparison_operator: is
+            value: pawn
+            varType: string
+            variable_selector:
+            - route
+            - action
+        - case_id: redeem
+          id: redeem
+          logical_operator: and
+          conditions:
+          - id: redeem-cond
+            comparison_operator: is
+            value: redeem
+            varType: string
+            variable_selector:
+            - route
+            - action
+        - case_id: browse
+          id: browse
+          logical_operator: and
+          conditions:
+          - id: browse-cond
+            comparison_operator: is
+            value: browse
+            varType: string
+            variable_selector:
+            - route
+            - action
+        - case_id: dream
+          id: dream
+          logical_operator: and
+          conditions:
+          - id: dream-cond
+            comparison_operator: is
+            value: dream
+            varType: string
+            variable_selector:
+            - route
+            - action
+        - case_id: balance
+          id: balance
+          logical_operator: and
+          conditions:
+          - id: balance-cond
+            comparison_operator: is
+            value: balance
+            varType: string
+            variable_selector:
+            - route
+            - action
+    - id: pawn_appraise
+      type: custom
+      position:
+        x: 920
+        y: -560
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: code
+        title: 估价 · 判味
+        desc: 核心玩法在 Dify：细节浓度、感官颗粒、情绪、数字刻度、第一人称共同决定估价。
+        selected: false
+        code_language: python3
+        code: "import json\nimport re\n\nSENSORY = (\n    \"雨\", \"雪\", \"风\", \"光\", \"灯\", \"味道\", \"气味\", \"香\", \"声音\", \"响\", \"烫\", \"凉\",\n    \"冰\", \"热\", \"沙\", \"海\", \"雾\", \"烟\", \"甜\", \"苦\", \"咸\", \"颜色\", \"红\", \"蓝\", \"白\",\n)\nEMOTION_WORDS = {\n    \"温柔\": (\"妈\", \"奶奶\", \"外婆\", \"猫\", \"拥抱\", \"手\", \"信\", \"晚安\", \"回家\", \"灯\"),\n    \"遗憾\": (\"没\", \"错过\", \"如果\", \"离开\", \"最后\", \"来不及\", \"本来\", \"可惜\", \"忘了\"),\n    \"狂喜\": (\"笑\", \"跳\", \"尖叫\", \"赢\", \"成功\", \"第一次\", \"终于\", \"炸开\", \"飞奔\"),\n    \"恐惧\": (\"怕\", \"黑\", \"血\", \"追\", \"坠\", \"锁\", \"尖叫\", \"躲\", \"颤抖\"),\n    \"酸涩\": (\"分手\", \"泪\", \"背影\", \"旧\", \"一个人\", \"车站\", \"空\", \"再见\", \"删\"),\n    \"平静\": (\"雨\", \"海\", \"散步\", \"午后\", \"茶\", \"书\", \"窗\", \"发呆\", \"慢慢\"),\n}\nNUMBER_RE = re.compile(r\"\\d|[一二三四五六七八九十百千万零两]\")\nPUNCT_RE = re.compile(r\"[\\s，。！？、,.!?;；:：\\\"'“”‘’()（）]+\")\n\n\ndef classify_emotion(text: str) -> str:\n    scores = {}\n    for name, words in EMOTION_WORDS.items():\n  \
+          \      scores[name] = sum(text.count(word) for word in words)\n    best = max(scores, key=scores.get)\n    return best if scores[best] > 0 else \"未命名\"\n\n\ndef main(text: str, player_id: str, turn_id: str) -> dict:\n    text = (text or \"\").strip()\n    if len(text) < 10:\n        return {\n            \"can_pawn\": False,\n            \"title\": \"\",\n            \"emotion\": \"\",\n            \"appraisal\": 0,\n            \"reasons_line\": \"\",\n            \"store_body\": \"\",\n            \"ledger_body\": \"\",\n        }\n\n    coins = 25\n    reasons = []\n\n    detail = min(20, len(text) // 20)\n    coins += detail\n    if detail:\n        reasons.append(f\"细节浓度 +{detail}\")\n\n    sensory = sum(text.count(word) for word in SENSORY)\n    sensory_bonus = min(18, sensory * 3)\n    coins += sensory_bonus\n    if sensory_bonus:\n        reasons.append(f\"感官颗粒 +{sensory_bonus}\")\n\n    emotion = classify_emotion(text)\n    if emotion != \"未命名\":\n        coins += 10\n\
+          \        reasons.append(f\"{emotion}余温 +10\")\n\n    if NUMBER_RE.search(text):\n        coins += 8\n        reasons.append(\"可核对的刻度 +8\")\n\n    if \"我\" in text:\n        coins += 4\n        reasons.append(\"第一人称 +4\")\n\n    coins = max(30, min(180, coins))\n    cleaned = PUNCT_RE.sub(\" \", text).strip()\n    title = (cleaned[:16] if cleaned else \"无题\")\n    reasons_line = \"、\".join(reasons) or \"干净、克制，像一张没写地址的明信片\"\n\n    store_body = json.dumps(\n        {\n            \"player_id\": player_id,\n            \"text\": text,\n            \"title\": title,\n            \"emotion\": emotion,\n            \"appraisal\": coins,\n        },\n        ensure_ascii=False,\n    )\n    ledger_body = json.dumps(\n        {\n            \"player_id\": player_id,\n            \"turn_id\": turn_id,\n            \"delta\": coins,\n            \"reason\": f\"典当《{title}》\",\n        },\n        ensure_ascii=False,\n    )\n    return {\n        \"can_pawn\": True,\n        \"title\": title,\n\
+          \        \"emotion\": emotion,\n        \"appraisal\": coins,\n        \"reasons_line\": reasons_line,\n        \"store_body\": store_body,\n        \"ledger_body\": ledger_body,\n    }"
+        outputs:
+          can_pawn:
+            children: null
+            type: boolean
+          title:
+            children: null
+            type: string
+          emotion:
+            children: null
+            type: string
+          appraisal:
+            children: null
+            type: number
+          reasons_line:
+            children: null
+            type: string
+          store_body:
+            children: null
+            type: string
+          ledger_body:
+            children: null
+            type: string
+        variables:
+        - variable: text
+          value_selector:
+          - route
+          - text
+          value_type: string
+        - variable: player_id
+          value_selector:
+          - route
+          - player_id
+          value_type: string
+        - variable: turn_id
+          value_selector:
+          - route
+          - turn_id
+          value_type: string
+    - id: pawn_store
+      type: custom
+      position:
+        x: 1220
+        y: -560
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: http-request
+        title: 写入当票
+        desc: 只负责向量化并写入 seekdb；估价由上一个 Code 节点给出。
+        selected: false
+        method: post
+        url: http://host.docker.internal:8700/api/memory/store
         authorization:
           type: no-auth
+        headers: 'Content-Type: application/json
+
+          X-Pawnshop-Token: change-me-pawnshop-token'
+        params: ''
         body:
+          type: json
           data:
           - key: ''
             type: text
-            value: '{{#route.payload_json#}}'
-          type: json
-        desc: 调用本地记忆当铺服务，由 seekdb 完成向量检索与账本结算。
+            value: '{{#pawn_appraise.store_body#}}'
+        timeout:
+          connect: 10
+          read: 60
+          write: 60
+        retry_config:
+          enabled: false
+          max_retries: 1
+          retry_interval: 1000
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
         error_strategy: default-value
         default_value:
         - key: body
           type: string
-          value: '{"ok": false, "error": "counter_unreachable", "message": "柜台暂时打烊了：记忆当铺服务没有响应。请按运行说明启动服务，并确认本节点的地址可达。"}'
+          value: '{"ok": false, "error": "backend_unreachable", "message": "柜台暂时打烊了：记忆当铺服务没有响应。请确认服务已启动，并检查节点的地址与 X-Pawnshop-Token。"}'
         - key: status_code
           type: number
           value: 0
         - key: headers
           type: object
           value: {}
-        headers: 'Content-Type: application/json'
+    - id: pawn_ledger
+      type: custom
+      position:
+        x: 1520
+        y: -560
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: http-request
+        title: 记忆币入账
+        desc: Dify 已决定估价；这里把 delta 交给 seekdb 钱包/账本事务，turn_id 保证重试不重复入账。
+        selected: false
         method: post
+        url: http://host.docker.internal:8700/api/wallet/apply
+        authorization:
+          type: no-auth
+        headers: 'Content-Type: application/json
+
+          X-Pawnshop-Token: change-me-pawnshop-token'
         params: ''
+        body:
+          type: json
+          data:
+          - key: ''
+            type: text
+            value: '{{#pawn_appraise.ledger_body#}}'
+        timeout:
+          connect: 10
+          read: 60
+          write: 60
         retry_config:
           enabled: false
+          max_retries: 1
+          retry_interval: 1000
           exponential_backoff:
             enabled: false
             max_interval: 10000
             multiplier: 2
-          max_retries: 1
-          retry_interval: 1000
-        selected: false
-        timeout:
-          connect: 10
-          read: 30
-          write: 30
-        title: seekdb 柜台
-        type: http-request
-        url: http://host.docker.internal:8700/api/tool
-      height: 90
-      id: counter
+        error_strategy: default-value
+        default_value:
+        - key: body
+          type: string
+          value: '{"ok": false, "error": "backend_unreachable", "message": "柜台暂时打烊了：记忆当铺服务没有响应。请确认服务已启动，并检查节点的地址与 X-Pawnshop-Token。"}'
+        - key: status_code
+          type: number
+          value: 0
+        - key: headers
+          type: object
+          value: {}
+    - id: pawn_reply
+      type: custom
       position:
-        x: 680
-        y: 282
-      selected: false
+        x: 1820
+        y: -560
       sourcePosition: right
       targetPosition: left
-      type: custom
+      selected: false
       width: 244
-    - data:
-        code: "import json\n\n\ndef main(raw: str) -> dict:\n    try:\n        data = json.loads(raw or \"{}\")\n    except ValueError:\n        return {\"text\": \"柜台暂时打烊了。请确认记忆当铺服务已经启动，再敲敲柜台。\"}\n\n    if not data.get(\"ok\", True):\n        message = data.get(\"message\") or \"掌柜摇了摇头，没办成。\"\n        if data.get(\"hint\") == \"action=pawn\":\n            message += \"（先当掉一段记忆，再来赎。）\"\n        return {\"text\": message}\n\n    action = data.get(\"action\")\n    say = data.get(\"say\") or \"\"\n    lines = [] if action == \"dream\" else [say]\n\n    if action == \"pawn\":\n        reasons = data.get(\"reasons\") or []\n        if reasons:\n            lines.append(\"估价明细：\" + \"、\".join(str(item) for item in reasons))\n    elif action == \"redeem\":\n        content = data.get(\"content\")\n        if content:\n            lines.append(f\"当票背面还留着字：「{content}」\")\n    elif action == \"browse\":\n        items = data.get(\"items\") or []\n        if items:\n            lines.append(\"\")\n\
-          \            for item in items:\n                lines.append(\n                    f\"· {item.get('owner')} 的《{item.get('title')}》\"\n                    f\"（{item.get('emotion')}，相似度 {item.get('similarity')}）：\"\n                    f\"{item.get('fragment')}\"\n                )\n    elif action == \"dream\":\n        fragments = data.get(\"fragments\") or []\n        if fragments:\n            lines.append(\"\")\n            lines.append(f\"掌柜把灯拧暗，你听见 {len(fragments)} 段旧事在锅里翻身：\")\n            for item in fragments:\n                lines.append(f\"你回到《{item.get('title')}》——{item.get('text')}\")\n            lines.append(f\"梦的成本 {data.get('cost')} 枚，余额 {data.get('balance')} 枚。\")\n    elif action == \"balance\":\n        lines.append(\"\")\n        for item in data.get(\"recent\") or []:\n            lines.append(f\"· {item.get('delta'):+d} 枚：{item.get('reason')}\")\n    return {\"text\": \"\\n\".join(line for line in lines if line).strip()}"
+      height: 90
+      data:
+        type: code
+        title: 整理当票
+        desc: 把估价、当票编号和 seekdb 返回的余额合成回复；失败时说明是没写成还是没入账。
+        selected: false
         code_language: python3
-        desc: 把柜台返回的 JSON 整理成当铺口吻的文字，不依赖任何模型。
+        code: "import json\n\n\ndef main(store_body: str, ledger_body: str, title: str, emotion: str, appraisal: int, reasons_line: str) -> dict:\n    try:\n        store = json.loads(store_body or \"{}\")\n    except ValueError:\n        store = {\"ok\": False, \"message\": \"柜台没有回话。\"}\n    if not store.get(\"ok\"):\n        return {\"text\": \"柜台没写成当票：\" + (store.get(\"message\") or \"记忆当铺服务不可达。\")}\n    try:\n        ledger = json.loads(ledger_body or \"{}\")\n    except ValueError:\n        ledger = {\"ok\": False, \"message\": \"账本没有回话。\"}\n    if not ledger.get(\"ok\"):\n        return {\n            \"text\": f\"《{title}》已经存进柜底，但入账失败：\"\n            + (ledger.get(\"message\") or \"账本服务不可达。\")\n        }\n    balance = ledger.get(\"balance\")\n    memory_id = store.get(\"memory_id\")\n    return {\n        \"text\": (\n            f\"掌柜收下了《{title}》，估价 {appraisal} 枚记忆币，判它是「{emotion}」味。\\n\"\n            f\"估价明细：{reasons_line}\\n\"\n            f\"当票编号 #{memory_id}。你现在还有 {balance} 枚记忆币。\"\
+          \n        )\n    }"
         outputs:
           text:
             children: null
             type: string
-        selected: false
-        title: 整理柜台回话
-        type: code
         variables:
-        - value_selector:
-          - counter
+        - variable: store_body
+          value_selector:
+          - pawn_store
           - body
           value_type: string
-          variable: raw
-      height: 90
-      id: format
+        - variable: ledger_body
+          value_selector:
+          - pawn_ledger
+          - body
+          value_type: string
+        - variable: title
+          value_selector:
+          - pawn_appraise
+          - title
+          value_type: string
+        - variable: emotion
+          value_selector:
+          - pawn_appraise
+          - emotion
+          value_type: string
+        - variable: appraisal
+          value_selector:
+          - pawn_appraise
+          - appraisal
+          value_type: number
+        - variable: reasons_line
+          value_selector:
+          - pawn_appraise
+          - reasons_line
+          value_type: string
+    - id: redeem_wallet
+      type: custom
       position:
-        x: 980
-        y: 282
-      selected: false
+        x: 920
+        y: -280
       sourcePosition: right
       targetPosition: left
-      type: custom
+      selected: false
       width: 244
-    - data:
-        answer: '{{#format.text#}}'
+      height: 90
+      data:
+        type: http-request
+        title: 赎回前查余额
+        desc: 手续费由 Dify 计算，先取 seekdb 中的余额。
+        selected: false
+        method: post
+        url: http://host.docker.internal:8700/api/wallet/get
+        authorization:
+          type: no-auth
+        headers: 'Content-Type: application/json
+
+          X-Pawnshop-Token: change-me-pawnshop-token'
+        params: ''
+        body:
+          type: json
+          data:
+          - key: ''
+            type: text
+            value: '{{#route.wallet_body#}}'
+        timeout:
+          connect: 10
+          read: 60
+          write: 60
+        retry_config:
+          enabled: false
+          max_retries: 1
+          retry_interval: 1000
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+        error_strategy: default-value
+        default_value:
+        - key: body
+          type: string
+          value: '{"ok": false, "error": "backend_unreachable", "message": "柜台暂时打烊了：记忆当铺服务没有响应。请确认服务已启动，并检查节点的地址与 X-Pawnshop-Token。"}'
+        - key: status_code
+          type: number
+          value: 0
+        - key: headers
+          type: object
+          value: {}
+    - id: redeem_search
+      type: custom
+      position:
+        x: 1220
+        y: -280
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: http-request
+        title: 赎回向量检索
+        desc: 只检索当前玩家未赎回的当票，返回 top5 候选与相似度。
+        selected: false
+        method: post
+        url: http://host.docker.internal:8700/api/memory/search
+        authorization:
+          type: no-auth
+        headers: 'Content-Type: application/json
+
+          X-Pawnshop-Token: change-me-pawnshop-token'
+        params: ''
+        body:
+          type: json
+          data:
+          - key: ''
+            type: text
+            value: '{{#route.redeem_search_body#}}'
+        timeout:
+          connect: 10
+          read: 60
+          write: 60
+        retry_config:
+          enabled: false
+          max_retries: 1
+          retry_interval: 1000
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+        error_strategy: default-value
+        default_value:
+        - key: body
+          type: string
+          value: '{"ok": false, "error": "backend_unreachable", "message": "柜台暂时打烊了：记忆当铺服务没有响应。请确认服务已启动，并检查节点的地址与 X-Pawnshop-Token。"}'
+        - key: status_code
+          type: number
+          value: 0
+        - key: headers
+          type: object
+          value: {}
+    - id: redeem_choose
+      type: custom
+      position:
+        x: 1520
+        y: -280
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: code
+        title: 选票 · 算手续费
+        desc: 核心玩法在 Dify：设置 0.35 相似度门槛，按 appraisal 与 similarity 计算手续费，判断余额是否足够。
+        selected: false
+        code_language: python3
+        code: "import json\n\nMIN_MATCH = 0.35\n\n\ndef main(wallet_body: str, search_body: str, player_id: str, turn_id: str) -> dict:\n    try:\n        wallet = json.loads(wallet_body or \"{}\")\n    except ValueError:\n        wallet = {\"ok\": False, \"message\": \"钱柜没有回话。\"}\n    if not wallet.get(\"ok\"):\n        return {\n            \"decision\": \"fail\",\n            \"fail_reason\": \"柜台暂时打烊了：\" + (wallet.get(\"message\") or \"钱柜不可达。\"),\n            \"memory_id\": 0,\n            \"title\": \"\",\n            \"similarity\": 0,\n            \"cost\": 0,\n            \"exactness\": \"\",\n            \"balance\": 0,\n            \"commit_body\": \"\",\n        }\n    balance = int(wallet.get(\"balance\") or 0)\n\n    try:\n        result = json.loads(search_body or \"{}\")\n    except ValueError:\n        result = {\"ok\": False, \"items\": [], \"message\": \"检索柜没有回话。\"}\n    items = result.get(\"items\") or []\n    if not result.get(\"ok\"):\n        return {\n            \"\
+          decision\": \"fail\",\n            \"fail_reason\": \"检索柜暂时打烊了：\" + (result.get(\"message\") or \"向量检索不可达。\"),\n            \"memory_id\": 0,\n            \"title\": \"\",\n            \"similarity\": 0,\n            \"cost\": 0,\n            \"exactness\": \"\",\n            \"balance\": balance,\n            \"commit_body\": \"\",\n        }\n    if not items:\n        return {\n            \"decision\": \"fail\",\n            \"fail_reason\": \"柜台上没有你当掉的记忆。先去典当一段吧。\",\n            \"memory_id\": 0,\n            \"title\": \"\",\n            \"similarity\": 0,\n            \"cost\": 0,\n            \"exactness\": \"\",\n            \"balance\": balance,\n            \"commit_body\": \"\",\n        }\n\n    best = items[0]\n    similarity = float(best.get(\"similarity\") or 0)\n    if similarity < MIN_MATCH:\n        return {\n            \"decision\": \"fail\",\n            \"fail_reason\": (\n                f\"最像的一张只有 {similarity:.2f}，低于掌柜敢认账的 {MIN_MATCH:.2f}。\"\n         \
+          \       \"换一条更具体的线索，或者先去典当一段。\"\n            ),\n            \"memory_id\": 0,\n            \"title\": str(best.get(\"title\") or \"\"),\n            \"similarity\": similarity,\n            \"cost\": 0,\n            \"exactness\": \"\",\n            \"balance\": balance,\n            \"commit_body\": \"\",\n        }\n\n    appraisal = int(best.get(\"appraisal\") or 0)\n    factor = max(0.55, min(1.35, 1.55 - similarity))\n    cost = max(8, round(appraisal * factor))\n    if balance < cost:\n        return {\n            \"decision\": \"fail\",\n            \"fail_reason\": (\n                f\"赎回《{best.get('title')}》要 {cost} 枚记忆币，你只有 {balance} 枚。\"\n                \"再当一段故事吧。\"\n            ),\n            \"memory_id\": int(best.get(\"id\") or 0),\n            \"title\": str(best.get(\"title\") or \"\"),\n            \"similarity\": similarity,\n            \"cost\": cost,\n            \"exactness\": \"\",\n            \"balance\": balance,\n            \"commit_body\": \"\"\
+          ,\n        }\n\n    if similarity >= 0.82:\n        exactness = \"几乎一字不差\"\n    elif similarity >= 0.55:\n        exactness = \"轮廓还在，边角被雨水泡软了\"\n    else:\n        exactness = \"只剩一个模糊的影子\"\n    commit_body = json.dumps(\n        {\n            \"player_id\": player_id,\n            \"memory_id\": int(best.get(\"id\") or 0),\n            \"fee\": cost,\n            \"turn_id\": turn_id,\n        },\n        ensure_ascii=False,\n    )\n    return {\n        \"decision\": \"commit\",\n        \"fail_reason\": \"\",\n        \"memory_id\": int(best.get(\"id\") or 0),\n        \"title\": str(best.get(\"title\") or \"\"),\n        \"similarity\": similarity,\n        \"cost\": cost,\n        \"exactness\": exactness,\n        \"balance\": balance,\n        \"commit_body\": commit_body,\n    }"
+        outputs:
+          decision:
+            children: null
+            type: string
+          fail_reason:
+            children: null
+            type: string
+          memory_id:
+            children: null
+            type: number
+          title:
+            children: null
+            type: string
+          similarity:
+            children: null
+            type: number
+          cost:
+            children: null
+            type: number
+          exactness:
+            children: null
+            type: string
+          balance:
+            children: null
+            type: number
+          commit_body:
+            children: null
+            type: string
+        variables:
+        - variable: wallet_body
+          value_selector:
+          - redeem_wallet
+          - body
+          value_type: string
+        - variable: search_body
+          value_selector:
+          - redeem_search
+          - body
+          value_type: string
+        - variable: player_id
+          value_selector:
+          - route
+          - player_id
+          value_type: string
+        - variable: turn_id
+          value_selector:
+          - route
+          - turn_id
+          value_type: string
+    - id: redeem_if
+      type: custom
+      position:
+        x: 1820
+        y: -280
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 170
+      data:
+        type: if-else
+        title: 能否赎回
+        desc: 相似度过低、没有当票或余额不足都走失败分支。
+        selected: false
+        cases:
+        - case_id: commit
+          id: commit
+          logical_operator: and
+          conditions:
+          - id: commit-cond
+            comparison_operator: is
+            value: commit
+            varType: string
+            variable_selector:
+            - redeem_choose
+            - decision
+    - id: redeem_commit
+      type: custom
+      position:
+        x: 2120
+        y: -360
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: http-request
+        title: 赎回当票
+        desc: Dify 已算好手续费；seekdb 在一次事务里改当票状态、扣余额、写账本。
+        selected: false
+        method: post
+        url: http://host.docker.internal:8700/api/memory/redeem
+        authorization:
+          type: no-auth
+        headers: 'Content-Type: application/json
+
+          X-Pawnshop-Token: change-me-pawnshop-token'
+        params: ''
+        body:
+          type: json
+          data:
+          - key: ''
+            type: text
+            value: '{{#redeem_choose.commit_body#}}'
+        timeout:
+          connect: 10
+          read: 60
+          write: 60
+        retry_config:
+          enabled: false
+          max_retries: 1
+          retry_interval: 1000
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+        error_strategy: default-value
+        default_value:
+        - key: body
+          type: string
+          value: '{"ok": false, "error": "backend_unreachable", "message": "柜台暂时打烊了：记忆当铺服务没有响应。请确认服务已启动，并检查节点的地址与 X-Pawnshop-Token。"}'
+        - key: status_code
+          type: number
+          value: 0
+        - key: headers
+          type: object
+          value: {}
+    - id: redeem_reply
+      type: custom
+      position:
+        x: 2420
+        y: -360
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: code
+        title: 交还当票
+        desc: 把相似度、手续费与当票原文交给客人。
+        selected: false
+        code_language: python3
+        code: "import json\n\n\ndef main(commit_body: str, title: str, similarity: float, cost: int, exactness: str) -> dict:\n    try:\n        data = json.loads(commit_body or \"{}\")\n    except ValueError:\n        data = {\"ok\": False, \"message\": \"柜台没有回话。\"}\n    if not data.get(\"ok\"):\n        return {\"text\": \"这张当票没赎成：\" + (data.get(\"message\") or \"记忆当铺服务不可达。\")}\n    return {\n        \"text\": (\n            f\"掌柜从柜底抽出《{data.get('title') or title}》，\"\n            f\"相似度 {float(similarity):.2f}，收手续费 {cost} 枚，\"\n            f\"余额 {data.get('balance')} 枚。\\n\"\n            f\"当票背面还留着字：「{data.get('content') or ''}」\\n\"\n            f\"清晰度：{exactness}。\"\n        )\n    }"
+        outputs:
+          text:
+            children: null
+            type: string
+        variables:
+        - variable: commit_body
+          value_selector:
+          - redeem_commit
+          - body
+          value_type: string
+        - variable: title
+          value_selector:
+          - redeem_choose
+          - title
+          value_type: string
+        - variable: similarity
+          value_selector:
+          - redeem_choose
+          - similarity
+          value_type: number
+        - variable: cost
+          value_selector:
+          - redeem_choose
+          - cost
+          value_type: number
+        - variable: exactness
+          value_selector:
+          - redeem_choose
+          - exactness
+          value_type: string
+    - id: redeem_fail
+      type: custom
+      position:
+        x: 2120
+        y: -180
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: code
+        title: 赎回失败说明
+        desc: 没有当票、相似度低于门槛或余额不足时，由 Dify 给出下一步建议。
+        selected: false
+        code_language: python3
+        code: "def main(fail_reason: str, balance: int) -> dict:\n    reason = (fail_reason or \"掌柜摇了摇头，没办成。\").strip()\n    if balance and balance > 0:\n        return {\"text\": f\"{reason}\\n你现在有 {balance} 枚记忆币。\"}\n    return {\"text\": reason}"
+        outputs:
+          text:
+            children: null
+            type: string
+        variables:
+        - variable: fail_reason
+          value_selector:
+          - redeem_choose
+          - fail_reason
+          value_type: string
+        - variable: balance
+          value_selector:
+          - redeem_choose
+          - balance
+          value_type: number
+    - id: browse_search
+      type: custom
+      position:
+        x: 920
+        y: 40
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: http-request
+        title: 黑市向量检索
+        desc: 在别人公开的存当里做 seekdb 向量检索。
+        selected: false
+        method: post
+        url: http://host.docker.internal:8700/api/memory/search
+        authorization:
+          type: no-auth
+        headers: 'Content-Type: application/json
+
+          X-Pawnshop-Token: change-me-pawnshop-token'
+        params: ''
+        body:
+          type: json
+          data:
+          - key: ''
+            type: text
+            value: '{{#route.browse_search_body#}}'
+        timeout:
+          connect: 10
+          read: 60
+          write: 60
+        retry_config:
+          enabled: false
+          max_retries: 1
+          retry_interval: 1000
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+        error_strategy: default-value
+        default_value:
+        - key: body
+          type: string
+          value: '{"ok": false, "error": "backend_unreachable", "message": "柜台暂时打烊了：记忆当铺服务没有响应。请确认服务已启动，并检查节点的地址与 X-Pawnshop-Token。"}'
+        - key: status_code
+          type: number
+          value: 0
+        - key: headers
+          type: object
+          value: {}
+    - id: browse_parse
+      type: custom
+      position:
+        x: 1220
+        y: 40
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: code
+        title: 解析候选
+        desc: 把 HTTP 字符串解析成数组，交给迭代节点逐条处理。
+        selected: false
+        code_language: python3
+        code: "import json\n\n\ndef main(search_body: str) -> dict:\n    try:\n        data = json.loads(search_body or \"{}\")\n    except ValueError:\n        return {\"items\": [], \"error\": \"黑市的检索柜没有回话。\", \"query\": \"\"}\n    items = data.get(\"items\") or []\n    if not isinstance(items, list):\n        items = []\n    if not data.get(\"ok\"):\n        return {\n            \"items\": [],\n            \"error\": \"黑市暂时打烊了：\" + (data.get(\"message\") or \"向量检索不可达。\"),\n            \"query\": data.get(\"query\") or \"\",\n        }\n    error = \"\" if items else \"黑市今晚没开张，换个词试试。\"\n    return {\"items\": items, \"error\": error, \"query\": data.get(\"query\") or \"\"}"
+        outputs:
+          items:
+            children: null
+            type: array[object]
+          error:
+            children: null
+            type: string
+          query:
+            children: null
+            type: string
+        variables:
+        - variable: search_body
+          value_selector:
+          - browse_search
+          - body
+          value_type: string
+    - id: browse_iter
+      type: custom
+      position:
+        x: 1520
+        y: 40
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 420
+      height: 220
+      zIndex: 1
+      data:
+        type: iteration
+        title: 逐条翻黑市
+        desc: 对黑市检索返回的每一条记忆执行一次格式化。
+        selected: false
+        start_node_id: browse_iter_start
+        iterator_selector:
+        - browse_parse
+        - items
+        iterator_input_type: array[object]
+        output_selector:
+        - browse_line
+        - line
+        output_type: array[string]
+        is_parallel: false
+        parallel_nums: 10
+        error_handle_mode: terminated
+    - id: browse_iter_start
+      type: custom-iteration-start
+      parentId: browse_iter
+      extent: parent
+      draggable: false
+      selectable: false
+      zIndex: 1002
+      position:
+        x: 40
+        y: 70
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 44
+      height: 48
+      data:
+        type: iteration-start
+        title: ''
         desc: ''
         selected: false
-        title: 直接回复
-        type: answer
-        variables: []
-      height: 90
-      id: answer
+        isInIteration: true
+    - id: browse_line
+      type: custom
       position:
-        x: 1280
-        y: 282
-      selected: false
+        x: 300
+        y: 65
       sourcePosition: right
       targetPosition: left
-      type: custom
+      selected: false
       width: 244
+      height: 90
+      data:
+        type: code
+        title: 格式化一条黑市记忆
+        desc: 迭代体：每个匿名旅人一条，别名由 owner_key 前两位生成。
+        selected: false
+        code_language: python3
+        code: "import json\n\n\ndef main(item) -> dict:\n    if not isinstance(item, dict):\n        try:\n            item = json.loads(item)\n        except (TypeError, ValueError):\n            item = {}\n    key = str(item.get(\"owner_key\") or \"\")\n    alias = \"匿名的旅人·\" + (key[:2].upper() if key else \"??\")\n    similarity = float(item.get(\"similarity\") or 0)\n    line = (\n        f\"· {alias} 的《{item.get('title') or '无题'}》\"\n        f\"（{item.get('emotion') or '未命名'}，相似度 {similarity:.4f}）：\"\n        f\"{item.get('snippet') or ''}\"\n    )\n    return {\"line\": line}"
+        outputs:
+          line:
+            children: null
+            type: string
+        variables:
+        - variable: item
+          value_selector:
+          - browse_iter
+          - item
+          value_type: object
+        isInIteration: true
+        iteration_id: browse_iter
+      parentId: browse_iter
+      extent: parent
+      zIndex: 1002
+    - id: browse_join
+      type: custom
+      position:
+        x: 2100
+        y: 40
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: code
+        title: 拼黑市回话
+        desc: 迭代结束后把每条 line 合成一段散文式回话。
+        selected: false
+        code_language: python3
+        code: "def main(lines: list, error: str, query: str) -> dict:\n    if error:\n        return {\"text\": error}\n    lines = [str(line) for line in (lines or []) if str(line).strip()]\n    if not lines:\n        return {\"text\": \"黑市今晚没开张，换个词试试。\"}\n    head = \"掌柜拉开黑市的暗门，翻出几段不属于你的记忆：\"\n    if query:\n        head += f\"（线索：{query}）\"\n    return {\"text\": head + \"\\n\" + \"\\n\".join(lines)}"
+        outputs:
+          text:
+            children: null
+            type: string
+        variables:
+        - variable: lines
+          value_selector:
+          - browse_iter
+          - output
+          value_type: array[string]
+        - variable: error
+          value_selector:
+          - browse_parse
+          - error
+          value_type: string
+        - variable: query
+          value_selector:
+          - browse_parse
+          - query
+          value_type: string
+    - id: dream_wallet
+      type: custom
+      position:
+        x: 920
+        y: 330
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: http-request
+        title: 托梦前查余额
+        desc: 托梦扣费由 Dify 决定，先确认余额。
+        selected: false
+        method: post
+        url: http://host.docker.internal:8700/api/wallet/get
+        authorization:
+          type: no-auth
+        headers: 'Content-Type: application/json
+
+          X-Pawnshop-Token: change-me-pawnshop-token'
+        params: ''
+        body:
+          type: json
+          data:
+          - key: ''
+            type: text
+            value: '{{#route.wallet_body#}}'
+        timeout:
+          connect: 10
+          read: 60
+          write: 60
+        retry_config:
+          enabled: false
+          max_retries: 1
+          retry_interval: 1000
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+        error_strategy: default-value
+        default_value:
+        - key: body
+          type: string
+          value: '{"ok": false, "error": "backend_unreachable", "message": "柜台暂时打烊了：记忆当铺服务没有响应。请确认服务已启动，并检查节点的地址与 X-Pawnshop-Token。"}'
+        - key: status_code
+          type: number
+          value: 0
+        - key: headers
+          type: object
+          value: {}
+    - id: dream_fragments
+      type: custom
+      position:
+        x: 1220
+        y: 330
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: http-request
+        title: 抽取旧记忆碎片
+        desc: 只做存储层随机抽取，不扣费、不生成叙事。
+        selected: false
+        method: post
+        url: http://host.docker.internal:8700/api/memory/fragments
+        authorization:
+          type: no-auth
+        headers: 'Content-Type: application/json
+
+          X-Pawnshop-Token: change-me-pawnshop-token'
+        params: ''
+        body:
+          type: json
+          data:
+          - key: ''
+            type: text
+            value: '{{#route.dream_body#}}'
+        timeout:
+          connect: 10
+          read: 60
+          write: 60
+        retry_config:
+          enabled: false
+          max_retries: 1
+          retry_interval: 1000
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+        error_strategy: default-value
+        default_value:
+        - key: body
+          type: string
+          value: '{"ok": false, "error": "backend_unreachable", "message": "柜台暂时打烊了：记忆当铺服务没有响应。请确认服务已启动，并检查节点的地址与 X-Pawnshop-Token。"}'
+        - key: status_code
+          type: number
+          value: 0
+        - key: headers
+          type: object
+          value: {}
+    - id: dream_check
+      type: custom
+      position:
+        x: 1520
+        y: 330
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: code
+        title: 托梦检查与扣费单
+        desc: 核心玩法在 Dify：检查碎片与余额，生成 -10 的账本载荷。
+        selected: false
+        code_language: python3
+        code: "import json\n\nCOST = 10\n\n\ndef main(wallet_body: str, fragments_body: str) -> dict:\n    try:\n        wallet = json.loads(wallet_body or \"{}\")\n    except ValueError:\n        wallet = {\"ok\": False, \"message\": \"钱柜没有回话。\"}\n    try:\n        result = json.loads(fragments_body or \"{}\")\n    except ValueError:\n        result = {\"ok\": False, \"fragments\": [], \"message\": \"托梦机没有回话。\"}\n\n    balance = int(wallet.get(\"balance\") or 0) if wallet.get(\"ok\") else 0\n    if not wallet.get(\"ok\"):\n        return {\n            \"decision\": \"fail\",\n            \"fail_reason\": \"钱柜暂时打烊了：\" + (wallet.get(\"message\") or \"余额不可达。\"),\n            \"fragment_text\": \"\",\n            \"fragment_count\": 0,\n            \"ledger_body\": \"\",\n            \"balance\": balance,\n        }\n    if not result.get(\"ok\"):\n        return {\n            \"decision\": \"fail\",\n            \"fail_reason\": \"托梦机暂时打烊了：\" + (result.get(\"message\") or \"碎片检索不可达。\"),\n\
+          \            \"fragment_text\": \"\",\n            \"fragment_count\": 0,\n            \"ledger_body\": \"\",\n            \"balance\": balance,\n        }\n    fragments = result.get(\"fragments\") or []\n    if not fragments:\n        return {\n            \"decision\": \"fail\",\n            \"fail_reason\": \"你还没在当铺留下任何东西，梦是拼不出来的。先去典当一段吧。\",\n            \"fragment_text\": \"\",\n            \"fragment_count\": 0,\n            \"ledger_body\": \"\",\n            \"balance\": balance,\n        }\n    if balance < COST:\n        return {\n            \"decision\": \"fail\",\n            \"fail_reason\": f\"托梦要 {COST} 枚记忆币，你只有 {balance} 枚。\",\n            \"fragment_text\": \"\",\n            \"fragment_count\": 0,\n            \"ledger_body\": \"\",\n            \"balance\": balance,\n        }\n    text = \"\\n\".join(\n        f\"- 《{item.get('title') or '无题'}》（{item.get('emotion') or '未命名'}）：\"\n        f\"{item.get('text') or ''}\"\n        for item in fragments\n    )\n\
+          \    ledger_body = json.dumps(\n        {\"player_id\": \"\", \"turn_id\": \"\", \"delta\": -COST, \"reason\": \"托梦：把旧记忆缝在一起\"},\n        ensure_ascii=False,\n    )\n    return {\n        \"decision\": \"dream\",\n        \"fail_reason\": \"\",\n        \"fragment_text\": text,\n        \"fragment_count\": len(fragments),\n        \"ledger_body\": ledger_body,\n        \"balance\": balance,\n    }"
+        outputs:
+          decision:
+            children: null
+            type: string
+          fail_reason:
+            children: null
+            type: string
+          fragment_text:
+            children: null
+            type: string
+          fragment_count:
+            children: null
+            type: number
+          ledger_body:
+            children: null
+            type: string
+          balance:
+            children: null
+            type: number
+        variables:
+        - variable: wallet_body
+          value_selector:
+          - dream_wallet
+          - body
+          value_type: string
+        - variable: fragments_body
+          value_selector:
+          - dream_fragments
+          - body
+          value_type: string
+    - id: dream_ledger_prep
+      type: custom
+      position:
+        x: 1820
+        y: 330
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: code
+        title: 补全扣费单
+        desc: 把 player_id 与 turn_id 填进扣费载荷。
+        selected: false
+        code_language: python3
+        code: "import json\n\n\ndef main(player_id: str, turn_id: str, base_body: str) -> dict:\n    try:\n        data = json.loads(base_body or \"{}\")\n    except ValueError:\n        data = {}\n    data[\"player_id\"] = player_id\n    data[\"turn_id\"] = turn_id\n    return {\"body\": json.dumps(data, ensure_ascii=False)}"
+        outputs:
+          body:
+            children: null
+            type: string
+        variables:
+        - variable: player_id
+          value_selector:
+          - route
+          - player_id
+          value_type: string
+        - variable: turn_id
+          value_selector:
+          - route
+          - turn_id
+          value_type: string
+        - variable: base_body
+          value_selector:
+          - dream_check
+          - ledger_body
+          value_type: string
+    - id: dream_if
+      type: custom
+      position:
+        x: 2120
+        y: 330
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 170
+      data:
+        type: if-else
+        title: 能否托梦
+        desc: 没有碎片或余额不足走失败分支；否则扣费并生成梦。
+        selected: false
+        cases:
+        - case_id: dream
+          id: dream
+          logical_operator: and
+          conditions:
+          - id: dream-cond
+            comparison_operator: is
+            value: dream
+            varType: string
+            variable_selector:
+            - dream_check
+            - decision
+    - id: dream_ledger
+      type: custom
+      position:
+        x: 2420
+        y: 230
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: http-request
+        title: 托梦扣费
+        desc: seekdb 事务扣 10 枚并写账本，turn_id 幂等。
+        selected: false
+        method: post
+        url: http://host.docker.internal:8700/api/wallet/apply
+        authorization:
+          type: no-auth
+        headers: 'Content-Type: application/json
+
+          X-Pawnshop-Token: change-me-pawnshop-token'
+        params: ''
+        body:
+          type: json
+          data:
+          - key: ''
+            type: text
+            value: '{{#dream_ledger_prep.body#}}'
+        timeout:
+          connect: 10
+          read: 60
+          write: 60
+        retry_config:
+          enabled: false
+          max_retries: 1
+          retry_interval: 1000
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+        error_strategy: default-value
+        default_value:
+        - key: body
+          type: string
+          value: '{"ok": false, "error": "backend_unreachable", "message": "柜台暂时打烊了：记忆当铺服务没有响应。请确认服务已启动，并检查节点的地址与 X-Pawnshop-Token。"}'
+        - key: status_code
+          type: number
+          value: 0
+        - key: headers
+          type: object
+          value: {}
+    - id: dream_weave
+      type: custom
+      position:
+        x: 2720
+        y: 230
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: code
+        title: 离线缝梦
+        desc: 无模型版本：按碎片顺序拼成一段短梦，扣费数字仍由 Dify 给出。
+        selected: false
+        code_language: python3
+        code: "import json\n\n\ndef main(fragment_text: str, count: int, ledger_body: str, cost: int) -> dict:\n    try:\n        ledger = json.loads(ledger_body or \"{}\")\n    except ValueError:\n        ledger = {\"ok\": False, \"message\": \"账本没有回话。\"}\n    if not ledger.get(\"ok\"):\n        return {\"text\": \"托梦机响了一下又灭了：\" + (ledger.get(\"message\") or \"入账失败。\")}\n    return {\n        \"text\": (\n            f\"掌柜把灯拧暗，你听见 {count} 段旧事在锅里翻身：\\n\"\n            f\"{fragment_text}\\n\\n\"\n            f\"（离线版不生成新叙事；托梦扣 {cost} 枚，余额 {ledger.get('balance')} 枚。）\"\n        )\n    }"
+        outputs:
+          text:
+            children: null
+            type: string
+        variables:
+        - variable: fragment_text
+          value_selector:
+          - dream_check
+          - fragment_text
+          value_type: string
+        - variable: count
+          value_selector:
+          - dream_check
+          - fragment_count
+          value_type: number
+        - variable: ledger_body
+          value_selector:
+          - dream_ledger
+          - body
+          value_type: string
+        - variable: cost
+          value_selector:
+          - route
+          - dream_cost
+          value_type: number
+    - id: dream_fail
+      type: custom
+      position:
+        x: 2420
+        y: 430
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: code
+        title: 托梦失败说明
+        desc: 没有碎片或余额不足时说明原因。
+        selected: false
+        code_language: python3
+        code: "def main(fail_reason: str, balance: int) -> dict:\n    reason = (fail_reason or \"掌柜摇了摇头，梦没有接上。\").strip()\n    if balance and balance > 0:\n        return {\"text\": f\"{reason}\\n你现在有 {balance} 枚记忆币。\"}\n    return {\"text\": reason}"
+        outputs:
+          text:
+            children: null
+            type: string
+        variables:
+        - variable: fail_reason
+          value_selector:
+          - dream_check
+          - fail_reason
+          value_type: string
+        - variable: balance
+          value_selector:
+          - dream_check
+          - balance
+          value_type: number
+    - id: balance_wallet
+      type: custom
+      position:
+        x: 920
+        y: 620
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: http-request
+        title: 查余额
+        desc: 只读 seekdb 的钱包、当票计数与最近账本。
+        selected: false
+        method: post
+        url: http://host.docker.internal:8700/api/wallet/get
+        authorization:
+          type: no-auth
+        headers: 'Content-Type: application/json
+
+          X-Pawnshop-Token: change-me-pawnshop-token'
+        params: ''
+        body:
+          type: json
+          data:
+          - key: ''
+            type: text
+            value: '{{#route.wallet_body#}}'
+        timeout:
+          connect: 10
+          read: 60
+          write: 60
+        retry_config:
+          enabled: false
+          max_retries: 1
+          retry_interval: 1000
+          exponential_backoff:
+            enabled: false
+            max_interval: 10000
+            multiplier: 2
+        error_strategy: default-value
+        default_value:
+        - key: body
+          type: string
+          value: '{"ok": false, "error": "backend_unreachable", "message": "柜台暂时打烊了：记忆当铺服务没有响应。请确认服务已启动，并检查节点的地址与 X-Pawnshop-Token。"}'
+        - key: status_code
+          type: number
+          value: 0
+        - key: headers
+          type: object
+          value: {}
+    - id: balance_fmt
+      type: custom
+      position:
+        x: 1220
+        y: 620
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: code
+        title: 整理账本
+        desc: 把余额、存当/赎回数量与最近账目整理成回话。
+        selected: false
+        code_language: python3
+        code: "import json\n\n\ndef main(wallet_body: str) -> dict:\n    try:\n        data = json.loads(wallet_body or \"{}\")\n    except ValueError:\n        data = {\"ok\": False, \"message\": \"钱柜没有回话。\"}\n    if not data.get(\"ok\"):\n        return {\"text\": \"钱柜暂时打烊了：\" + (data.get(\"message\") or \"余额不可达。\")}\n    lines = [\n        f\"你现在有 {data.get('balance')} 枚记忆币。\"\n        f\"柜台上还存着 {data.get('pawned')} 段记忆，已经赎走 {data.get('redeemed')} 段。\"\n    ]\n    recent = data.get(\"recent\") or []\n    if recent:\n        lines.append(\"最近账目：\")\n        for item in recent:\n            delta = int(item.get(\"delta\") or 0)\n            lines.append(f\"· {delta:+d} 枚：{item.get('reason') or '未注明'}\")\n    return {\"text\": \"\\n\".join(lines)}"
+        outputs:
+          text:
+            children: null
+            type: string
+        variables:
+        - variable: wallet_body
+          value_selector:
+          - balance_wallet
+          - body
+          value_type: string
+    - id: chat_fmt
+      type: custom
+      position:
+        x: 920
+        y: 900
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: code
+        title: 离线闲聊
+        desc: 无模型版本：说明玩法，不编造交易。
+        selected: false
+        code_language: python3
+        code: "def main(query: str, hint: str) -> dict:\n    if hint:\n        return {\"text\": hint + \"\\n当铺可以：典当一段记忆、凭线索赎回、逛黑市、托梦、查余额。\"}\n    return {\n        \"text\": (\n            \"掌柜在擦一只不存在的杯子，等你开口。\\n\"\n            \"这里可以：把记忆当掉换记忆币、凭线索赎回旧当票、\"\n            \"逛黑市看别人的记忆、托梦，或者查一查余额。\"\n        )\n    }"
+        outputs:
+          text:
+            children: null
+            type: string
+        variables:
+        - variable: query
+          value_selector:
+          - sys
+          - query
+          value_type: string
+        - variable: hint
+          value_selector:
+          - route
+          - hint
+          value_type: string
+    - id: merge
+      type: custom
+      position:
+        x: 3340
+        y: 320
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 220
+      data:
+        type: variable-aggregator
+        title: 汇总六路回话
+        desc: 把六个动作分支的最终回话合并成一个出口。
+        selected: false
+        output_type: string
+        variables:
+        - - pawn_reply
+          - text
+        - - redeem_reply
+          - text
+        - - redeem_fail
+          - text
+        - - browse_join
+          - text
+        - - dream_weave
+          - text
+        - - dream_fail
+          - text
+        - - balance_fmt
+          - text
+        - - chat_fmt
+          - text
+    - id: answer
+      type: custom
+      position:
+        x: 3640
+        y: 320
+      sourcePosition: right
+      targetPosition: left
+      selected: false
+      width: 244
+      height: 90
+      data:
+        type: answer
+        title: 回复
+        desc: ''
+        selected: false
+        answer: '{{#merge.output#}}'
+        variables: []
     viewport:
       x: 0
       y: 0
-      zoom: 0.7
+      zoom: 0.45
   rag_pipeline_variables: []

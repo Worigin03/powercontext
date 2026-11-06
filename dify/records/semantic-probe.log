@@ -1,0 +1,11 @@
+query: 淋成落汤鸡推开家门，被家人一边数落一边照顾
+
+fastembed (default, semantic):
+  0.5573  大雨跑回家
+  0.4422  外婆的缝纫机
+  0.4034  凌晨三点的泡面
+
+hash (offline fallback, literal overlap):
+  0.2570  大雨跑回家
+  0.0693  地铁站的分手
+  0.0536  毕业礼帽

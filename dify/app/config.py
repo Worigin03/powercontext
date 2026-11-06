@@ -13,7 +13,13 @@ DB_CONFIG = {
     "autocommit": True,
 }
 
-EMBED_BACKEND = os.getenv("PAWNSHOP_EMBED_BACKEND", "hash").strip().lower()
+# The Dify HTTP nodes must send this value in X-Pawnshop-Token. It is a
+# deployment secret: change it in .env and in the two DSL files together.
+API_TOKEN = os.getenv("PAWNSHOP_API_TOKEN", "change-me-pawnshop-token")
+
+# fastembed is the default so retrieval is semantic out of the box. The hash
+# backend stays available for machines that cannot download the model.
+EMBED_BACKEND = os.getenv("PAWNSHOP_EMBED_BACKEND", "fastembed").strip().lower()
 EMBED_MODEL = os.getenv(
     "PAWNSHOP_EMBED_MODEL",
     "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
@@ -21,5 +27,5 @@ EMBED_MODEL = os.getenv(
 EMBED_DIM = 384
 MODEL_CACHE = Path(os.getenv("PAWNSHOP_MODEL_CACHE", str(ROOT / ".models")))
 
-START_COINS = int(os.getenv("PAWNSHOP_START_COINS", "120"))
-DREAM_COST = int(os.getenv("PAWNSHOP_DREAM_COST", "10"))
+START_COINS = 120
+DREAM_COST = 10

@@ -2,9 +2,9 @@
 version: 5.7.25-OceanBase seekdb-v1.4.0.0
 database: memory_pawnshop
 tables: ledger, memories, meta, wallets
-embedding backend: hash:char-ngram-384
+embedding backend: fastembed:sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
 
-== schema ==
+== schema: memories ==
 CREATE TABLE `memories` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `owner_id` varchar(64) NOT NULL,
@@ -21,25 +21,55 @@ CREATE TABLE `memories` (
   FULLTEXT KEY `ft_mem` (`content`) WITH PARSER ik PARSER_PROPERTIES=(ik_mode="smart") BLOCK_SIZE 16384,
   VECTOR KEY `vidx_mem` (`embedding`) WITH (DISTANCE=COSINE, TYPE=HNSW, LIB=VSAG, M=16, EF_CONSTRUCTION=200, EF_SEARCH=64) BLOCK_SIZE 16384,
   KEY `idx_owner_status` (`owner_id`, `status`) BLOCK_SIZE 16384 LOCAL
-) ORGANIZATION INDEX AUTO_INCREMENT = 29 DEFAULT CHARSET = utf8mb4 ROW_FORMAT = DYNAMIC COMPRESSION = 'zstd_1.3.8' BLOCK_SIZE = 16384 TABLET_SIZE = 134217728 PCTFREE = 0
+) ORGANIZATION INDEX AUTO_INCREMENT = 31 DEFAULT CHARSET = utf8mb4 ROW_FORMAT = DYNAMIC COMPRESSION = 'zstd_1.3.8' BLOCK_SIZE = 16384 TABLET_SIZE = 134217728 PCTFREE = 0
 
-== memories ==
-total: 14
-  status=pawned: 13
-  status=redeemed: 1
+== indexes: memories ==
+  key=PRIMARY seq=1 column=id type=BTREE
+  key=ft_mem seq=1 column=content type=FULLTEXT
+  key=vidx_mem seq=1 column=embedding type=VECTOR
+  key=idx_owner_status seq=1 column=owner_id type=BTREE
+  key=idx_owner_status seq=2 column=status type=BTREE
 
-== vector search ==
-  id=24 title=凌晨三点的便利店 我买了两份关东 owner=verify-2026 status=redeemed distance=0.7091 similarity=0.2909
-  id=3 title=海边埋脚 owner=路人·03 status=pawned distance=0.9118 similarity=0.0882
-  id=2 title=高三的第一场雪 owner=路人·02 status=pawned distance=0.9231 similarity=0.0769
+== schema: ledger ==
+CREATE TABLE `ledger` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `owner_id` varchar(64) NOT NULL,
+  `turn_id` varchar(64) DEFAULT NULL,
+  `delta` int(11) NOT NULL,
+  `reason` varchar(160) NOT NULL,
+  `memory_id` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_owner_turn` (`owner_id`, `turn_id`) BLOCK_SIZE 16384 LOCAL,
+  KEY `idx_owner` (`owner_id`) BLOCK_SIZE 16384 LOCAL
+) ORGANIZATION INDEX AUTO_INCREMENT = 47 DEFAULT CHARSET = utf8mb4 ROW_FORMAT = DYNAMIC COMPRESSION = 'zstd_1.3.8' BLOCK_SIZE = 16384 TABLET_SIZE = 134217728 PCTFREE = 0
 
-== fulltext search (ik) ==
-  id=24 title=凌晨三点的便利店 我买了两份关东 score=2.0206897938868025
+== row counts ==
+memories: 18
+  status=pawned: 16
+  status=redeemed: 2
+ledger rows: 12
 
-== wallet / ledger ==
-player: verify-2026 coins: 157
-  #31 -10 托梦：把旧记忆缝在一起 memory=None
-  #30 -38 赎回《凌晨三点的便利店 我买了两份关东》 memory=24
-  #29 +38 典当《凌晨三点的便利店 我买了两份关东》 memory=24
-  #28 +47 典当《去年冬天奶奶在厨房煮姜汤 窗外下》 memory=23
-  #27 +120 开户：掌柜塞给你的启动记忆币 memory=None
+== vector search: ORDER BY cosine_distance(...) ==
+query: 淋雨跑回家
+  id=10 title=大雨跑回家 status=pawned distance=0.1763 similarity=0.8237
+  id=5 title=地铁站的分手 status=pawned distance=0.6575 similarity=0.3425
+  id=2 title=高三的第一场雪 status=pawned distance=0.6816 similarity=0.3184
+
+== fulltext search: MATCH ... AGAINST (ik parser) ==
+  id=10 title=大雨跑回家 score=3.8471
+  id=8 title=操场丢失的钥匙 score=1.6059
+
+== wallet and ledger for acct:e2e-2026 ==
+wallet: {"coins": 191, "created_at": "2026-11-06 12:21:26"}
+  {"id": 28, "turn_id": null, "delta": 120, "reason": "开户：掌柜塞给你的启动记忆币", "memory_id": null, "created_at": "2026-11-06 12:21:26"}
+  {"id": 29, "turn_id": "4947b10d-d9b1-44c0-91b4-fb130fc87b28", "delta": 47, "reason": "典当《去年冬天奶奶在厨房煮姜汤 窗外下》", "memory_id": null, "created_at": "2026-11-06 12:21:28"}
+  {"id": 30, "turn_id": "8a0e9321-42fd-4954-b773-fa4d0f226515", "delta": 38, "reason": "典当《凌晨三点我们在宿舍分一锅泡面 谁》", "memory_id": null, "created_at": "2026-11-06 12:21:29"}
+  {"id": 31, "turn_id": "cc01e076-dce9-40f0-87b4-33f0f87131bb", "delta": 36, "reason": "典当《毕业典礼把帽子抛向天空 落下来时》", "memory_id": null, "created_at": "2026-11-06 12:21:29"}
+  {"id": 32, "turn_id": "9172c4d8-bbe3-4fef-9952-74858d0fc9dd", "delta": -40, "reason": "赎回《去年冬天奶奶在厨房煮姜汤 窗外下》", "memory_id": 23, "created_at": "2026-11-06 12:21:30"}
+  {"id": 33, "turn_id": "96cae058-2381-4b9e-8dd7-ea07a8d7ebe4", "delta": -10, "reason": "托梦：把旧记忆缝在一起", "memory_id": null, "created_at": "2026-11-06 12:21:31"}
+
+== this player's tickets ==
+  {"id": 23, "title": "去年冬天奶奶在厨房煮姜汤 窗外下", "status": "redeemed", "appraisal": 47, "redeemed_at": "2026-11-06 12:21:30"}
+  {"id": 24, "title": "凌晨三点我们在宿舍分一锅泡面 谁", "status": "pawned", "appraisal": 38, "redeemed_at": null}
+  {"id": 25, "title": "毕业典礼把帽子抛向天空 落下来时", "status": "pawned", "appraisal": 36, "redeemed_at": null}

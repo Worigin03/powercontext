@@ -136,6 +136,36 @@ async def test_dense_page_can_be_persisted_and_recalled_in_full(tmp_path):
 
 
 @pytest.mark.asyncio
+async def test_memory_revision_change_rebuilds_cached_page_index():
+    definitions = registry()
+    original = PDFPageInput(
+        document_id="ACME_2022_10K",
+        document_sha256="a" * 64,
+        page_number=9,
+        text="Cash provided by operating activities was 450 million.",
+    )
+    original_source = await definitions.resolve(original)
+    added = original.model_copy(
+        update={
+            "page_number": 10,
+            "text": "Asset retirement obligations increased to 170 million.",
+        }
+    )
+    async with open_builtin_runtime(BuiltinConfig(), candidate_pipeline=EvidencePipeline()) as runtime:
+        memory = await seed(runtime, definitions, [original])
+        citations = await search_pdf_pages(memory, "cash provided by operating activities", limit=5)
+        assert await source_ids(memory, citations) == {original_source.name}
+
+        added_source = await definitions.resolve(added)
+        observation = project_source_for_transport(definitions, added_source)
+        await runtime.ingestion.submit(SubmitSourceObservation(scope_id=memory.scope_id, observation=observation))
+        await memory.flush()
+
+        citations = await search_pdf_pages(memory, "What are Acme's asset retirement obligations?", limit=5)
+        assert await source_ids(memory, citations) == {added_source.name}
+
+
+@pytest.mark.asyncio
 async def test_same_physical_page_in_distinct_pdf_revisions_is_not_collapsed():
     definitions = registry()
     pages = [
@@ -418,6 +448,7 @@ async def test_quick_ratio_question_recalls_its_balance_sheet_components():
     "question",
     [
         "What was Acme's free cash flow in 2022?",
+        "Does Acme have an improving Free cashflow conversion as of FY2022?",
         "How much cash did Acme's operations generate, and what was spent on capital projects?",
     ],
 )
@@ -618,3 +649,111 @@ async def test_statements_remain_available_across_same_issuer_reports():
         memory = await seed(runtime, definitions, pages)
         citations = await search_pdf_pages(memory, "What was Acme's EBITDA less capex in FY2019?", limit=20)
         assert statements <= await source_ids(memory, citations)
+
+
+@pytest.mark.asyncio
+async def test_capital_intensive_question_covers_three_financial_statements():
+    definitions = registry()
+    template = PDFPageInput(document_id="ACME_2022_10K", document_sha256="a" * 64, page_number=1, text="")
+    noise = [
+        template.model_copy(
+            update={"page_number": page, "text": f"Capital-intensive business discussion and outlook {page}."}
+        )
+        for page in range(1, 21)
+    ]
+    statements = [
+        template.model_copy(
+            update={
+                "page_number": 48,
+                "text": "Consolidated Statement of Income\n2022 2021\nNet sales 100 90\nOperating income 30 25",
+            }
+        ),
+        template.model_copy(
+            update={
+                "page_number": 50,
+                "text": "Consolidated Balance Sheet\n2022 2021\nProperty plant and equipment 80 75\nTotal assets 200 190",
+            }
+        ),
+        template.model_copy(
+            update={
+                "page_number": 52,
+                "text": "Consolidated Statement of Cash Flows\n2022 2021\n"
+                "Cash provided by operating activities 40 35\nPurchases of property plant and equipment 12 10",
+            }
+        ),
+    ]
+    async with open_builtin_runtime(BuiltinConfig(), candidate_pipeline=EvidencePipeline()) as runtime:
+        memory = await seed(runtime, definitions, [*noise, *statements])
+        citations = await search_pdf_pages(
+            memory, "Is Acme a capital-intensive business based on FY2022 data?", limit=3
+        )
+        assert await source_ids(memory, citations) == {(await definitions.resolve(page)).name for page in statements}
+
+
+@pytest.mark.asyncio
+async def test_business_description_questions_keep_multipage_evidence():
+    definitions = registry()
+    template = PDFPageInput(document_id="ACME_2022_10K", document_sha256="a" * 64, page_number=1, text="")
+    pages = [
+        template.model_copy(
+            update={
+                "page_number": 4,
+                "text": "Our Operations\nWe are organized into seven reportable segments, including North America and Europe.",
+            }
+        ),
+        template.model_copy(update={"page_number": 5, "text": "6) Africa, Middle East and South Asia."}),
+        template.model_copy(
+            update={
+                "page_number": 8,
+                "text": "Our major customers include commercial airlines. A significant portion of our revenues comes from them.",
+            }
+        ),
+        template.model_copy(
+            update={
+                "page_number": 10,
+                "text": "The U.S. government is a customer for defense programs. Government spending changed in 2022.",
+            }
+        ),
+        template.model_copy(
+            update={
+                "page_number": 14,
+                "text": "In 2022, 40% of our revenues were earned pursuant to U.S. government contracts.",
+            }
+        ),
+        template.model_copy(
+            update={
+                "page_number": 25,
+                "text": "Sales and operating income by business segment\n2022 2021\n"
+                "Organic sales 2.6 0.3\nAcquisitions 0 0\nDivestitures (0.6) (0.4)",
+            }
+        ),
+        template.model_copy(
+            update={
+                "page_number": 62,
+                "text": "Summary of Business Segment Data\n2022 2021\n"
+                "Commercial products 100 90\nGlobal services 80 70\nTotal revenues 180 160",
+            }
+        ),
+    ]
+    pages.extend(
+        template.model_copy(
+            update={
+                "page_number": page,
+                "text": f"Geographic Information and business segment discussion {page}. Acquisitions and divestitures 2022.",
+            }
+        )
+        for page in range(100, 120)
+    )
+    by_number = {page.page_number: page for page in pages}
+    async with open_builtin_runtime(BuiltinConfig(), candidate_pipeline=EvidencePipeline()) as runtime:
+        memory = await seed(runtime, definitions, pages)
+        scenarios = [
+            ("What are the geographies that Acme primarily operates in as of FY2022?", [4, 5]),
+            ("Who are the primary customers of Acme as of FY2022?", [8, 10, 14]),
+            ("If we exclude the impact of M&A, which segment dragged down Acme's growth in 2022?", [25]),
+            ("Do any product or service categories represent more than 20% of Acme's revenue in FY2022?", [62]),
+        ]
+        for question, expected_pages in scenarios:
+            citations = await search_pdf_pages(memory, question, limit=20)
+            expected = {(await definitions.resolve(by_number[number])).name for number in expected_pages}
+            assert expected <= await source_ids(memory, citations)

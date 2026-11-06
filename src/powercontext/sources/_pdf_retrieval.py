@@ -25,6 +25,7 @@ from dataclasses import dataclass
 from itertools import pairwise
 from typing import TYPE_CHECKING
 from urllib.parse import unquote
+from weakref import WeakKeyDictionary
 
 if TYPE_CHECKING:
     from powercontext.builtin.artifacts.memory.models import MemoryCitation
@@ -107,7 +108,8 @@ _DIVIDENDS = _Clause(("dividends paid", "cash dividends", "dividend payments", "
 # pages. These are financial terms and formula inputs, independent of issuer.
 _CONCEPTS: tuple[tuple[str, tuple[_Clause, ...]], ...] = (
     (r"\bebitda\b", (_OPERATING_INCOME, _DEPRECIATION)),
-    (r"\b(?:free cash flow|fcf)\b", (_OPERATING_CASH, _CAPEX)),
+    (r"\b(?:free cash ?flows?|fcf)\b", (_OPERATING_CASH, _CAPEX)),
+    (r"\bcapital[-\s]intensive\b", (_OPERATING_INCOME, _ASSETS, _CAPEX)),
     (r"\b(?:capex|capital expenditures?|capital spending|capital projects?)\b", (_CAPEX,)),
     (
         r"\b(?:operating cash(?: flows?)?|ocf|cash flows? (?:from )?operations|"
@@ -154,6 +156,11 @@ _CONCEPTS: tuple[tuple[str, tuple[_Clause, ...]], ...] = (
     (r"\b(?:net margin|net profit margin)\b", (_EARNINGS, _SALES)),
     (r"\b(?:revenue|sales) (?:growth|change)\b", (_SALES,)),
     (
+        r"(?:\b(?:m&a|acquisitions?|divestitures?)\b[^.!?]*\bsegments?\b|"
+        r"\bsegments?\b[^.!?]*\b(?:m&a|acquisitions?|divestitures?)\b)",
+        (_Clause(("business segment",)), _Clause(("organic sales", "acquisitions", "divestitures"))),
+    ),
+    (
         r"\b(?:eps|earnings per share|income per share)\b",
         (
             _Clause(("earnings per share", "income per share", "net earnings per share"), _INCOME),
@@ -199,6 +206,22 @@ _CONCEPTS: tuple[tuple[str, tuple[_Clause, ...]], ...] = (
         (_Clause(("legal proceedings", "litigation", "legal contingencies", "pending lawsuits")),),
     ),
     (
+        r"\b(?:products?|services?|categories|segments?)\b[^.!?]*\b(?:revenue|sales)\b",
+        (_Clause(("summary of business segment data", "business segment data", "segment revenues", "total revenues")),),
+    ),
+    (
+        r"\b(?:customers?|clients?)\b",
+        (
+            _Clause((
+                "major customers",
+                "primary customers",
+                "customer concentration",
+                "significant portion of our revenues",
+            )),
+            _Clause(("government contracts", "u s government")),
+        ),
+    ),
+    (
         r"\b(?:geograph\w*|regions?|countries|where .*operat\w*)\b",
         (
             _Clause((
@@ -210,6 +233,7 @@ _CONCEPTS: tuple[tuple[str, tuple[_Clause, ...]], ...] = (
                 "geographic areas",
                 "segment information",
             )),
+            _Clause(("we are organized into", "our operations", "reportable segments")),
         ),
     ),
     (
@@ -251,6 +275,17 @@ class _PageTerms:
     heading: str
     value_rows: str
     statement: str | None
+
+
+@dataclass(frozen=True)
+class _PageIndex:
+    memory_ref: object
+    source_type: str
+    pages: tuple[_Page, ...]
+    terms: tuple[_PageTerms, ...]
+
+
+_PAGE_INDEXES = WeakKeyDictionary()
 
 
 @dataclass(frozen=True)
@@ -408,11 +443,16 @@ def _neighbor_follows(anchor: _Match, candidate: _Page) -> bool:
 
 
 def _rank_pages(
-    pages: tuple[_Page, ...], question: str, native: dict[tuple[str, str], int], limit: int
+    pages: tuple[_Page, ...],
+    indexed: tuple[_PageTerms, ...],
+    question: str,
+    native: dict[tuple[str, str], int],
+    limit: int,
 ) -> tuple[_Page, ...]:
     subjects = {page.document: _subject(page.document) for page in pages}
     named = {document for document, issuer in subjects.items() if _mentions(issuer, question)}
     if named:
+        indexed = tuple(terms for page, terms in zip(pages, indexed, strict=True) if page.document in named)
         pages = tuple(page for page in pages if page.document in named)
     issuer_words = {word for document in named for word in _tokens(" ".join(subjects[document]))}
     question = re.sub(r"\b(?:fy|fiscal\s+year)\s*['’]?(\d{4})\b", r"\1", question)  # noqa: RUF001
@@ -427,7 +467,6 @@ def _rank_pages(
         )
     )
     labels = tuple(tuple(f" {' '.join(_tokens(label))} " for label in clause.labels) for clause in clauses)
-    indexed = tuple(_index_page(page.body) for page in pages)
     frequency = Counter(term for page in indexed for term in page.counts)
     mean_length = max(1.0, sum(len(page.words) for page in indexed) / len(indexed))
     weights = {
@@ -460,16 +499,23 @@ def _primary_matches(ranked: list[_Match], clause_count: int) -> list[_Match]:
     for match in ranked:
         reports.setdefault(match.page.report, []).append(match)
 
-    # Select the strongest match for each independent piece of evidence in
-    # each report, then fill the budget by the combined page score.
+    # Cover every required component before adding alternative pages for a
+    # component whose evidence spans several sections or physical pages.
     primaries = []
+    alternatives = []
     for index in range(clause_count):
         for report in reports.values():
-            best = max(report, key=lambda match: (match.clauses[index], match.score))
-            if best.clauses[index]:
-                primaries.append(best)
+            candidates = sorted(
+                (match for match in report if match.clauses[index]),
+                key=lambda match: (match.clauses[index], match.score),
+                reverse=True,
+            )
+            if candidates:
+                primaries.append(candidates[0])
+                alternatives.extend(candidates[1:8])
     if len(reports) > 1:
         primaries.extend(report[0] for report in reports.values())
+    primaries.extend(alternatives)
     return primaries
 
 
@@ -494,16 +540,12 @@ def _select_pages(ranked: list[_Match], pages: tuple[_Page, ...], clause_count: 
     return tuple(selected.values())
 
 
-async def recall_pages(
-    memory: ScopedMemoryApplication, question: str, *, limit: int, source_type: str
-) -> tuple[MemoryCitation, ...]:
-    """Use the scoped Memory's own entries and citations for offline retrieval."""
-    from powercontext.builtin.runtime import SearchMemoryRequest
-
-    if not isinstance(limit, int) or isinstance(limit, bool) or limit < 1 or not question.strip():
-        return ()
-
+async def _load_page_index(memory: ScopedMemoryApplication, source_type: str) -> _PageIndex:
     snapshot = await memory.list()
+    cached = _PAGE_INDEXES.get(memory)
+    if cached is not None and cached.memory_ref == snapshot.memory_ref and cached.source_type == source_type:
+        return cached
+
     pages = []
     for record in snapshot.entries:
         identities = {ref.source_id for ref in record.entry.sources if ref.source_type == source_type}
@@ -525,14 +567,43 @@ async def recall_pages(
             number = None
         if separator and body.strip():
             pages.append(_Page(record.citation, source_id, document, report, number, body))
-    if not pages:
+
+    index = _PageIndex(
+        snapshot.memory_ref,
+        source_type,
+        tuple(pages),
+        tuple(_index_page(page.body) for page in pages),
+    )
+    if snapshot.memory_ref is not None:
+        _PAGE_INDEXES[memory] = index
+    return index
+
+
+async def recall_pages(
+    memory: ScopedMemoryApplication, question: str, *, limit: int, source_type: str
+) -> tuple[MemoryCitation, ...]:
+    """Use the scoped Memory's own entries and citations for offline retrieval."""
+    from powercontext.builtin.runtime import SearchMemoryRequest
+
+    if not isinstance(limit, int) or isinstance(limit, bool) or limit < 1 or not question.strip():
         return ()
 
     normalized = unicodedata.normalize("NFKC", question).casefold()
     query = " ".join(dict.fromkeys(word for word in _tokens(normalized) if word not in _STOP))
-    native = {}
+    results = None
     if query:
-        results = await memory.search(SearchMemoryRequest(query=query, mode="fts", limit=min(64, len(pages))))
-        if results.memory_ref == snapshot.memory_ref:
-            native = {(hit.entry_id, hit.entry_version_id): rank for rank, hit in enumerate(results.hits, 1)}
-    return tuple(page.citation for page in _rank_pages(tuple(pages), normalized, native, limit))
+        results = await memory.search(SearchMemoryRequest(query=query, mode="fts", limit=64))
+        cached = _PAGE_INDEXES.get(memory)
+        if cached is not None and cached.memory_ref == results.memory_ref and cached.source_type == source_type:
+            index = cached
+        else:
+            index = await _load_page_index(memory, source_type)
+    else:
+        index = await _load_page_index(memory, source_type)
+    if not index.pages:
+        return ()
+
+    native = {}
+    if results is not None and results.memory_ref == index.memory_ref:
+        native = {(hit.entry_id, hit.entry_version_id): rank for rank, hit in enumerate(results.hits, 1)}
+    return tuple(page.citation for page in _rank_pages(index.pages, index.terms, normalized, native, limit))
